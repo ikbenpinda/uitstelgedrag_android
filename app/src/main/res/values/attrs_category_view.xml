@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="CategoryView">
+        <attr name="example_String" format="string" />
+        <attr name="example_Dimension" format="dimension" />
+        <attr name="example_Color" format="color" />
+        <attr name="example_Drawable" format="color|reference" />
+    </declare-styleable>
+</resources>

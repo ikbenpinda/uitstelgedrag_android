@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="Min_5">300000</integer>
+    <integer name="Min_15">900000</integer>
+    <integer name="Min_30">1800000</integer>
+    <integer name="Hour">3600000</integer>
+    <integer name="Day">14400000</integer>
+</resources>
