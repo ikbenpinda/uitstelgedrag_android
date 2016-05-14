@@ -25,6 +25,9 @@ import achan.nl.uitstelgedrag.models.Task;
 import achan.nl.uitstelgedrag.models.Timestamp;
 import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.OnReverseGeocodingListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -38,8 +41,14 @@ public class OverviewActivity extends AppCompatActivity
     Location location = null;
     Address address = null;
     AlertDialog dialog;
+    TaskAdapter adapter;
 
     public UitstelgedragOpenHelper databaseHelper;
+
+    @BindView(R.id.ShowAttendancesLogButton) Button logButton;
+    @BindView(R.id.AddTaskButton) Button AddTaskButton;
+    @BindView(R.id.CheckinButton) Button CheckinButton;
+    @BindView(R.id.CheckoutButton) Button CheckoutButton;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -59,6 +68,8 @@ public class OverviewActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
+        ButterKnife.bind(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -81,7 +92,7 @@ public class OverviewActivity extends AppCompatActivity
         //};
         //databaseloader.execute(null);
 
-        final TaskAdapter adapter = new TaskAdapter(tasks, this);
+        adapter = new TaskAdapter(tasks, this);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -89,51 +100,82 @@ public class OverviewActivity extends AppCompatActivity
         list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
 
-        Button AddTaskButton = (Button) findViewById(R.id.AddTaskButton);
-        AddTaskButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
-                EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
-                Task task = new Task(desc.getText().toString());
-                databaseHelper.addTask(task);
-                adapter.addItem(adapter.getItemCount(), task);
-                //adapter.notifyDataSetChanged();
-                Log.i("Uitstelgedrag", "Persisted task #"+task.id);
-                desc.setText("");
-                desc.clearFocus();
-            }
-        });
+//        Button AddTaskButton = (Button) findViewById(R.id.AddTaskButton);
+//        AddTaskButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
+//                EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
+//                Task task = new Task(desc.getText().toString());
+//                databaseHelper.addTask(task);
+//                adapter.addItem(adapter.getItemCount(), task);
+//                //adapter.notifyDataSetChanged();
+//                Log.i("Uitstelgedrag", "Persisted task #"+task.id);
+//                desc.setText("");
+//                desc.clearFocus();
+//            }
+//        });
 
-        Button CheckinButton = (Button) findViewById(R.id.CheckinButton);
-        CheckinButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("is", " deze knop wel nodig?");
-                dialog.show();
-                getLocation();
-            }
-        });
+//        Button CheckinButton = (Button) findViewById(R.id.CheckinButton);
+//        CheckinButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.i("is", " deze knop wel nodig?");
+//                dialog.show();
+//                getLocation();
+//            }
+//        });
 
-        Button CheckoutButton = (Button) findViewById(R.id.CheckoutButton);
-        CheckoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
-                String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
-                Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
-                databaseHelper.addTimestamp(Timestamp.DEPARTURE);
-            }
-        });
+//        Button CheckoutButton = (Button) findViewById(R.id.CheckoutButton);
+//        CheckoutButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
+//                String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
+//                Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
+//                databaseHelper.addTimestamp(Timestamp.DEPARTURE);
+//            }
+//        });
 
-        Button logButton = (Button) findViewById(R.id.ShowAttendancesLogButton);
-        logButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
-                startActivity(intent);
-            }
-        });
+        //Button logButton = (Button) findViewById(R.id.ShowAttendancesLogButton);
+//        logButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
+//                startActivity(intent);
+//            }
+//        });
+
+
+    }
+
+    @OnClick(R.id.ShowAttendancesLogButton) void submit() {
+        Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.AddTaskButton) void addtask(View v){
+        //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
+        EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
+        Task     task = new Task(desc.getText().toString());
+        databaseHelper.addTask(task);
+        adapter.addItem(adapter.getItemCount(), task);
+        //adapter.notifyDataSetChanged();
+        Log.i("Uitstelgedrag", "Persisted task #"+task.id);
+        desc.setText("");
+        desc.clearFocus();
+    }
+
+    @OnClick(R.id.CheckinButton) void checkIn(){
+        dialog.show();
+        getLocation();
+    }
+
+    @OnClick(R.id.CheckoutButton) void checkOut(View v){
+        Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
+        String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
+        Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
+        databaseHelper.addTimestamp(Timestamp.DEPARTURE);
     }
 
     @Override
