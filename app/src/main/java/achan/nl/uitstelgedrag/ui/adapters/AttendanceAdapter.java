@@ -51,7 +51,7 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.At
         StringBuilder ts_str = new StringBuilder()
                 .append(ts.translateType(ts.type))
                 .append(":\t ")
-                .append(ts.translateDay(ts.day))
+                .append(ts.translateDay(ts.weekday))
                 .append(", ")
                 .append(ts.day)
                 .append(" ")
@@ -60,7 +60,7 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.At
                 .append(ts.hours)
                 .append(":")
                 .append(ts.minutes);
-
+        Log.e("asdfasdfasdf", ""+ts.weekday);
         holder.textView.setText(ts_str.toString());
         holder.textView.setOnClickListener(new View.OnClickListener() {
             @Override

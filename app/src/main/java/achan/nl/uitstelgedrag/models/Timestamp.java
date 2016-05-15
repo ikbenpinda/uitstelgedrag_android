@@ -1,11 +1,14 @@
 package achan.nl.uitstelgedrag.models;
 
+import android.util.Log;
+
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Created by Etienne on 24-4-2016.
  */
-public class Timestamp {
+public class Timestamp {// TODO: 15-5-2016 SimpleDate.format()?
 
     public static final String DATE_DELIMITER = "-";
     public static final String FIELD_DELIMITER = "|";
@@ -16,13 +19,14 @@ public class Timestamp {
 
     public int id = -1;
 
-    public int day;
-    public int month;
-    public int year;
+    public final int weekday;
 
-    public int hours;
-    public int minutes;
+    public final int day;
+    public final int month;
+    public final int year;
+    public final int hours;
 
+    public final int minutes;
     public String type;
     public String location; // or x and y coordinates?
 
@@ -103,9 +107,6 @@ public class Timestamp {
         return type.equals(ARRIVAL) ? "Aankomst" : "Vertrek";
     }
 
-    public Timestamp() {
-    }
-
     /**
      * Creates a new timestamp set to the current moment.
      * @param type
@@ -114,8 +115,10 @@ public class Timestamp {
 
         this.type = type;
 
+        this.weekday = instance.get(Calendar.DAY_OF_WEEK);
+        Log.e("high", ""+weekday);
         this.day = instance.get(Calendar.DAY_OF_MONTH);
-        this.month = instance.get(Calendar.MONTH) + 1; // month is zero-based.
+        this.month = instance.get(Calendar.MONTH);
         this.year = instance.get(Calendar.YEAR);
 
         this.hours = instance.get(Calendar.HOUR_OF_DAY);
@@ -131,10 +134,13 @@ public class Timestamp {
      * @param hours 24h format
      * @param minutes
      */
-    public Timestamp(String type, int day, int month, int year, int hours, int minutes){
+    public Timestamp(int day, int month, int year, int hours, int minutes){
 
-        this.type = type;
+        //this.type = type;
 
+        Calendar c = new GregorianCalendar(year, month, day, hours, minutes);
+        this.weekday = c.get(c.DAY_OF_WEEK);
+        Log.e("asdfasdfasdf", ""+weekday);
         this.day = day;
         this.month = month;
         this.year = year;

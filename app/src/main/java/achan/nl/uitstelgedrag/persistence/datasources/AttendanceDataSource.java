@@ -37,7 +37,6 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
      * @return Timestamp a Timestamp object devoid of type or id!
      */
     public Timestamp parseFrom(String timestampstr){
-        Timestamp timestamp = new Timestamp();
 
         // Make sure regular expressions are escaped when using String.split()!
         String[] fields = timestampstr.split("\\"+Timestamp.FIELD_DELIMITER);
@@ -47,17 +46,17 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
         Log.i("Uitstelgedrag", "time="+time);
         //String date = timestring.substring(0, timestring.indexOf(Timestamp.FIELD_DELIMITER)); // FIXME: 25-4-2016 empty str
         //String time = timestring.substring(timestring.indexOf(Timestamp.FIELD_DELIMITER) + 1, timestring.length());
-        timestamp.day =       Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[0]);
-        timestamp.month =     Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[1]);
-        timestamp.year =      Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[2]);
-        Log.i("Uitstelgedrag", "day=" + timestamp.day);
-        Log.i("Uitstelgedrag", "month=" + timestamp.month);
-        Log.i("Uitstelgedrag", "year=" + timestamp.year);
-        timestamp.hours =     Integer.parseInt(time.split("\\"+Timestamp.TIME_DELIMITER)[0]);
-        timestamp.minutes =   Integer.parseInt(time.split("\\"+Timestamp.TIME_DELIMITER)[1]);
-        Log.i("Uitstelgedrag", "hours/minutes="+timestamp.hours+"/"+timestamp.minutes);
+        int day =       Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[0]);
+        int month =     Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[1]);
+        int year =      Integer.parseInt(date.split("\\"+Timestamp.DATE_DELIMITER)[2]);
+        Log.i("Uitstelgedrag", "day=" + day);
+        Log.i("Uitstelgedrag", "month=" + month);
+        Log.i("Uitstelgedrag", "year=" + year);
+        int hours =     Integer.parseInt(time.split("\\"+Timestamp.TIME_DELIMITER)[0]);
+        int minutes =   Integer.parseInt(time.split("\\"+Timestamp.TIME_DELIMITER)[1]);
+        Log.i("Uitstelgedrag", "hours/minutes="+hours+"/"+minutes);
 
-        return timestamp;
+        return new Timestamp(day, month, year, hours, minutes);
     }
 
     /**
