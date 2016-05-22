@@ -6,6 +6,7 @@ import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +16,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import java.util.List;
 
@@ -36,19 +40,24 @@ public class OverviewActivity extends AppCompatActivity
                               implements OnLocationUpdatedListener, OnReverseGeocodingListener {
 
     Context context;
-    RecyclerView list;
     List<Task> tasks;
     Location location = null;
     Address address = null;
     AlertDialog dialog;
     TaskAdapter adapter;
+    String[] draweritems;
 
     public UitstelgedragOpenHelper databaseHelper;
 
-    @BindView(R.id.ShowAttendancesLogButton) Button logButton;
-    @BindView(R.id.AddTaskButton) Button AddTaskButton;
-    @BindView(R.id.CheckinButton) Button CheckinButton;
-    @BindView(R.id.CheckoutButton) Button CheckoutButton;
+    @BindView(R.id.ShowAttendancesLogButton)Button       logButton;
+    @BindView(R.id.AddTaskButton)           Button       AddTaskButton;
+    @BindView(R.id.CheckinButton)           Button       CheckinButton;
+    @BindView(R.id.CheckoutButton)          Button       CheckoutButton;
+
+    @BindView(R.id.drawer_layout)           DrawerLayout drawer;
+    @BindView(R.id.left_drawer)             ListView     drawerlist; // FIXME: 21-5-2016 recview
+
+    @BindView(R.id.MainList)                RecyclerView list;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,6 +82,12 @@ public class OverviewActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        draweritems = new String[]{
+                "Taken",
+                "Aanwezigheid",
+                "Instellingen"
+        };
+
         context = getApplicationContext();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -96,58 +111,39 @@ public class OverviewActivity extends AppCompatActivity
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        list = (RecyclerView) findViewById(R.id.MainList);
         list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
 
-//        Button AddTaskButton = (Button) findViewById(R.id.AddTaskButton);
-//        AddTaskButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
-//                EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
-//                Task task = new Task(desc.getText().toString());
-//                databaseHelper.addTask(task);
-//                adapter.addItem(adapter.getItemCount(), task);
-//                //adapter.notifyDataSetChanged();
-//                Log.i("Uitstelgedrag", "Persisted task #"+task.id);
-//                desc.setText("");
-//                desc.clearFocus();
-//            }
-//        });
-
-//        Button CheckinButton = (Button) findViewById(R.id.CheckinButton);
-//        CheckinButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.i("is", " deze knop wel nodig?");
-//                dialog.show();
-//                getLocation();
-//            }
-//        });
-
-//        Button CheckoutButton = (Button) findViewById(R.id.CheckoutButton);
-//        CheckoutButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
-//                String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
-//                Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
-//                databaseHelper.addTimestamp(Timestamp.DEPARTURE);
-//            }
-//        });
-
-        //Button logButton = (Button) findViewById(R.id.ShowAttendancesLogButton);
-//        logButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-
-
+        // Set the adapter for the list view
+        drawerlist.setAdapter(new ArrayAdapter<>(this,
+                R.layout.drawer_item, R.id.drawer_item, draweritems));
+        // Set the list's click listener
+        drawerlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Class target  = null;
+                switch (draweritems[position]){
+                    case "Taken":
+                        Log.i("DRAWER", "Taken");
+                        //target = OverviewActivity.class;
+                        return;
+                    case "Aanwezigheid":
+                        target = AttendanceActivity.class;
+                        Log.i("DRAWER", "Aanwezigheid");
+                        break;
+                    case "Instellingen":
+                        target = SettingsActivity.class;
+                        Log.i("DRAWER", "Instellingen");
+                        break;
+                    default:
+                        Log.i("DRAWER", ""+position);
+                        return;
+                }
+                startActivity(new Intent(getBaseContext(), target));
+            }
+        });
     }
+
 
     @OnClick(R.id.ShowAttendancesLogButton) void submit() {
         Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
