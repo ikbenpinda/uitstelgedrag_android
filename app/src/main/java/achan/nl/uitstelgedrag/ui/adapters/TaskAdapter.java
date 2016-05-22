@@ -18,11 +18,13 @@ import java.util.List;
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.models.Task;
 import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import butterknife.BindColor;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * // FIXME: 29-4-2016 Transactions
  * // FIXME: 29-4-2016 Error handling
- * // FIXME: 29-4-2016 IllegalStateException on RecyclerView
  * // FIXME: 29-4-2016 Data layer in view layer.
  * // FIXME: 29-4-2016 Categories
  *
@@ -30,9 +32,15 @@ import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
  */
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    TaskViewHolder holder;
-    List<Task>     tasks;
-    Context        context;
+    public static final int VIEWTYPE_CATEGORY = 1;
+    public static final int VIEWTYPE_TASK = 2;
+
+    @BindColor(R.color.colorAccent) int accent;
+
+    TaskViewHolder      holder;
+    CategoryViewHolder  holder_cat;
+    List<Task>          tasks;
+    Context             context;
 
     public TaskAdapter(List<Task> tasks, Context context){
         this.tasks = tasks;
@@ -65,11 +73,29 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     @Override
-    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
-        holder = new TaskViewHolder(view, context);
-        return holder;
+    public int getItemViewType(int position) {
+        return tasks.get(position) instanceof Task ? 2 : 1;
     }
+
+    @Override
+    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//        if (viewType == VIEWTYPE_TASK) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
+            holder = new TaskViewHolder(view, context);
+            return holder;
+//        } else {
+//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
+//            holder_cat = new CategoryViewHolder(view);
+//            return holder;
+//        }
+  //      return holder;
+    }
+
+    // TODO: 16-5-2016 haal items binnen
+    // TODO: 16-5-2016 Sorteer op categorie
+    // TODO: 16-5-2016 voeg categorieen samen met header views
+    // TODO: 16-5-2016 push uiteindelijke lijst naar adapter
+    // TODO: 16-5-2016 implementeer getViewType en de verschillende holders
 
     @Override
     public void onBindViewHolder(final TaskViewHolder holder, final int position) {
@@ -77,6 +103,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // FIXME: 29-4-2016 Document what the hell is going on here.
         String description = tasks.get(holder.getAdapterPosition()).description;
         holder.taskdescription.setText(description);
+        holder.taskdescription.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.i("RECVIEW", "item highlighted:" + tasks.get(holder.getAdapterPosition()).description);
+                return false;
+            }
+        });
         holder.taskDone.setChecked(false);
         holder.taskDone.setOnCheckedChangeListener(
                 new CompoundButton.OnCheckedChangeListener() {
@@ -105,7 +138,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                             @Override
                             public void onClick(View v) {
                                 final int bottom = getItemCount();
-                                addItem(/* FIXME: adapterposition */bottom, selected);
+                                addItem(adapterposition, selected);
                             }
                         })
                         .setCallback(new Snackbar.Callback() {
@@ -132,26 +165,38 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return tasks.size();
     }
 
+
+
+//  Custom ViewHolders for TaskAdapter.
+//  Caches UI views by holding findviewbyid() results in-memory. Reduces performance hit.
+
     /**
-     * Custom AttendanceViewHolder for TaskAdapter.
-     *
-     * Caches UI views by holding findviewbyid() results in-memory. Reduces performance hit.
+     * ViewHolder for tasks, natural style.
      */
     public class TaskViewHolder extends RecyclerView.ViewHolder{
 
         // binding happens here.
-        public CheckBox taskDone;
-        public TextView taskdescription;
+        @BindView(R.id.TaskViewCheckBox) CheckBox taskDone;
+        @BindView(R.id.TaskViewDescriptionTextView) TextView taskdescription;
         public Context context;
 
         public TaskViewHolder(final View itemView, final Context context) {
             super(itemView);
             this.context = context;
+            ButterKnife.bind(this, itemView);
+        }
+    }
 
-            taskDone = (CheckBox) itemView.findViewById(R.id.TaskViewCheckBox);
-            taskdescription = (TextView) itemView.findViewById(R.id.TaskViewDescriptionTextView);
+    /**
+     * ViewHolder for categories, ButterKnife'd.
+     */
+    public class CategoryViewHolder extends RecyclerView.ViewHolder{
 
+        public @BindView(R.id.categoryHeader) TextView category;
 
+        public CategoryViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 }
