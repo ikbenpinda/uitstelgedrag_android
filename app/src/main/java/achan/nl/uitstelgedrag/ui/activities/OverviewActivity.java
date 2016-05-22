@@ -6,21 +6,13 @@ import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import java.util.List;
 
@@ -36,7 +28,7 @@ import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.OnReverseGeocodingListener;
 import io.nlopez.smartlocation.SmartLocation;
 
-public class OverviewActivity extends AppCompatActivity
+public class OverviewActivity extends BaseActivity
                               implements OnLocationUpdatedListener, OnReverseGeocodingListener {
 
     Context context;
@@ -45,48 +37,26 @@ public class OverviewActivity extends AppCompatActivity
     Address address = null;
     AlertDialog dialog;
     TaskAdapter adapter;
-    String[] draweritems;
+//    String[] draweritems;
 
     public UitstelgedragOpenHelper databaseHelper;
 
-    @BindView(R.id.ShowAttendancesLogButton)Button       logButton;
-    @BindView(R.id.AddTaskButton)           Button       AddTaskButton;
-    @BindView(R.id.CheckinButton)           Button       CheckinButton;
-    @BindView(R.id.CheckoutButton)          Button       CheckoutButton;
-
-    @BindView(R.id.drawer_layout)           DrawerLayout drawer;
-    @BindView(R.id.left_drawer)             ListView     drawerlist; // FIXME: 21-5-2016 recview
+    @BindView(R.id.ShowAttendancesLogButton) Button       logButton;
+    @BindView(R.id.AddTaskButton)            Button       AddTaskButton;
+    @BindView(R.id.CheckinButton)            Button       CheckinButton;
+    @BindView(R.id.CheckoutButton)           Button       CheckoutButton;
 
     @BindView(R.id.MainList)                RecyclerView list;
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-        return true;
+    int getLayoutResource() {
+        return R.layout.activity_overview;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_overview);
         ButterKnife.bind(this);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        draweritems = new String[]{
-                "Taken",
-                "Aanwezigheid",
-                "Instellingen"
-        };
 
         context = getApplicationContext();
 
@@ -113,33 +83,10 @@ public class OverviewActivity extends AppCompatActivity
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
-
-        // Set the adapter for the list view
-        drawerlist.setAdapter(new ArrayAdapter<>(this,
-                R.layout.drawer_item, R.id.drawer_item, draweritems));
-        // Set the list's click listener
-        drawerlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Class target  = null;
-                switch (draweritems[position]){
-                    case "Taken":
-                        Log.i("DRAWER", "Taken");
-                        //target = OverviewActivity.class;
-                        return;
-                    case "Aanwezigheid":
-                        target = AttendanceActivity.class;
-                        Log.i("DRAWER", "Aanwezigheid");
-                        break;
-                    case "Instellingen":
-                        target = SettingsActivity.class;
-                        Log.i("DRAWER", "Instellingen");
-                        break;
-                    default:
-                        Log.i("DRAWER", ""+position);
-                        return;
-                }
-                startActivity(new Intent(getBaseContext(), target));
+            public boolean onLongClick(View v) {
+                return false;
             }
         });
     }
