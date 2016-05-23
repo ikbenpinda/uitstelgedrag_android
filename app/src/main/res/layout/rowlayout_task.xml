@@ -20,5 +20,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:layout_alignParentTop="true"
         android:text="lorem ipsum \ndolor sit amet gg"
-        android:padding="4dp"/>
+        android:padding="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground"/>
 </RelativeLayout>

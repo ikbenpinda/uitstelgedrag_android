@@ -5,24 +5,25 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-    <service android:name="UitstelgedragRemoteViewsService"
-    android:permission="android.permission.BIND_REMOTEVIEWS" />
+    <service
+        android:name=".UitstelgedragRemoteViewsService"
+        android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
+    <!-- @style/Theme.AppCompat.NoActionBar -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/AppTheme">
         <meta-data
-            tools:replace="android:value"
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"
-            />
+            tools:replace="android:value"/>
+
         <activity
             android:name=".ui.activities.OverviewActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -52,6 +53,10 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".ui.activities.TaskActivity">
+        </activity>
+        <activity android:name=".ui.activities.DayplannerActivity">
         </activity>
     </application>
 
