@@ -37,16 +37,14 @@ public class OverviewActivity extends BaseActivity
     Address address = null;
     AlertDialog dialog;
     TaskAdapter adapter;
-//    String[] draweritems;
 
-    public UitstelgedragOpenHelper databaseHelper;
+    public UitstelgedragOpenHelper database;
 
     @BindView(R.id.ShowAttendancesLogButton) Button       logButton;
     @BindView(R.id.AddTaskButton)            Button       AddTaskButton;
     @BindView(R.id.CheckinButton)            Button       CheckinButton;
     @BindView(R.id.CheckoutButton)           Button       CheckoutButton;
-
-    @BindView(R.id.MainList)                RecyclerView list;
+    @BindView(R.id.MainList)                 RecyclerView list;
 
     @Override
     int getLayoutResource() {
@@ -71,8 +69,8 @@ public class OverviewActivity extends BaseActivity
         //AsyncTask databaseloader = new AsyncTask() {
         //    @Override
         //    protected Object doInBackground(Object[] params) {
-                databaseHelper = new UitstelgedragOpenHelper(this, null);
-                tasks = databaseHelper.getAll();
+                database = new UitstelgedragOpenHelper(this, null);
+                tasks = database.getAll();
             //}
         //};
         //databaseloader.execute(null);
@@ -91,7 +89,6 @@ public class OverviewActivity extends BaseActivity
         });
     }
 
-
     @OnClick(R.id.ShowAttendancesLogButton) void submit() {
         Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
         startActivity(intent);
@@ -101,7 +98,7 @@ public class OverviewActivity extends BaseActivity
         //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
         EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
         Task     task = new Task(desc.getText().toString());
-        databaseHelper.addTask(task);
+        database.addTask(task);
         adapter.addItem(adapter.getItemCount(), task);
         //adapter.notifyDataSetChanged();
         Log.i("Uitstelgedrag", "Persisted task #"+task.id);
@@ -118,7 +115,7 @@ public class OverviewActivity extends BaseActivity
         Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
         String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
         Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
-        databaseHelper.addTimestamp(Timestamp.DEPARTURE);
+        database.addTimestamp(Timestamp.DEPARTURE);
     }
 
     @Override
@@ -173,6 +170,6 @@ public class OverviewActivity extends BaseActivity
                 timestampstr,
                 Snackbar.LENGTH_SHORT
         ).show();
-        databaseHelper.addTimestamp(Timestamp.ARRIVAL);
+        database.addTimestamp(Timestamp.ARRIVAL);
     }
 }

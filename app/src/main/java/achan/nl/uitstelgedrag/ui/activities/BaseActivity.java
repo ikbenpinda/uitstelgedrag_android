@@ -1,9 +1,11 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,8 +23,9 @@ import butterknife.ButterKnife;
 public abstract class BaseActivity extends AppCompatActivity {
 
     String[] draweritems;
+    ActionBarDrawerToggle mDrawerToggle;
 
-    //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem;
+    //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem; // FIXME: unnecessary view?
     @BindView(R.id.drawer_layout)     DrawerLayout  drawer;
     @BindView(R.id.left_drawer)       ListView      drawerlist;         // FIXME: 21-5-2016 recview
     @BindView(R.id.toolbar)           Toolbar       toolbar;
@@ -39,11 +42,35 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutResource());
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        // Use the constructor with the toolbar animation to fix navigation issues.
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.draweraccessopen, R.string.draweraccessclose)
+        {
+
+            public void onDrawerClosed(View view)
+            {
+                supportInvalidateOptionsMenu();
+                //drawerOpened = false;
+            }
+
+            public void onDrawerOpened(View drawerView)
+            {
+                supportInvalidateOptionsMenu();
+                //drawerOpened = true;
+            }
+        };
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        drawer.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
+        // https://medium.com/@ngdelamo/using-drawerlayout-the-material-way-i-716bba2b5705#.yeqv0jln5
+        drawer.setStatusBarBackground(R.color.colorPrimary);
 
         draweritems = new String[]{
                 "Overzicht",
-                "Vandaag",
-                "Morgen",
+                "Dagplanner",
                 "Taken",
                 "Aanwezigheid",
                 "Instellingen"
@@ -61,23 +88,25 @@ public abstract class BaseActivity extends AppCompatActivity {
 
                 switch (draweritems[position]){
                     case "Overzicht":
-                        Log.i("DRAWER", "Taken");
-                        target = OverviewActivity.class;
+                            Log.i("DRAWER", "Taken");
+                            target = OverviewActivity.class;
+                        break;
+                    case "Dagplanner":
+                            Log.i("DRAWER", "Taken");
+                            target = DayplannerActivity.class;
                         break;
                     case "Taken":
-                        Log.i("DRAWER", "Taken");
-                        target = TaskActivity.class;
+                            Log.i("DRAWER", "Taken");
+                            target = TaskActivity.class;
                         break;
                     case "Aanwezigheid":
-                        target = AttendanceActivity.class;
-                        Log.i("DRAWER", "Aanwezigheid");
+                            Log.i("DRAWER", "Aanwezigheid");
+                            target = AttendanceActivity.class;
                         break;
                     case "Instellingen":
-                        target = SettingsActivity.class;
-                        Log.i("DRAWER", "Instellingen");
+                            Log.i("DRAWER", "Instellingen");
+                            target = SettingsActivity.class;
                         break;
-                    case "Vandaag":
-                    case "Morgen":
                     default:
                         Log.i("DRAWER", "" + position);
                         return;
@@ -96,6 +125,21 @@ public abstract class BaseActivity extends AppCompatActivity {
 //                return false;
 //            }
 //        });
+    }
+
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override

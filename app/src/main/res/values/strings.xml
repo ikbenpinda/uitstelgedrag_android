@@ -155,4 +155,6 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="draweraccessopen">open drawer</string>
+    <string name="draweraccessclose">close drawer</string>
 </resources>

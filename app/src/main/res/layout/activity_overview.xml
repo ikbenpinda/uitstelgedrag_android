@@ -3,16 +3,26 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
         <!--
             DrawerLayout extends FrameLayout.
             To make the toolbar not be overdrawn by the other views, a LinearLayout is used.
+
+            fitsSystemWindows + "-25dp" + setStatusBarBackground to make the status bar overlap and translucent.
+
+            clickable="true" supposedly fixes a bug where the drawer gets stuck:
+            http://stackoverflow.com/questions/18044277/android-navigation-drawer-bug-using-the-sample
         -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:fitsSystemWindows="true"
+            android:clickable="true"
+            android:paddingTop="-25dp"
+            android:background="#AAFFFFFF">
             <!-- The main content view -->
             <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
                                                              xmlns:app="http://schemas.android.com/apk/res-auto"

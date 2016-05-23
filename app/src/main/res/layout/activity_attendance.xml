@@ -1,16 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activities.AttendanceActivity">
+    android:fitsSystemWindows="true">
 
-    <android.support.v7.widget.RecyclerView
+    <!--
+        DrawerLayout extends FrameLayout.
+        To make the toolbar not be overdrawn by the other views, a LinearLayout is used.
+
+        fitsSystemWindows + "-25dp" + setStatusBarBackground to make the status bar overlap and translucent.
+
+        clickable="true" supposedly fixes a bug where the drawer gets stuck:
+        http://stackoverflow.com/questions/18044277/android-navigation-drawer-bug-using-the-sample
+    -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/attendances_lv">
-    </android.support.v7.widget.RecyclerView>
+        android:orientation="vertical"
+        android:fitsSystemWindows="true"
+        android:clickable="true"
+        android:paddingTop="-25dp"
+        android:background="#AAFFFFFF">
+        <!-- The main content view -->
+        <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                         xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                         xmlns:tools="http://schemas.android.com/tools"
+                                                         android:layout_width="match_parent"
+                                                         android:layout_height="match_parent"
+                                                         android:fitsSystemWindows="true"
+                                                         tools:context=".ui.activities.OverviewActivity">
+            <android.support.design.widget.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.AppBarOverlay">
 
-</LinearLayout>
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            </android.support.design.widget.AppBarLayout>
+
+            <include layout="@layout/content_attendances"/>
+        </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
+
+    <!-- The navigation drawer -->
+    <ListView android:id="@+id/left_drawer"
+              android:layout_width="240dp"
+              android:layout_height="match_parent"
+              android:layout_gravity="start"
+              android:background="#111"
+              android:choiceMode="singleChoice"
+              android:divider="@android:color/transparent"
+              android:dividerHeight="0dp"/>
+</android.support.v4.widget.DrawerLayout>
