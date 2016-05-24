@@ -1,5 +1,6 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -158,4 +160,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Dismisses the virtual keyboard, regardless of where you at.
+     */
+    public void dismissKeyboard(){
+        //http://stackoverflow.com/questions/3553779/android-dismiss-keyboard
+        ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    }
 }

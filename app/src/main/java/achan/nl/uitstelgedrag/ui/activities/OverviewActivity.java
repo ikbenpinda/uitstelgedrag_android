@@ -104,6 +104,7 @@ public class OverviewActivity extends BaseActivity
         Log.i("Uitstelgedrag", "Persisted task #"+task.id);
         desc.setText("");
         desc.clearFocus();
+        dismissKeyboard();
     }
 
     @OnClick(R.id.CheckinButton) void checkIn(){
