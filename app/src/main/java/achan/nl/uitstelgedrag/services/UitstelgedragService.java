@@ -14,4 +14,8 @@ public class UitstelgedragService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+    public UitstelgedragService() {
+        super();
+    }
 }

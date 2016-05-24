@@ -41,6 +41,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResource());
         ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -61,6 +62,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 //drawerOpened = true;
             }
         };
+
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         drawer.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();

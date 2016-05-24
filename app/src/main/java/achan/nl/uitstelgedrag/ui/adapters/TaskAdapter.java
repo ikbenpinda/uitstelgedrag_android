@@ -4,9 +4,12 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -103,11 +106,33 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // FIXME: 29-4-2016 Document what the hell is going on here.
         String description = tasks.get(holder.getAdapterPosition()).description;
         holder.taskdescription.setText(description);
-        holder.taskdescription.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.taskdescription.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                Log.i("RECVIEW", "item highlighted:" + tasks.get(holder.getAdapterPosition()).description);
-                return false;
+            public void onClick(final View v) {
+                PopupMenu    popup    = new PopupMenu(context, v);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()){
+                            case R.id.popup_edit:
+                                Snackbar.make(v, "Lol cant", Snackbar.LENGTH_SHORT).show();
+                                break;
+                            case R.id.popup_plan_today:
+                                Snackbar.make(v, "Gepland voor vandaag! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
+                                // TODO
+                                break;
+                            case  R.id.popup_plan_tomorrow:
+                                Snackbar.make(v, "Gepland voor morgen! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
+                                // TODO: 24-5-2016 move to planner
+                                break;
+                        }
+
+                        return true;
+                    }
+                });
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.taskpopupmenu, popup.getMenu());
+                popup.show();
             }
         });
         holder.taskDone.setChecked(false);
@@ -165,10 +190,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return tasks.size();
     }
 
-
-
-//  Custom ViewHolders for TaskAdapter.
-//  Caches UI views by holding findviewbyid() results in-memory. Reduces performance hit.
+    //  Custom ViewHolders for TaskAdapter.
+    //  Caches UI views by holding findviewbyid() results in-memory. Reduces performance hit.
 
     /**
      * ViewHolder for tasks, natural style.
