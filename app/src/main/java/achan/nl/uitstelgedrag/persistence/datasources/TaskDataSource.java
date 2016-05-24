@@ -47,11 +47,14 @@ public class TaskDataSource implements DataSource<Task> {
         Task task = new Task("");
         String query = "SELECT * FROM Tasks WHERE id = " + id;
         Cursor cursor = database.rawQuery(query, null);
-        cursor.moveToFirst();
-        task.id = cursor.getInt(col++);
-        task.description = cursor.getString(col++);
-        cursor.close();
-        return task;
+        if(cursor != null && cursor.moveToFirst()) { // Fixes issue where doubleclicking the view would cause the database to get called with a nulled object.
+            task.id = cursor.getInt(col++);
+            task.description = cursor.getString(col++);
+            cursor.close();
+            return task;
+        }
+        Log.w("TaskDataSource", "Returned null - cursor was null or moveToFirst returned false!");
+        return null;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class TaskDataSource implements DataSource<Task> {
         List<Task> tasks  = new ArrayList<>();
 
         // Cursor starts at -1,
-        // first call will make it start at first value of set.
+        // first call will make it start at first v alue of set.
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(0);
@@ -90,6 +93,9 @@ public class TaskDataSource implements DataSource<Task> {
     @Override
     public void update(Task row) {
         Log.w("UITSTELGEDRAG", "Called update() but should've been calling insert()!");
+        //UPDATE table_name
+        //SET column1 = value1, column2 = value2...., columnN = valueN
+        //WHERE [condition];
     }
 
     @Override
