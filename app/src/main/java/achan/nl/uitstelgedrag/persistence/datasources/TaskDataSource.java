@@ -101,6 +101,10 @@ public class TaskDataSource implements DataSource<Task> {
     @Override
     public boolean delete(int id) {
         Task task = get(id);
+
+        if (task == null)
+            return false;
+
         String query = "DELETE FROM Tasks WHERE id = " + task.id + "";
         database.execSQL(query);
         Log.i("UITSTELGEDRAG", "Deleted task " + task.id + ":" + task.description);

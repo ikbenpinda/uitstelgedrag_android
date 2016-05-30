@@ -31,8 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activities.AttendanceActivity"
-            android:label="@string/title_activity_attendance">
+            android:name=".ui.activities.AttendanceActivity">
         </activity>
         <activity
             android:name=".ui.activities.SettingsActivity"

@@ -45,6 +45,7 @@
             </android.support.design.widget.AppBarLayout>
 
             <include layout="@layout/content_dayplanning"/>
+
         </android.support.design.widget.CoordinatorLayout>
     </LinearLayout>
 
