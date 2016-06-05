@@ -13,10 +13,10 @@ import android.widget.ListView;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.logic.TaskPresenter;
-import achan.nl.uitstelgedrag.logic.TaskPresenterImpl;
-import achan.nl.uitstelgedrag.models.Task;
+import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
+import achan.nl.uitstelgedrag.ui.presenters.TaskPresenter;
+import achan.nl.uitstelgedrag.ui.presenters.TaskPresenterImpl;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -31,7 +31,7 @@ public class TaskActivity extends BaseActivity {
     @BindView(R.id.AddTaskButton)   Button       AddTaskButton;
     @BindView(R.id.MainList)        RecyclerView list;
     @BindView(R.id.drawer_layout)   DrawerLayout drawer;
-    @BindView(R.id.left_drawer)     ListView     drawerlist; // FIXME: 21-5-2016 recview
+    @BindView(R.id.left_drawer)     ListView     drawerlist; // FIXME: 21-5-2016 recview cant be used. Use NavView btw.
 
     @Override
     int getLayoutResource() {
@@ -54,7 +54,7 @@ public class TaskActivity extends BaseActivity {
         list.setAdapter(adapter);
     }
 
-    @OnClick(R.id.AddTaskButton) void addtask(View v){
+    @OnClick(R.id.AddTaskButton) void addTask(View v){
         //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016
         EditText desc = (EditText) findViewById(R.id.AddTaskDescription);
         Task     task = new Task(desc.getText().toString());

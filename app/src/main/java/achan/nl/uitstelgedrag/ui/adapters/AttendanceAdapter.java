@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.models.Timestamp;
+import achan.nl.uitstelgedrag.domain.models.Timestamp;
 
 /**
  * Created by Etienne on 2-5-2016.
@@ -22,7 +22,7 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.At
     List<Timestamp>      timestamps;
     Context              context;
 
-    public AttendanceAdapter(List<Timestamp> timestamps,Context context) {
+    public AttendanceAdapter(List<Timestamp> timestamps, Context context) {
         this.timestamps = timestamps;
         this.context = context;
         Log.i("Uitstelgedrag", "timestamps.size="+timestamps.size());
@@ -62,11 +62,8 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.At
                 .append(ts.minutes);
         Log.e("asdfasdfasdf", ""+ts.weekday);
         holder.textView.setText(ts_str.toString());
-        holder.textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //
-            }
+        holder.textView.setOnClickListener(v -> {
+            //
         });
     }
 

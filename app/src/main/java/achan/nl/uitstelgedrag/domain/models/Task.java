@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.models;
+package achan.nl.uitstelgedrag.domain.models;
 
 /**
  * Created by Etienne on 26-3-2016.

@@ -1,8 +1,8 @@
-package achan.nl.uitstelgedrag.logic;
+package achan.nl.uitstelgedrag.ui.presenters;
 
 import java.util.List;
 
-import achan.nl.uitstelgedrag.models.Task;
+import achan.nl.uitstelgedrag.domain.models.Task;
 
 /**
  * Created by Etienne on 29-5-2016.

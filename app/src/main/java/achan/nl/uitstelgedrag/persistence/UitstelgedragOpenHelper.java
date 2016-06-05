@@ -6,27 +6,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.util.List;
-
-import achan.nl.uitstelgedrag.models.Task;
-import achan.nl.uitstelgedrag.models.Timestamp;
-import achan.nl.uitstelgedrag.persistence.datasources.AttendanceDataSource;
-import achan.nl.uitstelgedrag.persistence.datasources.CategoryDataSource;
-import achan.nl.uitstelgedrag.persistence.datasources.TaskDataSource;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.AttendanceDefinition;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.CategoryDefinition;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.TaskDefinition;
 
 /**
+ * So i'm guessing this is the Service Layer with all the needed repositories.
+ *
  * Created by Etienne on 3-4-2016.
  */
-public class UitstelgedragOpenHelper extends SQLiteOpenHelper {
+public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
-    public static final String DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int DATABASE_SCHEMA_VERSION = 6;
+    public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
+    public static final int     DATABASE_SCHEMA_VERSION = 7;
 
     private final SQLiteDatabase sqlite;
-
-    public TaskDataSource       tasks;
-    public CategoryDataSource   categories;
-    public AttendanceDataSource attendances;
 
     // FIXME: 18-4-2016 How to handle multiple attendances per day / attendances spanning multiple days?
 
@@ -40,29 +34,13 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper {
 
     {   // Initializer block.
         sqlite = getWritableDatabase();
-        tasks = new TaskDataSource(sqlite);
-        categories = new CategoryDataSource(sqlite);
-        attendances = new AttendanceDataSource(sqlite);
-    }
-
-    public List<Task> getAll(){
-        return tasks.getAll();
-    }
-
-    public void addTask(Task task) {
-        tasks.insert(task);
-    }
-
-    public void deleteTask(Task task){
-        Log.w("XXXXXXXXX", ""+task.id);
-        tasks.delete(task.id);
     }
 
     private void nuke(SQLiteDatabase db){
         Log.w("OpenHelper", "Upgraded/Downgraded sqlite, deleted tables.");
-        db.delete("Tasks", null,null);
-        db.delete("Categories", null,null);
-        db.delete("Attendances", null,null);
+        db.delete(TaskDefinition.TASKS.name, null,null);
+        db.delete(CategoryDefinition.CATEGORIES.name, null,null);
+        db.delete(AttendanceDefinition.ATTENDANCES.name, null,null);
         onCreate(db);
     }
 
@@ -73,11 +51,11 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE IF NOT EXISTS " + tasks.TABLE_TASKS;
+        String query = "CREATE TABLE IF NOT EXISTS " + TaskDefinition.TASKS;
         db.execSQL(query);
-        query = "CREATE TABLE IF NOT EXISTS " + categories.CATEGORIES;
+        query = "CREATE TABLE IF NOT EXISTS " + CategoryDefinition.CATEGORIES;
         db.execSQL(query);
-        query = "CREATE TABLE IF NOT EXISTS " + attendances.ATTENDANCES;
+        query = "CREATE TABLE IF NOT EXISTS " + AttendanceDefinition.ATTENDANCES;
         db.execSQL(query);
     }
 
@@ -91,20 +69,8 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper {
         nuke(db);
     }
 
-    /**
-     *
-     * @param type Timestamp.ARRIVAL or Timestamp.DEPARTURE.
-     */
-    public void addTimestamp(String type) {
-        attendances.insert(new Timestamp(type));
-    }
-
-    /**
-     * Gets all attendances from the sqlite.
-     *
-     * IDs are a bit tricky to work with tbh.
-     */
-    public List<Timestamp> getTimestamps(){
-        return attendances.getAll();
+    @Override
+    public int getSchemaVersion() {
+        return DATABASE_SCHEMA_VERSION;
     }
 }

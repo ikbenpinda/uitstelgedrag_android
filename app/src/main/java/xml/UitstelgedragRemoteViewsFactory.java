@@ -7,8 +7,8 @@ import android.widget.RemoteViews;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.models.Task;
-import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.domain.models.Task;
+import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 
 /**
  *
@@ -19,7 +19,7 @@ import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
  */
 public class UitstelgedragRemoteViewsFactory implements UitstelgedragRemoteViewsService.RemoteViewsFactory{
 
-    List<Task> datasource;
+    List<Task> tasks;
     Context context;
     Intent intent;
 
@@ -30,7 +30,7 @@ public class UitstelgedragRemoteViewsFactory implements UitstelgedragRemoteViews
 
     @Override
     public void onCreate() {
-        datasource = new UitstelgedragOpenHelper(context, null).getAll();
+        tasks = new TaskGateway(context).getAll();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class UitstelgedragRemoteViewsFactory implements UitstelgedragRemoteViews
 
     @Override
     public int getCount() {
-        return datasource.size();
+        return tasks.size();
     }
 
     @Override

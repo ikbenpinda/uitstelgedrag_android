@@ -18,8 +18,8 @@ import android.widget.TextView;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.models.Task;
-import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.domain.models.Task;
+import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,7 +42,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     TaskViewHolder      holder;
     CategoryViewHolder  holder_cat;
     List<Task>          tasks;
-        Context             context;
+    Context             context;
 
     public TaskAdapter(List<Task> tasks, Context context){
         this.tasks = tasks;
@@ -55,7 +55,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         handler.post(() -> {
             //structural events = whole list, item events = single items
             notifyItemInserted(position); // Exception - Inconsistency detected.
-            //notifyDataSetChanged();       // Stops animation and re-layout.
+            //notifyDataSetChanged(); Stops animation and re-layout.
         });
     }
 
@@ -64,7 +64,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             notifyItemRemoved(position);
-            //notifyDataSetChanged();
+            //notifyDataSetChanged(); is obsolete because notifyItemRemoved specifies what changed.
+            //                        Same goes for notifyItemInserted.
         });
     }
 
@@ -159,7 +160,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                                 if (event == DISMISS_EVENT_SWIPE
                                         | event == DISMISS_EVENT_TIMEOUT
                                         | event == DISMISS_EVENT_CONSECUTIVE){
-                                    new UitstelgedragOpenHelper(context, null).deleteTask(selected);
+                                    new TaskGateway(context).delete(selected);
                                     Log.i("Snackbar", "Item removed. pos=" + adapterposition);
                                 }
                             }

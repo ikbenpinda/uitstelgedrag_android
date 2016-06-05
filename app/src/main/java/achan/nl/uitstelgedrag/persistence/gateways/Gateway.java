@@ -1,17 +1,17 @@
-package achan.nl.uitstelgedrag.persistence.datasources;
+package achan.nl.uitstelgedrag.persistence.gateways;
 
 import java.util.List;
 
 /**
  * Generic interface for DataSources.
- * a DataSource typically knows about all the queries related to a specific object.
+ * a Gateway typically knows about all the queries related to a specific object.
  * These queries are then executed on the database.
  *
- * Whether the DataSource knows about the database; do what works for you.
+ * Whether the Gateway knows about the database; do what works for you.
  *
  * Created by Etienne on 17-4-2016.
  */
-public interface DataSource<T> {
+public interface Gateway<T> {
 
     /**
      * Returns a single row with given id.
@@ -38,5 +38,5 @@ public interface DataSource<T> {
     /**
      * Deletes a row with given id.
      */
-    boolean delete(int id);
+    boolean delete(T row);
 }

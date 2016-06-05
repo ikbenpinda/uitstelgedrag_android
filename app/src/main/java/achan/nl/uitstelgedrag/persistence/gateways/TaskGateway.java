@@ -1,5 +1,6 @@
-package achan.nl.uitstelgedrag.persistence.datasources;
+package achan.nl.uitstelgedrag.persistence.gateways;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -8,24 +9,20 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import achan.nl.uitstelgedrag.models.Task;
-import achan.nl.uitstelgedrag.persistence.definitions.ColumnDefinition;
-import achan.nl.uitstelgedrag.persistence.definitions.TableDefinition;
+import achan.nl.uitstelgedrag.domain.models.Task;
+import achan.nl.uitstelgedrag.persistence.TaskRepository;
+import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.TaskDefinition;
 
 /**
  * Created by Etienne on 17-4-2016.
  */
-public class TaskDataSource implements DataSource<Task> {
-
-    public static final ColumnDefinition COLUMN_ID          = new ColumnDefinition("id", "INTEGER", "PRIMARY KEY AUTOINCREMENT");
-    public static final ColumnDefinition COLUMN_DESCRIPTION = new ColumnDefinition("description", "TEXT", "NOT NULL");
-    public static final ColumnDefinition COLUMN_CATEGORY_ID = new ColumnDefinition("CATEGORY_ID", "INTEGER", "NULL");
-    public static final TableDefinition  TABLE_TASKS        = new TableDefinition("Tasks", COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_CATEGORY_ID);
+public class TaskGateway implements TaskRepository {
 
     SQLiteDatabase database;
 
-    public TaskDataSource(SQLiteDatabase database) {
-        this.database = database;
+    public TaskGateway(Context context) {
+        this.database = new UitstelgedragOpenHelper(context, null).getWritableDatabase();
     }
 
     /**
@@ -45,7 +42,7 @@ public class TaskDataSource implements DataSource<Task> {
     public Task get(int id) {
         int col = 0;
         Task task = new Task("");
-        String query = "SELECT * FROM Tasks WHERE id = " + id;
+        String query = "SELECT * FROM " + TaskDefinition.ID.name + " WHERE " + TaskDefinition.ID.name + " = " + id;
         Cursor cursor = database.rawQuery(query, null);
         if(cursor != null && cursor.moveToFirst()) { // Fixes issue where doubleclicking the view would cause the database to get called with a nulled object.
             task.id = cursor.getInt(col++);
@@ -53,7 +50,7 @@ public class TaskDataSource implements DataSource<Task> {
             cursor.close();
             return task;
         }
-        Log.w("TaskDataSource", "Returned null - cursor was null or moveToFirst returned false!");
+        Log.w("TaskGateway", "Returned null - cursor was null or moveToFirst returned false!");
         return null;
     }
 
@@ -63,7 +60,7 @@ public class TaskDataSource implements DataSource<Task> {
         List<Task> tasks  = new ArrayList<>();
 
         // Cursor starts at -1,
-        // first call will make it start at first v alue of set.
+        // first call will make it start at first value of set.
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(0);
@@ -81,7 +78,7 @@ public class TaskDataSource implements DataSource<Task> {
 
     @Override
     public Task insert(Task object) {
-        String query = "INSERT INTO Tasks(" + COLUMN_DESCRIPTION.name + "," + COLUMN_CATEGORY_ID.name + ") VALUES(? ,0)";
+        String query = "INSERT INTO Tasks(" + TaskDefinition.DESCRIPTION.name + "," + TaskDefinition.CATEGORY_ID.name + ") VALUES(? ,0)";
         SQLiteStatement statement = database.compileStatement(query);
         statement.bindString(1, object.description);
      // Returns the SQLite-generated primary key generated after the insert.
@@ -91,21 +88,21 @@ public class TaskDataSource implements DataSource<Task> {
     }
 
     @Override
-    public void update(Task row) {
+    public Task update(Task row) {
         Log.w("UITSTELGEDRAG", "Called update() but should've been calling insert()!");
+        return null;
         //UPDATE table_name
         //SET column1 = value1, column2 = value2...., columnN = valueN
         //WHERE [condition];
     }
 
     @Override
-    public boolean delete(int id) {
-        Task task = get(id);
+    public boolean delete(Task task) {
 
         if (task == null)
             return false;
 
-        String query = "DELETE FROM Tasks WHERE id = " + task.id + "";
+        String query = "DELETE FROM " + TaskDefinition.TASKS.name + " WHERE " + TaskDefinition.ID.name + " = " + task.id + "";
         database.execSQL(query);
         Log.i("UITSTELGEDRAG", "Deleted task " + task.id + ":" + task.description);
         return true;

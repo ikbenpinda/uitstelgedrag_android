@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.models;
+package achan.nl.uitstelgedrag.domain.models;
 
 import java.util.List;
 

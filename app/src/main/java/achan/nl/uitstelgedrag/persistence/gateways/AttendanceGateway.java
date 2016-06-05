@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.persistence.datasources;
+package achan.nl.uitstelgedrag.persistence.gateways;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,27 +7,22 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import achan.nl.uitstelgedrag.models.Timestamp;
-import achan.nl.uitstelgedrag.persistence.definitions.ColumnDefinition;
-import achan.nl.uitstelgedrag.persistence.definitions.TableDefinition;
+import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.persistence.AttendanceRepository;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.AttendanceDefinition;
 
 /**
  * Created by Etienne on 29-4-2016.
  */
-public class AttendanceDataSource implements DataSource<Timestamp> {
+public class AttendanceGateway implements AttendanceRepository {
 
     public static final int              COL_ID = 0;
     public static final int              COL_TYPE = 1;
     public static final int              COL_STR = 2;
 
-    public static final ColumnDefinition ATTENDANCE_ID        = new ColumnDefinition("id", "INTEGER", "PRIMARY KEY AUTOINCREMENT");
-    public static final ColumnDefinition ATTENDANCE_TYPE      = new ColumnDefinition("type", "TEXT", "NULL");
-    public static final ColumnDefinition ATTENDANCE_TIMESTAMP = new ColumnDefinition("timestamp", "TEXT", "NULL");
-    public static final TableDefinition  ATTENDANCES          = new TableDefinition("Attendances", ATTENDANCE_ID, ATTENDANCE_TYPE, ATTENDANCE_TIMESTAMP) ;
-
     SQLiteDatabase database;
 
-    public AttendanceDataSource(SQLiteDatabase database) {
+    public AttendanceGateway(SQLiteDatabase database) {
         this.database = database;
     }
 
@@ -65,7 +60,7 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
      * @return
      */
     public String parseTo(Timestamp timestamp){
-        StringBuilder querybuilder = new StringBuilder("INSERT INTO Attendances(type, timestamp) VALUES(")
+        StringBuilder querybuilder = new StringBuilder("INSERT INTO "+AttendanceDefinition.ATTENDANCES.name+"("+AttendanceDefinition.TYPE.name+", "+AttendanceDefinition.TIMESTAMP.name +") VALUES(")
                 .append("\"")
                 .append(timestamp.type)
                 .append("\"")
@@ -81,7 +76,7 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
     public Timestamp get(int id) {
         Timestamp   timestamp;
 
-        String query  = "SELECT * FROM Attendances WHERE id = " + id;
+        String query  = "SELECT * FROM " + AttendanceDefinition.ATTENDANCES.name + " WHERE " + AttendanceDefinition.ID.name + " = " + id;
         Cursor cursor = database.rawQuery(query, null);
         cursor.moveToFirst();
         timestamp = parseFrom(cursor.getString(COL_STR)); //This returns a concatenated timestamp.
@@ -96,7 +91,7 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
     @Override
     public List<Timestamp> getAll() {
         List<Timestamp> timestamps = new ArrayList<>();
-        Cursor          cur        = database.rawQuery("SELECT * FROM Attendances", null);
+        Cursor          cur        = database.rawQuery("SELECT * FROM " + AttendanceDefinition.ATTENDANCES.name + "", null);
 
         cur.moveToPosition(-1);
         while (cur.moveToNext()){
@@ -131,12 +126,13 @@ public class AttendanceDataSource implements DataSource<Timestamp> {
     }
 
     @Override
-    public boolean delete(int id) {
+    public boolean delete(Timestamp timestamp) {
         return false;
     }
 
     @Override
-    public void update(Timestamp row) {
+    public Timestamp update(Timestamp row) {
         Log.w("UITSTELGEDRAG", "Called update() but should've been calling insert()!");
+        return row;
     }
 }

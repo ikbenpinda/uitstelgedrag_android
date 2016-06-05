@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.models.Category;
+import achan.nl.uitstelgedrag.domain.models.Category;
 import achan.nl.uitstelgedrag.ui.views.TaskView;
 
 /**

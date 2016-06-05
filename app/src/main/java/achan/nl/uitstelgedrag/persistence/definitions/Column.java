@@ -3,12 +3,12 @@ package achan.nl.uitstelgedrag.persistence.definitions;
 /**
  * Created by Etienne on 3-4-2016.
  */
-public class ColumnDefinition {
+public class Column {
     public String name;
     public String type;
     public String constraints;
 
-    public ColumnDefinition(String name, String type, String constraints) {
+    public Column(String name, String type, String constraints) {
         this.name = name;
         this.type = type;
         this.constraints = constraints;

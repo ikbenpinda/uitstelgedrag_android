@@ -3,11 +3,11 @@ package achan.nl.uitstelgedrag.persistence.definitions;
 /**
  * Created by Etienne on 3-4-2016.
  */
-public class TableDefinition {
-    public String name;
-    public ColumnDefinition[] columns;
+public class Table {
+    public String   name;
+    public Column[] columns;
 
-    public TableDefinition(String name, ColumnDefinition... columns) {
+    public Table(String name, Column... columns) {
         this.name = name;
         this.columns = columns;
     }
@@ -15,7 +15,7 @@ public class TableDefinition {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(name).append("(");
-        for (ColumnDefinition column : columns) {
+        for (Column column : columns) {
             sb.append(column.toString());
             sb.append(",");
         }
