@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:checkableBehavior="single">
+        <!--<item FIXME Feature request? -->
+        <!--android:id="@+id/navigation_item_main"-->
+        <!--android:checkable="true"-->
+        <!--android:title="Hoofdmenu"/>-->
+        <item
+            android:id="@+id/navigation_item_overview"
+            android:checkable="true"
+            android:title="Overzicht" />
+        <item
+            android:id="@+id/navigation_item_planner"
+            android:checkable="true"
+            android:checked="true"
+            android:title="Planner" />
+        <item
+            android:id="@+id/navigation_item_tasks"
+            android:checkable="true"
+            android:checked="true"
+            android:title="Taken" />
+        <item
+            android:id="@+id/navigation_item_attendance"
+            android:checkable="true"
+            android:checked="true"
+            android:title="Urenstaat" />
+
+    </group>
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/navigation_group_misc">
+        <item
+            android:id="@+id/navigation_item_help"
+            android:checkable="true"
+            android:title="Help" />
+        <item
+            android:id="@+id/navigation_item_settings"
+            android:checkable="true"
+            android:title="Instellingen" />
+    </group>
+</menu>

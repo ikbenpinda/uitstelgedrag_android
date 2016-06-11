@@ -5,4 +5,6 @@
     <color name="colorPrimaryDark">@color/primary_dark_material_dark</color>
     <color name="colorAccent">@color/accent_material_dark</color>
 
+    <color name="apptheme_colorbackground">#eee8d5</color>
+    <color name="apptheme_colorforeground">#002b36</color>
 </resources>

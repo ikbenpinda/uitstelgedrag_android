@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +15,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import achan.nl.uitstelgedrag.R;
 import butterknife.BindView;
@@ -29,7 +30,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem; // FIXME: unnecessary view?
     @BindView(R.id.drawer_layout)     DrawerLayout  drawer;
-    @BindView(R.id.left_drawer)       ListView      drawerlist;         // FIXME: 21-5-2016 recview
+    //@BindView(R.id.left_drawer)       ListView      drawerlist;         // FIXME: 21-5-2016 recview
+    @BindView(R.id.navigation_view)NavigationView navigationView;
     @BindView(R.id.toolbar)           Toolbar       toolbar;
 
     /**
@@ -43,6 +45,21 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResource());
         ButterKnife.bind(this);
+
+        final Map<String, Class> mapping = new LinkedHashMap<>();
+        mapping.put("Overzicht",       OverviewActivity.class);
+        mapping.put("Planner",       DayplannerActivity.class);
+        mapping.put("Taken",            TaskActivity.class);
+        mapping.put("Aanwezigheid",       AttendanceActivity.class);
+        //mapping.put("Help",                 HelpActivity.class); TODO
+        mapping.put("Instellingen",         SettingsActivity.class);
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            String title = item.getTitle().toString();
+            Log.i("Navigation Drawer", "Item selected: " + title);
+            startActivity(new Intent(getBaseContext(), mapping.get(title)));
+            return true;
+        });
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,6 +96,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 "Aanwezigheid",
                 "Instellingen"
         };
+/*      Legacy drawerlist code.
 
         // Set the adapter for the list view
         drawerlist.setAdapter(new ArrayAdapter<>(getBaseContext(),
@@ -119,7 +137,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 startActivity(new Intent(getBaseContext(), target));
             }
         });
-
+*/
         // do not set contentview in children?
 
 //        settingsMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
