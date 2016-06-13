@@ -2,19 +2,21 @@ package achan.nl.uitstelgedrag.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
-import android.support.design.widget.NavigationView;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,13 +27,13 @@ import butterknife.ButterKnife;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    String[] draweritems;
-    ActionBarDrawerToggle mDrawerToggle;
+    String[]              draweritems;
+    ActionBarDrawerToggle DrawerToggle;
 
     //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem; // FIXME: unnecessary view?
-    @BindView(R.id.drawer_layout)     DrawerLayout  drawer;
+    //@BindView(R.id.drawer_layout)     DrawerLayout  drawer;
     //@BindView(R.id.left_drawer)       ListView      drawerlist;         // FIXME: 21-5-2016 recview
-    @BindView(R.id.navigation_view)NavigationView navigationView;
+    //@BindView(R.id.navigation_view)NavigationView navigationView;
     @BindView(R.id.toolbar)           Toolbar       toolbar;
 
     /**
@@ -54,114 +56,40 @@ public abstract class BaseActivity extends AppCompatActivity {
         //mapping.put("Help",                 HelpActivity.class); TODO
         mapping.put("Instellingen",         SettingsActivity.class);
 
-        navigationView.setNavigationItemSelectedListener(item -> {
-            String title = item.getTitle().toString();
-            Log.i("Navigation Drawer", "Item selected: " + title);
-            startActivity(new Intent(getBaseContext(), mapping.get(title)));
-            return true;
-        });
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        // Use the constructor with the toolbar animation to fix navigation issues.
-        mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.draweraccessopen, R.string.draweraccessclose)
-        {
+        //if you want to update the items at a later time it is recommended to keep it in a variable
+        PrimaryDrawerItem   overzicht = new PrimaryDrawerItem().withName("Overzicht");
+        PrimaryDrawerItem   planner = new PrimaryDrawerItem().withName("Planner");
+        PrimaryDrawerItem   taken = new PrimaryDrawerItem().withName("Taken");
+        PrimaryDrawerItem   aanwezigheid = new PrimaryDrawerItem().withName("Aanwezigheid");
+        SecondaryDrawerItem help = (SecondaryDrawerItem) new SecondaryDrawerItem().withName("Help");
+        SecondaryDrawerItem instellingen = (SecondaryDrawerItem) new SecondaryDrawerItem().withName("Instellingen");
 
-            public void onDrawerClosed(View view)
-            {
-                supportInvalidateOptionsMenu();
-                //drawerOpened = false;
-            }
+        //create the drawer and remember the `Drawer` result object
+        Drawer drawer = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .addDrawerItems(
+                        overzicht,
+                        planner,
+                        taken,
+                        aanwezigheid,
+                        new DividerDrawerItem(),
+                        help,
+                        instellingen
 
-            public void onDrawerOpened(View drawerView)
-            {
-                supportInvalidateOptionsMenu();
-                //drawerOpened = true;
-            }
-        };
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        drawer.addDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-
-        // https://medium.com/@ngdelamo/using-drawerlayout-the-material-way-i-716bba2b5705#.yeqv0jln5
-        drawer.setStatusBarBackground(R.color.colorPrimary);
-
-        draweritems = new String[]{
-                "Overzicht",
-                "Dagplanner",
-                "Taken",
-                "Aanwezigheid",
-                "Instellingen"
-        };
-/*      Legacy drawerlist code.
-
-        // Set the adapter for the list view
-        drawerlist.setAdapter(new ArrayAdapter<>(getBaseContext(),
-                R.layout.drawer_item, R.id.drawer_item, draweritems));
-
-        // Set the list's click listener
-        drawerlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Class target;
-
-                switch (draweritems[position]){
-                    case "Overzicht":
-                            Log.i("DRAWER", "Taken");
-                            target = OverviewActivity.class;
-                        break;
-                    case "Dagplanner":
-                            Log.i("DRAWER", "Taken");
-                            target = DayplannerActivity.class;
-                        break;
-                    case "Taken":
-                            Log.i("DRAWER", "Taken");
-                            target = TaskActivity.class;
-                        break;
-                    case "Aanwezigheid":
-                            Log.i("DRAWER", "Aanwezigheid");
-                            target = AttendanceActivity.class;
-                        break;
-                    case "Instellingen":
-                            Log.i("DRAWER", "Instellingen");
-                            target = SettingsActivity.class;
-                        break;
-                    default:
-                        Log.i("DRAWER", "" + position);
-                        return;
-                }
-
-                startActivity(new Intent(getBaseContext(), target));
-            }
-        });
-*/
-        // do not set contentview in children?
-
-//        settingsMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                Log.i("BaseActivity", "MenuItem called!");
-//                return false;
-//            }
-//        });
-    }
-
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState)
-    {
-        super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig)
-    {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+                )
+                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+                    Log.i("Drawer", "Item clicked!");
+                    startActivity(new Intent(getBaseContext(),
+                            mapping.get(((PrimaryDrawerItem)drawerItem).getName().getText()))
+                    );
+                    return true;
+                })
+                .build();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class AttendanceActivity extends BaseActivity {
 
         context = getApplicationContext();
         presenter = new AttendancePresenterImpl(context);
-
+        //new DrawerBuilder().withActivity(this).build();
         timestamps = presenter.viewAttendance(); // FIXME
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
