@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:configure="xml.UitstelgedragAppWidgetConfigureActivity"
-                    android:initialKeyguardLayout="@layout/uitstelgedrag_app_widget"
-                    android:initialLayout="@layout/uitstelgedrag_app_widget"
+                    android:initialKeyguardLayout="@layout/widget"
+                    android:initialLayout="@layout/widget"
                     android:minHeight="180dp"
                     android:minWidth="250dp"
                     android:previewImage="@drawable/example_appwidget_preview"
