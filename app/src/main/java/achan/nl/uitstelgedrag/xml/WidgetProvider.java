@@ -1,31 +1,45 @@
 package achan.nl.uitstelgedrag.xml;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.ui.activities.OverviewActivity;
 
 /**
  * Implementation of App Widget functionality.
  */
 public class WidgetProvider extends AppWidgetProvider {
 
-//    public static final String VIEW_ITEM = "achan.nl.uitstelgedrag.xml.VIEW_ITEM";
-//    public static final String OPEN_APP = "achan.nl.uitstelgedrag.xml.OPEN_APP";
+    /*
+     * Communicating from the widget to the app happens through messages.
+     * Since these need to be consistent, one way would be to use constants.
+     */
+
+    public static final String VIEW_ITEM = "achan.nl.uitstelgedrag.xml.VIEW_ITEM";
+    public static final String OPEN_APP = "achan.nl.uitstelgedrag.xml.OPEN_APP";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-//        AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-//        if (intent.getAction().equals(OPEN_APP)) {
-//            int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-//                    AppWidgetManager.INVALID_APPWIDGET_ID);
-//            int viewIndex = intent.getIntExtra(OPEN_APP, 0);
-//            Toast.makeText(context, "Touched view " + viewIndex, Toast.LENGTH_SHORT).show();
-//        }
+            //AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+        Log.i("Widget", "Received intent with action: " + intent.getAction());
+        if (intent.getAction().equals(OPEN_APP)) {
+            String id = intent.getExtras().getString("task_id");
+            //int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            //int viewIndex = intent.getIntExtra(OPEN_APP, 0);
+
+            //Toast.makeText(context, "Touched task with id " + id, Toast.LENGTH_SHORT).show();
+
+            Intent openAppIntent = new Intent(context, OverviewActivity.class);
+            openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(openAppIntent);
+        }
         super.onReceive(context, intent);
     }
 
@@ -51,7 +65,7 @@ public class WidgetProvider extends AppWidgetProvider {
 //        views.setRemoteAdapter(appWidgetId, serviceIntent);
 //
 //        //setting an empty view in case of no data
-//        //views.setEmptyView(R.id.widget_listview, R.id.empty_view);
+//        //views.setEmptyView(R.id.widget_listview, R.id.empty_view); FIXME
 
         // Instruct the widget manager to update the widget
 //        appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -101,8 +115,25 @@ public class WidgetProvider extends AppWidgetProvider {
 //
 //            updateAppWidget(context, appWidgetManager, i);
 //        }
+
         for (int widgetId : appWidgetIds) {
             RemoteViews mView = initViews(context, appWidgetManager, widgetId);
+
+            // Adding collection list item handler
+            final Intent onItemClick = new Intent(context, WidgetProvider.class);
+
+            onItemClick.setAction(OPEN_APP);
+
+            onItemClick.setData(Uri.parse(onItemClick
+                    .toUri(Intent.URI_INTENT_SCHEME)));
+
+            final PendingIntent onClickPendingIntent = PendingIntent
+                    .getBroadcast(context, 0, onItemClick,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+
+            mView.setPendingIntentTemplate(R.id.widget_listview,
+                    onClickPendingIntent);
+
             appWidgetManager.updateAppWidget(widgetId, mView);
         }
         super.onUpdate(context, appWidgetManager, appWidgetIds);

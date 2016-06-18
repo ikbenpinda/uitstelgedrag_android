@@ -7,13 +7,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        >
 
         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/widget_listview"
-            android:padding="16dp"
             android:layout_above="@+id/widget_addtask_button"
             android:layout_below="@+id/textView">
         </ListView>

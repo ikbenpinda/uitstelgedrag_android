@@ -2,6 +2,7 @@ package achan.nl.uitstelgedrag.xml;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -51,21 +52,24 @@ public class WidgetViewsFactory implements WidgetService.RemoteViewsFactory{
 
     @Override
     public RemoteViews getViewAt(int position) {
+        Task task = tasks.get(position);
+
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_rowlayout);
-        views.setTextViewText(R.id.widget_id_textview, String.valueOf(tasks.get(position).id));
-        views.setTextViewText(R.id.widget_desc_textview, tasks.get(position).description);
-        Log.i("Widget", "View set to task("+tasks.get(position).description+")");
+        views.setTextViewText(R.id.widget_id_textview, String.valueOf(task.id));
+        views.setTextViewText(R.id.widget_desc_textview, task.description);
+        Log.i("Widget", "View set to task(" + task.description + ")");
 
         // Next, set a fill-intent, which will be used to fill in the pending intent template
         // that is set on the collection view in StackWidgetProvider.
-        //Bundle extras = new Bundle();
-        //extras.putInt(WidgetProvider.OPEN_APP, position);
-        //Intent fillInIntent = new Intent();
-        //fillInIntent.putExtras(extras);
+        final Intent fillInIntent = new Intent();
+        fillInIntent.setAction(WidgetProvider.OPEN_APP);
+        final Bundle bundle = new Bundle();
+        bundle.putString("task_id", "" + task.id); // TODO
+        fillInIntent.putExtras(bundle);
 
         // Make it possible to distinguish the individual on-click
         // action of a given item
-        //views.setOnClickFillInIntent(R.id.widget_listviewitem, fillInIntent);
+        views.setOnClickFillInIntent(R.id.widget_listviewitem, fillInIntent);
 
         return views;
     }
