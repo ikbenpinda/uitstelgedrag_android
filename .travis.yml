@@ -7,5 +7,9 @@ android:
     - extra-android-m2repository
     - extra-google-m2repository
 
+# http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
+before_install:
+    - chmod +x gradlew
+
 script:
    - ./gradlew build connectedCheck
