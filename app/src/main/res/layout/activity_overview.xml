@@ -22,7 +22,7 @@
             android:orientation="vertical"
             android:fitsSystemWindows="true"
             android:clickable="true"
-            android:paddingTop="-25dp">
+            >
             <!-- The main content view -->
             <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
                                                              xmlns:app="http://schemas.android.com/apk/res-auto"

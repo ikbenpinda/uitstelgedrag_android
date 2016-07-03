@@ -29,6 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     String[]              draweritems;
     ActionBarDrawerToggle DrawerToggle;
+    Drawer drawer;
 
     //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem; // FIXME: unnecessary view?
     //@BindView(R.id.drawer_layout)     DrawerLayout  drawer;
@@ -69,7 +70,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         SecondaryDrawerItem instellingen = (SecondaryDrawerItem) new SecondaryDrawerItem().withName("Instellingen");
 
         //create the drawer and remember the `Drawer` result object
-        Drawer drawer = new DrawerBuilder()
+        drawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .addDrawerItems(

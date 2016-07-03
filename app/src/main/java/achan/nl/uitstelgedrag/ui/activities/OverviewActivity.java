@@ -1,7 +1,6 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -36,7 +35,7 @@ public class OverviewActivity extends BaseActivity {
     AlertDialog dialog;
     TaskAdapter adapter;
 
-    @BindView(R.id.ShowAttendancesLogButton) Button       logButton;
+    //@BindView(R.id.ShowAttendancesLogButton) Button       logButton;
     @BindView(R.id.AddTaskButton)            Button       AddTaskButton;
     @BindView(R.id.CheckinButton)            Button       CheckinButton;
     @BindView(R.id.CheckoutButton)           Button       CheckoutButton;
@@ -63,7 +62,7 @@ public class OverviewActivity extends BaseActivity {
                 .setMessage("duurt ongeveer 20 seconden of minder.")
                 .create();
 
-        // TODO: 17-4-2016 backgroundServicing.
+        // TODO: 17-4-2016 backgroundServicing. - Implementation will need callbacks.
         //AsyncTask databaseloader = new AsyncTask() {
         //    @Override
         //    protected Object doInBackground(Object[] params) {
@@ -81,10 +80,10 @@ public class OverviewActivity extends BaseActivity {
         list.setOnLongClickListener(v -> false);
     }
 
-    @OnClick(R.id.ShowAttendancesLogButton) void submit() {
-        Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
-        startActivity(intent);
-    }
+//    @OnClick(R.id.ShowAttendancesLogButton) void submit() {
+//        Intent intent = new Intent(getBaseContext(), AttendanceActivity.class);
+//        startActivity(intent);
+//    }
 
     @OnClick(R.id.AddTaskButton) void addTask(View v){
         //EditText cat = (EditText) findViewById(R.id.AddTaskCategory); // TODO: 29-4-2016

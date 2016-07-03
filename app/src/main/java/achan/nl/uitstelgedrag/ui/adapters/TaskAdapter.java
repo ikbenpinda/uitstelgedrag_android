@@ -1,6 +1,7 @@
 package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
+import achan.nl.uitstelgedrag.ui.activities.TaskDetailActivity;
 import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,7 +103,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // FIXME: 29-4-2016 Document what the hell is going on here.
         String description = tasks.get(holder.getAdapterPosition()).description;
         holder.taskdescription.setText(description);
-        holder.taskdescription.setOnClickListener(v -> {
+        holder.view.setOnClickListener(v1 -> {
+            Intent intent = new Intent(context, TaskDetailActivity.class);
+            intent.putExtra("task_id", tasks.get(holder.getAdapterPosition()).id);
+            context.startActivity(intent);
+        });
+        holder.view.setOnLongClickListener(v -> {
             PopupMenu    popup    = new PopupMenu(context, v);
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()){
@@ -122,6 +130,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             MenuInflater inflater = popup.getMenuInflater();
             inflater.inflate(R.menu.taskpopupmenu, popup.getMenu());
             popup.show();
+            return true;
         });
         holder.taskDone.setChecked(false);
         holder.taskDone.setOnCheckedChangeListener(
@@ -186,6 +195,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // binding happens here.
         @BindView(R.id.TaskViewCheckBox) CheckBox taskDone;
         @BindView(R.id.TaskViewDescriptionTextView) TextView taskdescription;
+        @BindView(R.id.rowlayout_task_layout) RelativeLayout view;
+
         public Context context;
 
         public TaskViewHolder(final View itemView, final Context context) {
