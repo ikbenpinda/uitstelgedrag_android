@@ -42,7 +42,7 @@ public class TaskGateway implements TaskRepository {
     public Task get(int id) {
         int col = 0;
         Task task = new Task("");
-        String query = "SELECT * FROM " + TaskDefinition.ID.name + " WHERE " + TaskDefinition.ID.name + " = " + id;
+        String query = "SELECT * FROM " + TaskDefinition.TASKS.name + " WHERE " + TaskDefinition.ID.name + " = " + id;
         Cursor cursor = database.rawQuery(query, null);
         if(cursor != null && cursor.moveToFirst()) { // Fixes issue where doubleclicking the view would cause the database to get called with a nulled object.
             task.id = cursor.getInt(col++);
