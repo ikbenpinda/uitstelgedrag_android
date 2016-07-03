@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.xml;
+package achan.nl.uitstelgedrag.widget;
 
 import android.content.Context;
 import android.content.Intent;
@@ -62,9 +62,9 @@ public class WidgetViewsFactory implements WidgetService.RemoteViewsFactory{
         // Next, set a fill-intent, which will be used to fill in the pending intent template
         // that is set on the collection view in StackWidgetProvider.
         final Intent fillInIntent = new Intent();
-        fillInIntent.setAction(WidgetProvider.OPEN_APP);
+        fillInIntent.setAction(WidgetProvider.ADD_ITEM);
         final Bundle bundle = new Bundle();
-        bundle.putString("task_id", "" + task.id); // TODO
+        bundle.putInt("task_id", task.id); // TODO
         fillInIntent.putExtras(bundle);
 
         // Make it possible to distinguish the individual on-click

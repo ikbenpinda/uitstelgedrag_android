@@ -14,7 +14,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.Light">
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"
@@ -38,10 +38,10 @@
 
         <!-- Widget service -->
         <service
-            android:name=".xml.WidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
+            android:name=".widget.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
         <!-- Widget receiver -->
-        <receiver android:name=".xml.WidgetProvider">
+        <receiver android:name=".widget.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
@@ -56,6 +56,8 @@
         <activity android:name=".ui.activities.DayplannerActivity">
         </activity>
         <activity android:name=".ui.activities.LoginActivity">
+        </activity>
+        <activity android:name=".ui.activities.TaskDetailActivity">
         </activity>
     </application>
 

@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.xml;
+package achan.nl.uitstelgedrag.widget;
 
 import android.content.Intent;
 import android.widget.RemoteViewsService;

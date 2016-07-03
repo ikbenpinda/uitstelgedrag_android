@@ -1,4 +1,4 @@
-package achan.nl.uitstelgedrag.xml;
+package achan.nl.uitstelgedrag.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -11,6 +11,8 @@ import android.widget.RemoteViews;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.ui.activities.OverviewActivity;
+import achan.nl.uitstelgedrag.ui.activities.TaskActivity;
+import achan.nl.uitstelgedrag.ui.activities.TaskDetailActivity;
 
 /**
  * Implementation of App Widget functionality.
@@ -19,26 +21,37 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /*
      * Communicating from the widget to the app happens through messages.
-     * Since these need to be consistent, one way would be to use constants.
+     * Since these need to be consistent, use constants.
      */
 
+    public static final String OPEN_APP  = "achan.nl.uitstelgedrag.xml.OPEN_APP";
     public static final String VIEW_ITEM = "achan.nl.uitstelgedrag.xml.VIEW_ITEM";
-    public static final String OPEN_APP = "achan.nl.uitstelgedrag.xml.OPEN_APP";
+    public static final String ADD_ITEM  = "achan.nl.uitstelgedrag.xml.ADD_ITEM";
 
     @Override
     public void onReceive(Context context, Intent intent) {
             //AppWidgetManager mgr = AppWidgetManager.getInstance(context);
         Log.i("Widget", "Received intent with action: " + intent.getAction());
-        if (intent.getAction().equals(OPEN_APP)) {
-            String id = intent.getExtras().getString("task_id");
-            //int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-            //int viewIndex = intent.getIntExtra(OPEN_APP, 0);
 
-            //Toast.makeText(context, "Touched task with id " + id, Toast.LENGTH_SHORT).show();
-
-            Intent openAppIntent = new Intent(context, OverviewActivity.class);
-            openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(openAppIntent);
+        int id = -1;
+        switch (intent.getAction()){
+            case OPEN_APP:
+                Intent openAppIntent = new Intent(context, OverviewActivity.class);
+                openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(openAppIntent);
+                break;
+            case VIEW_ITEM:
+                id = intent.getExtras().getInt("task_id");
+                Intent openAppAndViewTaskIntent = new Intent(context, TaskDetailActivity.class);
+                openAppAndViewTaskIntent.putExtra("task_id", id);
+                openAppAndViewTaskIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(openAppAndViewTaskIntent);
+                break;
+            case ADD_ITEM:
+                Intent openAppAndAddTaskIntent = new Intent(context, TaskActivity.class);
+                openAppAndAddTaskIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(openAppAndAddTaskIntent);
+                break;
         }
         super.onReceive(context, intent);
     }
@@ -103,7 +116,7 @@ public class WidgetProvider extends AppWidgetProvider {
 //            // Set the action for the intent.
 //            // When the user touches a particular view, it will have the effect of
 //            // broadcasting TOAST_ACTION.
-//            toastIntent.setAction(WidgetProvider.OPEN_APP);
+//            toastIntent.setAction(WidgetProvider.ADD_ITEM);
 //            toastIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
 //            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
 //            PendingIntent toastPendingIntent = PendingIntent.getBroadcast(context, 0, toastIntent,
@@ -117,25 +130,37 @@ public class WidgetProvider extends AppWidgetProvider {
 //        }
 
         for (int widgetId : appWidgetIds) {
-            RemoteViews mView = initViews(context, appWidgetManager, widgetId);
+            RemoteViews views = initViews(context, appWidgetManager, widgetId);
 
             // Adding collection list item handler
             final Intent onItemClick = new Intent(context, WidgetProvider.class);
-
-            onItemClick.setAction(OPEN_APP);
-
+            onItemClick.setAction(VIEW_ITEM);
             onItemClick.setData(Uri.parse(onItemClick
                     .toUri(Intent.URI_INTENT_SCHEME)));
-
             final PendingIntent onClickPendingIntent = PendingIntent
                     .getBroadcast(context, 0, onItemClick,
                             PendingIntent.FLAG_UPDATE_CURRENT);
 
-            mView.setPendingIntentTemplate(R.id.widget_listview,
+            views.setPendingIntentTemplate(R.id.widget_listview,
                     onClickPendingIntent);
 
-            appWidgetManager.updateAppWidget(widgetId, mView);
+            // Adding event handler for "new task" button
+            final Intent onNewTaskClick = new Intent(context, WidgetProvider.class);
+            onNewTaskClick.setAction(ADD_ITEM);
+            onNewTaskClick.setData(Uri.parse(onNewTaskClick.toUri(Intent.URI_INTENT_SCHEME)));
+            final PendingIntent onNewTaskClickPendingIntent = PendingIntent.getBroadcast(context, 0, onNewTaskClick, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.widget_addtask_button, onNewTaskClickPendingIntent);
+
+            // Adding event handler for title header
+            final Intent onHeaderClick = new Intent(context, WidgetProvider.class);
+            onHeaderClick.setAction(OPEN_APP);
+            onHeaderClick.setData(Uri.parse(onHeaderClick.toUri(Intent.URI_INTENT_SCHEME)));
+            final PendingIntent onHeaderClickPendingIntent = PendingIntent.getBroadcast(context, 0, onHeaderClick, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.widget_header, onHeaderClickPendingIntent);
+
+            appWidgetManager.updateAppWidget(widgetId, views);
         }
+
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
