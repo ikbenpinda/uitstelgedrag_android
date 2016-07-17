@@ -20,7 +20,7 @@ android {
 
 
         // Enabling multidex support.
-        //multiDexEnabled true
+        multiDexEnabled true
 
     }
     buildTypes {
@@ -28,6 +28,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dexOptions{
+        javaMaxHeapSize "2048M" // MultiDex Out-Of-Memory fix.
+        preDexLibraries true // Faster incremental builds, slower clean builds.
     }
 }
 
@@ -48,8 +52,10 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:multidex:1.0.1'                // Multidex
     compile 'com.google.android.gms:play-services:8.4.0'        // Google Play Services - 9.0.2 doesn't work: services-measurement not found.
-    //compile 'com.facebook.android:facebook-android-sdk:[4,5)'   // Facebook SDK
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'   // Facebook SDK
     compile 'io.nlopez.smartlocation:library:3.2.2'             // SmartLocation
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'             // Retrofit
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'       //
     compile 'com.jakewharton:butterknife:8.0.1'                 // Butterknife
 }
 
