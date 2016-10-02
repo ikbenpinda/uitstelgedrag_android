@@ -1,41 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="achan.nl.uitstelgedrag">
+          package="achan.nl.uitstelgedrag"
+          >
 
+    <!-- Specify SDKs for unit testing and Play Store filtering. -->
+    <uses-sdk android:minSdkVersion="19"
+              android:targetSdkVersion="23"/>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> -->
 
     <service
         android:name=".UitstelgedragRemoteViewsService"
         android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
     <!-- @style/Theme.AppCompat.NoActionBar -->
+
     <application
+        android:name=".domain.Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:theme="@style/AppTheme.Solarized">
 
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"
             tools:replace="android:value"/>
 
         <activity
-            android:name=".ui.activities.OverviewActivity"
-            android:label="@string/app_name">
+            android:name=".ui.activities.Overview">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.AttendanceActivity">
+
+        <!-- Facebook API -->
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme"
+            />
+        <activity android:name=".ui.activities.Attendance">
         </activity>
         <activity
-            android:name=".ui.activities.SettingsActivity"
-            android:label="@string/title_activity_settings">
+            android:name=".ui.activities.SettingsActivity">
         </activity>
 
         <!-- Widget service -->
@@ -55,12 +73,23 @@
 
         <activity android:name=".ui.activities.TaskActivity">
         </activity>
-        <activity android:name=".ui.activities.DayplannerActivity">
+        <activity android:name=".ui.activities.Dayplanner">
         </activity>
         <activity android:name=".ui.activities.LoginActivity">
         </activity>
         <activity android:name=".ui.activities.TaskDetailActivity">
         </activity>
+        <activity android:name=".ui.activities.HelpActivity">
+        </activity>
+        <activity android:name=".ui.activities.AboutActivity">
+        </activity>
+
+        <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />
+        <meta-data android:name="com.sec.android.multiwindow.DEFAULT_SIZE_W" android:resource="@dimen/app_defaultsize_w" />
+        <meta-data android:name="com.sec.android.multiwindow.DEFAULT_SIZE_H" android:resource="@dimen/app_defaultsize_h" />
+        <meta-data android:name="com.sec.android.multiwindow.MINIMUM_SIZE_W" android:resource="@dimen/app_minimumsize_w" />
+        <meta-data android:name="com.sec.android.multiwindow.MINIMUM_SIZE_H" android:resource="@dimen/app_minimumsize_h" />
+        <uses-library android:required="false" android:name="com.sec.android.app.multiwindow"> </uses-library>
     </application>
 
 </manifest>
