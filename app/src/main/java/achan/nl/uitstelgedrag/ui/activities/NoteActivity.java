@@ -160,6 +160,7 @@ public class NoteActivity extends Base {
         }
     }
 
+    // region Legacy sensorlisteners.
     public class ProximitySensorListener implements SensorEventListener{
 
         @Override
@@ -226,18 +227,24 @@ public class NoteActivity extends Base {
             Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
         }
     }
+    // endregion
 
     public class AccelerometerListener implements SensorEventListener{// IMPORTANT - no high-pass filter for gravity applied!
 
         static final int   DEVICE_ORIENTATION_DOWNWARDS    = 1;
         static final int   DEVICE_ORIENTATION_NONDOWNWARDS = 0;
-        static final int   ACCELERATION_THRESHOLD          = 5; // arbitrary amount of minimum cycles before setState();
-        static final float DOWNWARDS                       = -9; // -90 with filtering?
-        static final float COUNT_THRESHOLD                 = 2;  // x10 with filtering? | arbitrary number of deviation in degrees.
-        static final int   MEASURED_ACCELERATION_Z         = 2;
+
+
+        static final int COUNT_THRESHOLD = 7; // arbitrary amount of minimum cycles before setState();
+                                              // This can be set by either incrementing the count_threshold or this,
+                                              // but the count_threshold is unreliable because the polling rate may not be enforced.
+
+        static final float DOWNWARDS               = -9; // -90 with filtering?
+        static final float Z_ANGLE_THRESHOLD       = 2;  // x10 with filtering? | arbitrary number of deviation in degrees.
+        static final int   MEASURED_ACCELERATION_Z = 2;
 
         int device_z_orientation = 0;
-        int accel_count = 0;        // setState() counter that changes on count > threshold.
+        int accel_count = 0;                  // setState() counter that changes on count > threshold.
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -250,14 +257,14 @@ public class NoteActivity extends Base {
             Log.i("Accelerometer","Device z-acceleration: " + device_angle);
 
             if (device_z_orientation == DEVICE_ORIENTATION_NONDOWNWARDS){
-                if (Math.abs(device_angle - DOWNWARDS) < COUNT_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + COUNT_THRESHOLD + ").");
+                if (Math.abs(device_angle - DOWNWARDS) < Z_ANGLE_THRESHOLD) {
+                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     accel_count++;
                 }
                 else
                     accel_count = 0;
 
-                if (accel_count > ACCELERATION_THRESHOLD) {
+                if (accel_count > COUNT_THRESHOLD) {
                     Log.w("Accelerometer", "Device flagged as downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_DOWNWARDS;
@@ -266,14 +273,14 @@ public class NoteActivity extends Base {
                     Log.i("Accelerometer","Device flagged as non-downwards facing.");
             }
             else {
-                if (Math.abs(device_angle - DOWNWARDS) > COUNT_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + COUNT_THRESHOLD + ").");
+                if (Math.abs(device_angle - DOWNWARDS) > Z_ANGLE_THRESHOLD) {
+                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     accel_count++;
                 }
                 else
                     accel_count = 0;
 
-                if (accel_count > ACCELERATION_THRESHOLD) {
+                if (accel_count > COUNT_THRESHOLD * 2) {// The threshold only goes for 90- degrees, not upwards.
                     Log.w("Accelerometer", "Device flagged as non-downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_NONDOWNWARDS;
