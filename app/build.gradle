@@ -16,34 +16,42 @@ android {
         minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
-
+        versionName "1.2"
 
         // Enabling multidex support.
         multiDexEnabled true
 
+        // Set AndroidJUnitRunner as the default test instrumentation runner.
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true // TODO build flavors and minifying!
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+//        debug{
+//            minifyEnabled true // TODO build flavors and minifying!
+//        }
     }
     dexOptions{
-        javaMaxHeapSize "2048M" // MultiDex Out-Of-Memory fix.
-        preDexLibraries true // Faster incremental builds, slower clean builds.
+        javaMaxHeapSize "3g" // MultiDex Out-Of-Memory fix.
+        preDexLibraries true // Faster incremental builds, slower clean builds. Memory overhead.
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.12'                              // JUnit 4
+    testCompile 'org.robolectric:robolectric:3.1.2'             // Robolectric
 
     apt 'com.jakewharton:butterknife-compiler:8.0.1'            // Butterknife
 
     compile('com.mikepenz:materialdrawer:5.3.0@aar') {          // MaterialDrawer
         transitive = true
     }
+
+    // App libraries
 
     compile 'com.android.support:appcompat-v7:23.4.0'           // Android Support Libraries
     compile 'com.android.support:design:23.4.0'
@@ -56,7 +64,17 @@ dependencies {
     compile 'io.nlopez.smartlocation:library:3.2.2'             // SmartLocation
     compile 'com.squareup.retrofit2:retrofit:2.1.0'             // Retrofit
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'       //
+    compile 'com.github.bumptech.glide:glide:3.7.0'             // Glide
     compile 'com.jakewharton:butterknife:8.0.1'                 // Butterknife
+
+    // Testing libraries
+
+    androidTestCompile 'com.android.support:support-annotations:23.4.0'
+    androidTestCompile 'com.android.support.test:runner:0.4'
+    androidTestCompile 'com.android.support.test:rules:0.4'                         // Set this dependency to use JUnit 4 rules
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'      // Set this dependency to build and run Espresso tests
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2' // Set this dependency to build and run UI Automator tests
+
 }
 
 apply plugin: 'com.google.gms.google-services'
