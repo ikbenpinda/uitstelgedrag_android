@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.domain.models.Attachment;
 import achan.nl.uitstelgedrag.domain.models.Note;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
 import achan.nl.uitstelgedrag.persistence.Repository;
@@ -38,6 +39,7 @@ public class NoteActivity extends Base {
     public static final int ACCELEROMETER_STATE_DOWNWARDS = 3;
 
     Repository<Note> notes;
+    NoteAdapter adapter;
 
     SensorEventListener listener;
     SensorManager sensors; // important - basic sensors are the proximity sensor and accelerometer.
@@ -45,6 +47,7 @@ public class NoteActivity extends Base {
     //    Sensor lightSensor; // doesn't compensate for nighttime light levels.
     Sensor accelerometer;
     Vibrator vibrator;
+    Recorder recorder;
 
     @BindView(R.id.noteview_list_notes) RecyclerView notelist;
 
@@ -59,6 +62,7 @@ public class NoteActivity extends Base {
         notes = new NoteGateway(this);
 
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        recorder = new Recorder();
         sensors = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         listener = new AccelerometerListener();
@@ -71,7 +75,7 @@ public class NoteActivity extends Base {
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
-        NoteAdapter adapter = new NoteAdapter(notes.getAll(), this);
+        adapter = new NoteAdapter(notes.getAll(), this);
         notelist.setLayoutManager(manager);
         notelist.setAdapter(adapter);
 
@@ -127,36 +131,54 @@ public class NoteActivity extends Base {
     public class Recorder{
 
         MediaRecorder recorder;
+        String filename;
+        boolean isRecording = false;
 
-        public void stopRecording() {
+        public String stopRecording() {
             vibrator.vibrate(250);
 
             recorder.stop();
             recorder.release();
             recorder = null;
 
-            Log.w("Recorder", "Recording saved.");
+            isRecording = false;
+            Log.w("Recorder", "Recording saved to " + filename);
+            return filename;
         }
 
         public void startRecording() {
             vibrator.vibrate(250);
 
-            String filename = String.format(Locale.ENGLISH, "recording_%d_%s", 4, Timestamp.formatDate(new Date()));
-            recorder = new MediaRecorder();
+            filename = getFilesDir().getAbsolutePath() + String.format(Locale.ENGLISH, "recording_%d_%s", 4, Timestamp.formatDate(new Date()));
+            recorder = new MediaRecorder(); // FIXME: 30-10-2016 illegal state
+//            recorder.reset();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             recorder.setOutputFile(filename);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
             try {
                 recorder.prepare();
             } catch (IOException e) {
-                Log.e("Recorder", "prepare() failed!");
+                Log.e("Recorder", "prepare() failed: " + e.getMessage());
             }
 
             recorder.start();
-
+            isRecording = true;
             Log.w("Recorder", "Recording message.");
+        }
+    }
+
+    public class SensorEventListenerBase implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
         }
     }
 
@@ -229,7 +251,7 @@ public class NoteActivity extends Base {
     }
     // endregion
 
-    public class AccelerometerListener implements SensorEventListener{// IMPORTANT - no high-pass filter for gravity applied!
+    public class AccelerometerListener extends SensorEventListenerBase{// IMPORTANT - no high-pass filter for gravity applied!
 
         static final int   DEVICE_ORIENTATION_DOWNWARDS    = 1;
         static final int   DEVICE_ORIENTATION_NONDOWNWARDS = 0;
@@ -256,46 +278,56 @@ public class NoteActivity extends Base {
 
             Log.i("Accelerometer","Device z-acceleration: " + device_angle);
 
+            float difference = Math.abs(device_angle - DOWNWARDS);
             if (device_z_orientation == DEVICE_ORIENTATION_NONDOWNWARDS){
-                if (Math.abs(device_angle - DOWNWARDS) < Z_ANGLE_THRESHOLD) {
+                if (difference < Z_ANGLE_THRESHOLD) {
                     Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     accel_count++;
                 }
-                else
+                else{
+                    Log.i("Accelerometer", "Acceleration difference out of range, not changing state.");
                     accel_count = 0;
+                }
 
                 if (accel_count > COUNT_THRESHOLD) {
                     Log.w("Accelerometer", "Device flagged as downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_DOWNWARDS;
+                    disableScreen();
+                    recorder.startRecording();
                 }
-                else
-                    Log.i("Accelerometer","Device flagged as non-downwards facing.");
             }
             else {
-                if (Math.abs(device_angle - DOWNWARDS) > Z_ANGLE_THRESHOLD) {
+                if (difference > Z_ANGLE_THRESHOLD) {
                     Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     accel_count++;
                 }
-                else
+                else {
+                    Log.i("Accelerometer", "Acceleration difference in range, not changing state.");
                     accel_count = 0;
+                }
 
                 if (accel_count > COUNT_THRESHOLD * 2) {// The threshold only goes for 90- degrees, not upwards.
                     Log.w("Accelerometer", "Device flagged as non-downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_NONDOWNWARDS;
+                    if (recorder.isRecording) {
+                        recorder.stopRecording();
+                        enableScreen();
+                        Note note = new Note();
+                        note.text = "Opname";
+                        note.created = new Date();
+                        note.attachment = new Attachment();
+                        note.attachment.path = recorder.filename;
+                        note.attachment.type = Attachment.ATTACHMENT_TYPE_AUDIO;
+                        notes.insert(note);
+                        adapter.addItem(adapter.getItemCount(), note);
+                    }
                 }
-                else
-                    Log.i("Accelerometer","Device flagged as downwards facing.");
             }
 
             //                todo | if orientation == horizontal (&& lightlevel = light // what if user is in bed or on couch during daytime?)
             //                openCamera();
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
         }
     }
 }

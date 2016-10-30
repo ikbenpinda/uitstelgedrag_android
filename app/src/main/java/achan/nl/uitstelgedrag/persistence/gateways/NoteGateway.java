@@ -78,12 +78,14 @@ public class NoteGateway implements Repository<Note> {
     @Override
     public Note insert(Note note) {
         note.id = (int)database.insert(Notes.TABLE.name, null, Notes.toValues(note));
+        if (note.attachment != null)
+            note.attachment.id = (int)database.insert(Attachments.TABLE.name, null, Attachments.toValues(note, note.attachment));
         return note;
     }
 
     @Override
     public boolean delete(Note note) {
-        database.delete(Notes.TABLE.name, Notes.ID + " = ?", new String[]{"" + note.id});
+        database.delete(Notes.TABLE.name, Notes.ID + " = ?", new String[]{"" + note.id}); // Attachments are ON DELETE CASCADE.
         return true;
     }
 
