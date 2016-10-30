@@ -2,13 +2,21 @@ package achan.nl.uitstelgedrag.domain.models;
 
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Date;
 
 /**
  * Created by Etienne on 24-4-2016.
  */
-public class Timestamp {// TODO: 15-5-2016 SimpleDate.format()?
+public class Timestamp { //IMPORTANT: rename to attendance, or vice versa.
+
+    public static final int DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+
+    public static final String DATE_PARSE_PATTERN = "yyyy-MM-dd"; // todo check parsing
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PARSE_PATTERN);
 
     public static final String DATE_DELIMITER = "-";
     public static final String FIELD_DELIMITER = "|";
@@ -25,8 +33,8 @@ public class Timestamp {// TODO: 15-5-2016 SimpleDate.format()?
     public final int month;
     public final int year;
     public final int hours;
-
     public final int minutes;
+
     public String type;
     public String location; // or x and y coordinates?
 
@@ -140,13 +148,43 @@ public class Timestamp {// TODO: 15-5-2016 SimpleDate.format()?
 
         Calendar c = new GregorianCalendar(year, month, day, hours, minutes);
         this.weekday = c.get(c.DAY_OF_WEEK);
-        Log.e("asdfasdfasdf", ""+weekday);
+        Log.w("Timestamp", "Weekday: " + weekday);
         this.day = day;
         this.month = month;
         this.year = year;
 
         this.hours = hours;
         this.minutes = minutes;
+    }
+
+    /**
+     * Returns the date without time.
+     * @param date
+     * @return the date as a parsed dd-mm-yyyy string.
+     */
+    public static String formatDate(Date date){
+//        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PARSE_PATTERN);
+        return date != null? dateFormat.format(date): null;
+    }
+
+    /**
+     * Returns the date without time.
+     * @param date
+     * @return the new util.Date or null on parse failure.
+     */
+    public static Date formatDate(String date){
+//        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PARSE_PATTERN);
+        if (date == null || date.isEmpty())
+            return null;
+
+        Date result = null;
+        try {
+            result = dateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     @Override
