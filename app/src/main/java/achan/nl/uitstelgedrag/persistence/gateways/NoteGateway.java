@@ -44,7 +44,8 @@ public class NoteGateway implements Repository<Note> {
 
         while(notesCursor.moveToNext()){
             note = Notes.fromCursor(notesCursor);
-            note.attachment = Attachments.fromCursor(attachmentsCursor); // returns null or the attachment.
+            if (attachmentsCursor.moveToNext())
+                note.attachment = Attachments.fromCursor(attachmentsCursor); // returns null or the attachment.
         }
 
         return note;
@@ -67,7 +68,8 @@ public class NoteGateway implements Repository<Note> {
                     Attachments.NOTE + " = ?",
                     new String[]{""+note.id}, null, null, null);
 
-            note.attachment = Attachments.fromCursor(attachmentsCursor); // returns null or the attachment.
+            if (attachmentsCursor.moveToNext())
+                note.attachment = Attachments.fromCursor(attachmentsCursor); // returns null or the attachment.
 
             notes.add(note);
         }

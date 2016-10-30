@@ -65,7 +65,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return super.getItemViewType(position);
+        return notes.get(position).attachment != null? VIEWTYPE_RECORDING : VIEWTYPE_NOTE;
     }
 
     @Override
