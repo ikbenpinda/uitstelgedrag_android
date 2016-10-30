@@ -9,5 +9,7 @@
                 android:textSize="16sp"
                 android:padding="16dp"
                 android:id="@+id/rowlayout_attendances_tv"/>
-    <include layout="@layout/list_divider"/>
+
+            <include layout="@layout/list_divider"/>
+
 </LinearLayout>

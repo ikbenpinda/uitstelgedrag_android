@@ -35,35 +35,47 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/TaskViewLabelsLayout"
-        android:layout_toEndOf="@+id/TaskViewDeadlineTextView"
-        android:layout_below="@+id/TaskViewDescriptionTextView"
-        android:layout_alignBottom="@+id/TaskViewDeadlineTextView">
+        android:weightSum="1"
+        android:layout_alignTop="@+id/taskCreationDate"
+        android:layout_toEndOf="@+id/TaskViewCheckBox">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="labels"
-            android:id="@+id/textView3"
+            android:text="geen deadline"
+            android:id="@+id/TaskViewDeadlineTextView"
+            android:layout_below="@+id/TaskViewDescriptionTextView"
+            android:layout_toEndOf="@+id/TaskViewCheckBox"
+            android:paddingBottom="4dp"
+            android:paddingTop="0dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="geen labels"
+            android:id="@+id/TaskViewNoLabelsTextView"
             android:layout_below="@+id/TaskViewDescriptionTextView"
             android:layout_toEndOf="@+id/TaskViewCheckBox"
             android:paddingTop="0dp"
             android:paddingBottom="4dp"
             android:paddingLeft="4dp"/>
+
     </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="deadline"
-        android:id="@+id/TaskViewDeadlineTextView"
+        android:id="@+id/taskCreationDate"
+        android:singleLine="false"
+        android:textColor="@color/md_cyan_900"
         android:layout_below="@+id/TaskViewDescriptionTextView"
-        android:layout_toEndOf="@+id/TaskViewCheckBox"
-        android:paddingBottom="4dp"
-        android:paddingTop="0dp"/>
+        android:layout_alignParentEnd="true"
+        android:paddingEnd="16dp"/>
 
 </RelativeLayout>

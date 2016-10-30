@@ -10,7 +10,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import achan.nl.uitstelgedrag.R;
-import achan.nl.uitstelgedrag.ui.activities.OverviewActivity;
+import achan.nl.uitstelgedrag.ui.activities.Overview;
 import achan.nl.uitstelgedrag.ui.activities.TaskActivity;
 import achan.nl.uitstelgedrag.ui.activities.TaskDetailActivity;
 
@@ -36,7 +36,7 @@ public class WidgetProvider extends AppWidgetProvider {
         int id = -1;
         switch (intent.getAction()){
             case OPEN_APP:
-                Intent openAppIntent = new Intent(context, OverviewActivity.class);
+                Intent openAppIntent = new Intent(context, Overview.class);
                 openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(openAppIntent);
                 break;

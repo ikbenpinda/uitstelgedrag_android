@@ -6,13 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".ui.activities.TaskDetailActivity">
+    tools:context="achan.nl.uitstelgedrag.ui.activities.NoteActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.Solarized.AppBarOverlay"
-        >
+        android:theme="@style/AppTheme.Solarized.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -23,8 +22,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_task_detail"/>
-
+    <include layout="@layout/content_note"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -32,6 +30,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_create_white_24dp"/>
+        android:src="@drawable/ic_note_add_white_18dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

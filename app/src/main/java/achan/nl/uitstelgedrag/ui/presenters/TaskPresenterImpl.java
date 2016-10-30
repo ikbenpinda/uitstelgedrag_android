@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Task;
-import achan.nl.uitstelgedrag.persistence.TaskRepository;
+import achan.nl.uitstelgedrag.persistence.Repository;
 import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 
 /**
@@ -14,10 +14,8 @@ import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
  */
 public class TaskPresenterImpl implements TaskPresenter {
 
-    // TODO: 30-5-2016 Error handling.
-
-    TaskRepository database;
-    Context        context;
+    Repository<Task> database;
+    Context    context;
 
     public TaskPresenterImpl(Context context) {
         this.context = context;
@@ -40,7 +38,8 @@ public class TaskPresenterImpl implements TaskPresenter {
     @Override
     public Task editTask(Task task) {
         Log.i("TaskPresenter", "Edited task!");
-        return database.update(task);
+        database.update(task);
+        return task;
     }
 
     @Override

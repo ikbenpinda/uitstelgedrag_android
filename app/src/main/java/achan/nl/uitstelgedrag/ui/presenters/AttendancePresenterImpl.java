@@ -8,8 +8,7 @@ import android.util.Log;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
-import achan.nl.uitstelgedrag.persistence.AttendanceRepository;
-import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.persistence.Repository;
 import achan.nl.uitstelgedrag.persistence.gateways.AttendanceGateway;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.OnReverseGeocodingListener;
@@ -20,8 +19,8 @@ import io.nlopez.smartlocation.SmartLocation;
  */
 public class AttendancePresenterImpl implements AttendancePresenter, OnLocationUpdatedListener, OnReverseGeocodingListener {
 
-    Context context;
-    AttendanceRepository database;
+    Context    context;
+    Repository<Timestamp> database;
 
     Timestamp current;
     Location location;
@@ -30,7 +29,7 @@ public class AttendancePresenterImpl implements AttendancePresenter, OnLocationU
 
     public AttendancePresenterImpl(Context context) {
         this.context = context;
-        this.database = new AttendanceGateway(new UitstelgedragOpenHelper(context, null).getWritableDatabase());
+        this.database = new AttendanceGateway(context);
     }
 
     @Override

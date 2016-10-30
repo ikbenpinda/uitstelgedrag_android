@@ -1,119 +1,368 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:paddingBottom="@dimen/activity_vertical_margin"
-              android:paddingLeft="@dimen/activity_horizontal_margin"
-              android:paddingRight="@dimen/activity_horizontal_margin"
-              android:paddingTop="@dimen/activity_vertical_margin"
-              app:layout_behavior="@string/appbar_scrolling_view_behavior"
-              tools:context=".ui.activities.OverviewActivity"
-              tools:showIn="@layout/activity_overview"
-              android:padding="0dp">
-
-
-    <View android:layout_width="match_parent"
-          android:layout_height="4dp"
-          android:background="@drawable/shadow"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Taken"
-        android:textStyle="italic"
-        android:textSize="@dimen/abc_text_size_subhead_material"
-        android:padding="16dp">
-    </TextView>
-
-    <View android:layout_width="match_parent"
-          android:layout_height="4dp"
-          android:background="@drawable/shadow"/>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            tools:context=".ui.activities.Overview"
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            >
 
     <!--android:layout_gravity="top"-->
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/MainList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp">
-    </android.support.v7.widget.RecyclerView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@drawable/shadow"/>
     <!--
     API 21
     android:elevation="2dp"
         android:outlineProvider="bounds"
         -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:padding="16dp"
-        >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <android.support.design.widget.TextInputLayout
+            android:layout_margin="8dp"
+            android:paddingBottom="64dp"
+            android:orientation="vertical"
+            android:weightSum="1">
+
+            <ProgressBar
+                style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/AddTaskCategory"
-                    android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar"
+                android:visibility="gone"
+                />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_green_light"
+                android:id="@+id/overview_layout_updatemessage"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="Categorie"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Update beschikbaar!"
+                    android:id="@+id/tvUpdateAvailable"
+                    android:textColor="@color/abc_primary_text_material_dark"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="klik voor installatie"
+                    android:id="@+id/tvUpdateDetails"
+                    android:textColor="@color/abc_primary_text_material_dark"
                     />
-            </android.support.design.widget.TextInputLayout>
-            <android.support.design.widget.TextInputLayout
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/AddTaskDescription"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_red_light"
+                android:id="@+id/overview_layout_warningmessage"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Offlinemodus"
+                    android:id="@+id/tvGreeting"
+                    android:textColor="@color/abc_primary_text_material_dark"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="geen verbinding :("
+                    android:id="@+id/tvWarningMessage"
+                    android:textColor="@color/abc_primary_text_material_dark"
+                    />
+            </LinearLayout>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Taak" />
-            </android.support.design.widget.TextInputLayout>
-            <Button
-                android:id="@+id/AddTaskButton"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tips"
+                        android:enabled="true"
+                        android:id="@+id/textView11"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textIsSelectable="false"
+                        android:paddingTop="24dp"
+                        android:paddingBottom="8dp"
+                        android:paddingRight="16dp"
+                        android:paddingLeft="16dp"
+                        android:padding="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvFBMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Altijd bij je gegevens kunnen? Groepsplannen maken? Koppel je account - er wordt niks op je profiel geplaatst, gegevens worden alleen gebruikt ter authenticatie. Je kan dit later nog wijzigen via de instellingen."
+                        android:layout_below="@+id/textView11"
+                        android:layout_alignParentStart="true"
+                        android:elegantTextHeight="false"
+                        android:enabled="true"
+                        android:singleLine="false"
+                        android:paddingTop="8dp"
+                        android:paddingRight="16dp"
+                        android:paddingLeft="16dp"
+                        android:paddingBottom="16dp"
+                        android:padding="16dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/tvFBMessage"
+                        android:layout_alignParentLeft="true">
+
+                        <com.facebook.login.widget.LoginButton
+                            android:id="@+id/login_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="16dp"/>
+
+                        <!-- Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Inloggen met facebook"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:paddingLeft="16dp"
+                            /-->
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="niet nu"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:padding="8dp"/>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+            
+            <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Toevoegen" />
+                app:cardCornerRadius="2dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Vandaag"
+                        android:enabled="true"
+                        android:id="@+id/textView8"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textIsSelectable="false"
+                        android:padding="16dp"
+                        android:paddingTop="24dp"/>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/CurrentTasksList"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/textView8"
+                        android:padding="16dp"/>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:id="@+id/linearLayout"
+                        android:layout_alignParentLeft="true"
+                        android:layout_below="@+id/CurrentTasksList"
+                        >
+
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Overzicht"
+                            android:id="@+id/btnOverview"
+                            android:layout_below="@+id/textView7"
+                            android:layout_alignParentEnd="true"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:paddingLeft="16dp"/>
+
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Snel toevoegen"
+                            android:id="@+id/btnQuickAddTask"
+                            android:layout_alignTop="@+id/btnOverview"
+                            android:layout_toStartOf="@+id/btnOverview"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:padding="8dp"/>
+                    </LinearLayout>
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Urenstaat"
+                        android:enabled="true"
+                        android:id="@+id/textView4"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:padding="16dp"
+                        android:paddingTop="24dp"/>
+
+                    <ViewSwitcher
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView"
+                        android:layout_below="@+id/textView4">
+
+                        <include layout="@layout/rowlayout_overview_attendances"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Geen check-ins."
+                            android:padding="16dp"
+                            android:singleLine="false"
+                            android:layout_alignParentStart="true"
+                            android:layout_below="@+id/textView4"/>
+
+                    </ViewSwitcher>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/linearLayout2"
+                        android:layout_below="@+id/CheckinButton"
+                        android:layout_alignParentStart="true">
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/CheckinButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Check in"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/textView"
+                        android:layout_alignParentBottom="true"/>
+
+                    <Button
+                        android:id="@+id/CheckoutButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Check uit"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_toEndOf="@+id/CheckinButton"
+                        android:layout_below="@+id/textView"
+                        android:layout_alignParentBottom="true"
+                        android:paddingTop="8dp"/>
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
+            <!-- Shows at the end of the day. -->
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp"
+                >
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Morgen"
+                        android:enabled="true"
+                        android:id="@+id/textView9"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textIsSelectable="false"
+                        android:padding="16dp"
+                        android:paddingTop="24dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Wil je alvast een planning opstellen?"
+                        android:id="@+id/textView10"
+                        android:padding="16dp"
+                        android:singleLine="false"
+                        android:layout_below="@+id/textView9"
+                        android:layout_alignParentStart="true"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ja"
+                        android:id="@+id/btnAddTomorrowsPlanning"
+                        android:layout_below="@+id/textView10"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                        />
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nee"
+                        android:id="@+id/btnDontAddTomorrowsPlanning"
+                        android:layout_below="@+id/textView10"
+                        android:layout_toEndOf="@+id/btnAddTomorrowsPlanning"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                        />
+
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+
         </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="italic"
-            android:padding="16dp"
-            android:paddingTop="32dp"
-            android:text="Urenstaat"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/CheckinButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Check in"/>
-            <Button
-                android:id="@+id/CheckoutButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Check uit"/>
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+</ScrollView>

@@ -21,7 +21,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class AttendanceActivity extends BaseActivity {
+public class    Attendance extends Base {
 
     AttendanceAdapter       adapter;
     List<Timestamp>         timestamps;
@@ -34,8 +34,8 @@ public class AttendanceActivity extends BaseActivity {
     @BindView(R.id.CheckoutButton) Button       CheckoutButton;
 
     @Override
-    int getLayoutResource() {
-        return R.layout.activity_attendance;
+    Activities getCurrentActivity() {
+        return Activities.ATTENDANCELOG;
     }
 
     @Override
@@ -45,12 +45,11 @@ public class AttendanceActivity extends BaseActivity {
 
         context = getApplicationContext();
         presenter = new AttendancePresenterImpl(context);
-        //new DrawerBuilder().withActivity(this).build();
         timestamps = presenter.viewAttendance(); // FIXME
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         dialog = builder
-                .setView(R.layout.alertdialog_loading)
+                .setView(R.layout.dialog_loading)
                 .setTitle("Wachten op locatie.")
                 .setMessage("duurt ongeveer 20 seconden of minder.")
                 .create();
@@ -86,7 +85,7 @@ public class AttendanceActivity extends BaseActivity {
                             "Inchecken mislukt.",
                             Snackbar.LENGTH_SHORT
                     ).show();
-                    Log.e("AttendanceActivity", "Something went wrong. OnError called for location services.");
+                    Log.e("Attendance", "Something went wrong. OnError called for location services.");
                 });
 
         adapter.addItem(adapter.getItemCount(), checkin);

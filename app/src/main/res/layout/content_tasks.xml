@@ -13,15 +13,10 @@
               tools:context=".ui.activities.TaskActivity"
               tools:showIn="@layout/activity_task">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Taken"/>
-    <!--android:layout_gravity="top"-->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/MainList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         >
     </android.support.v7.widget.RecyclerView>
@@ -49,6 +44,22 @@
                 android:layout_height="wrap_content"
                 android:hint="Taak" />
         </android.support.design.widget.TextInputLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/TaskIsPlanned"
+                android:text="Plan voor"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/TaskIsPlannedFor"
+                android:entries="@array/planning_presets">
+            </Spinner>
+        </LinearLayout>
         <Button
             android:id="@+id/AddTaskButton"
             android:layout_width="match_parent"

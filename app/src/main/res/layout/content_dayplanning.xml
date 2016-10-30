@@ -6,37 +6,39 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               app:layout_behavior="@string/appbar_scrolling_view_behavior"
-              tools:context=".ui.activities.DayplannerActivity"
+              tools:context=".ui.activities.Dayplanner"
               tools:showIn="@layout/activity_day_planning"
               android:paddingBottom="@dimen/activity_vertical_margin"
               android:paddingLeft="@dimen/activity_horizontal_margin"
               android:paddingRight="@dimen/activity_horizontal_margin"
               android:paddingTop="@dimen/activity_vertical_margin">
 
+    <ViewSwitcher
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/vs_dayplanning">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/md_deep_orange_300"
+            android:text="Geen plannen voor vandaag! :("/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/dayplanner_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </android.support.v7.widget.RecyclerView>
+    </ViewSwitcher>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Planned:"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/dayplanner_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.RecyclerView>
+        android:text="Wekker"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Start of day at:"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="datetime"/>
-    </android.support.design.widget.TextInputLayout>
+
 </LinearLayout>

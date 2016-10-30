@@ -4,8 +4,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="?attr/selectableItemBackground">
+    android:fitsSystemWindows="true">
 
     <!--
         DrawerLayout extends FrameLayout.
@@ -30,7 +29,7 @@
                                                          android:layout_width="match_parent"
                                                          android:layout_height="match_parent"
                                                          android:fitsSystemWindows="true"
-                                                         tools:context=".ui.activities.Overview">
+                                                         tools:context=".ui.activities.SettingsActivity">
             <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -45,7 +44,7 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <include layout="@layout/content_tasks"/>
+            <include layout="@layout/content_settings"/>
 
         </android.support.design.widget.CoordinatorLayout>
     </LinearLayout>

@@ -1,8 +1,10 @@
 package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,8 +62,18 @@ public class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.At
                 .append(ts.hours)
                 .append(":")
                 .append(ts.minutes);
-        Log.e("asdfasdfasdf", ""+ts.weekday);
+        Log.i("AttendanceAdapter", "Weekday=" + ts.translateDay(ts.weekday));
+
         holder.textView.setText(ts_str.toString());
+
+        if (ts.type.equals(Timestamp.ARRIVAL)){
+            holder.textView.setTextColor(Color.argb(255, 125,200,125));
+            holder.textView.setGravity(Gravity.LEFT);
+        }
+        else {
+            holder.textView.setTextColor(Color.argb(255, 200, 125,125));
+            holder.textView.setGravity(Gravity.RIGHT);
+        }
         holder.textView.setOnClickListener(v -> {
             //
         });

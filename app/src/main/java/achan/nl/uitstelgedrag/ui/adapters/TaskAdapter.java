@@ -14,13 +14,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Date;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.domain.models.Dayplan;
+import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
+import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.persistence.gateways.DayplanGateway;
 import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 import achan.nl.uitstelgedrag.ui.activities.TaskDetailActivity;
 import butterknife.BindColor;
@@ -46,15 +53,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     CategoryViewHolder  holder_cat;
     List<Task>          tasks;
     Context             context;
+    DayplanGateway      dayplanGateway;
+    TaskGateway         taskGateway;
 
     public TaskAdapter(List<Task> tasks, Context context){
         this.tasks = tasks;
         this.context = context;
+        dayplanGateway = new DayplanGateway(context);
+        taskGateway = new TaskGateway(context);
     }
 
     public void addItem(final int position, Task task) {
         tasks.add(position, task);
-        Handler handler = new Handler(Looper.getMainLooper());  //  Fixes IllegalStateException: redraw while calculatiing layout
+        Handler handler = new Handler(Looper.getMainLooper());  //  Fixes IllegalStateException: redraw while calculating layout
         handler.post(() -> {
             //structural events = whole list, item events = single items
             notifyItemInserted(position); // Exception - Inconsistency detected.
@@ -101,11 +112,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public void onBindViewHolder(final TaskViewHolder holder, final int position) {
 
         // FIXME: 29-4-2016 Document what the hell is going on here.
-        String description = tasks.get(holder.getAdapterPosition()).description;
-        holder.taskdescription.setText(description);
+        Task task = tasks.get(holder.getAdapterPosition());
+        holder.taskdescription.setText(task.description);
+        holder.deadline.setText(Timestamp.formatDate(task.deadline));
+//        String label = task.category != null && task.category.category != null ? task.category.category : ""; FIXME
+        if (task.labels != null || !task.labels.isEmpty()) {
+            for (Label label : task.labels) {
+                TextView labelsview = new TextView(context);
+                labelsview.setText(label.title);
+                labelsview.setTextColor(0xFF4081FF);
+                holder.labels.addView(labelsview);
+            }
+            holder.itemView.findViewById(R.id.TaskViewNoLabelsTextView).setVisibility(View.GONE);
+        }
         holder.view.setOnClickListener(v1 -> {
             Intent intent = new Intent(context, TaskDetailActivity.class);
-            intent.putExtra("task_id", tasks.get(holder.getAdapterPosition()).id);
+            intent.putExtra("task_id", task.id);
             context.startActivity(intent);
         });
         holder.view.setOnLongClickListener(v -> {
@@ -113,11 +135,25 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()){
                     case R.id.popup_edit:
-                        Snackbar.make(v, "Lol cant", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(v, "Nog niet beschikbaar :')", Snackbar.LENGTH_SHORT).show();
                         break;
                     case R.id.popup_plan_today:
+                        Date today = new Date();
+
+                        Dayplan plan = dayplanGateway.get(today); // Null or Dayplan.
+
+                        if (plan == null) {
+                            Log.i("TaskAdapter", "No dayplan found for today - created new one.");
+                            plan = new Dayplan(new Date(), task);
+                        } else {
+                            Log.i("TaskAdapter", "Dayplan found! plan = " + plan.toString());
+                            plan.tasks.add(task);
+                        }
+//                        task.related_planning = plan;
+//                        dayplanGateway.update(plan);
+                        taskGateway.update(task); // FIXME NPE
+
                         Snackbar.make(v, "Gepland voor vandaag! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
-                        // TODO
                         break;
                     case  R.id.popup_plan_tomorrow:
                         Snackbar.make(v, "Gepland voor morgen! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
@@ -132,9 +168,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             popup.show();
             return true;
         });
+        holder.creationDate.setText(Timestamp.formatDate(task.createdOn));
         holder.taskDone.setChecked(false);
         holder.taskDone.setOnCheckedChangeListener(
-                new CompoundButton.OnCheckedChangeListener() {
+                new OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -156,25 +193,24 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 Log.i("UITSTELGEDRAG", "Task #" + selected.id + " removed: " + selected.description);
 
                 Snackbar.make(holder.itemView, "Taak verwijderd: " + selected.description, Snackbar.LENGTH_SHORT)
-                        .setAction("Ongedaan maken", v -> {
-                            final int bottom = getItemCount();
-                            addItem(adapterposition, selected);
-                        })
-                        .setCallback(new Snackbar.Callback() {
-                            @Override
-                            public void onDismissed(Snackbar snackbar, int event) {
-                                super.onDismissed(snackbar, event);
-
-                                // User consciously deletes the item.
-                                if (event == DISMISS_EVENT_SWIPE
-                                        | event == DISMISS_EVENT_TIMEOUT
-                                        | event == DISMISS_EVENT_CONSECUTIVE){
-                                    new TaskGateway(context).delete(selected);
-                                    Log.i("Snackbar", "Item removed. pos=" + adapterposition);
-                                }
+                    .setAction("Ongedaan maken", v -> {
+                        final int bottom = getItemCount();
+                        addItem(adapterposition, selected);
+                    })
+                    .setCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar snackbar, int event) {
+                            super.onDismissed(snackbar, event);
+                         // User consciously deletes the item.
+                            if (event == DISMISS_EVENT_SWIPE
+                                    | event == DISMISS_EVENT_TIMEOUT
+                                    | event == DISMISS_EVENT_CONSECUTIVE){
+                                new TaskGateway(context).delete(selected);
+                                Log.i("Snackbar", "Item removed. pos=" + adapterposition);
                             }
-                        })
-                        .show();
+                        }
+                    })
+                    .show();
             }
         });
     }
@@ -196,6 +232,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         @BindView(R.id.TaskViewCheckBox) CheckBox taskDone;
         @BindView(R.id.TaskViewDescriptionTextView) TextView taskdescription;
         @BindView(R.id.rowlayout_task_layout) RelativeLayout view;
+        @BindView(R.id.TaskViewLabelsLayout) LinearLayout labels;
+        @BindView(R.id.taskCreationDate) TextView creationDate;
+        @BindView(R.id.TaskViewDeadlineTextView) TextView deadline;
 
         public Context context;
 
