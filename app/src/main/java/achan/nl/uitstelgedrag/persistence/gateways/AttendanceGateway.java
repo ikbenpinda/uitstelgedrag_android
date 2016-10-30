@@ -1,5 +1,6 @@
 package achan.nl.uitstelgedrag.persistence.gateways;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -8,21 +9,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
-import achan.nl.uitstelgedrag.persistence.AttendanceRepository;
-import achan.nl.uitstelgedrag.persistence.definitions.tables.AttendanceDefinition;
+import achan.nl.uitstelgedrag.persistence.Repository;
+import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Attendances;
 
 /**
  * Created by Etienne on 29-4-2016.
  */
-public class AttendanceGateway implements AttendanceRepository {
+public class AttendanceGateway implements Repository<Timestamp> {
 
     public static final int              COL_ID = 0;
     public static final int              COL_TYPE = 1;
     public static final int              COL_STR = 2;
 
+    Context context;
     SQLiteDatabase database;
 
-    public AttendanceGateway(SQLiteDatabase database) {
+    public AttendanceGateway(Context context) {
+        this.context = context;
+        database = new UitstelgedragOpenHelper(context, null).getWritableDatabase();
+    }
+
+    /**
+     * Migration constructor - only use for onUpgrade!
+     * @param database
+     */
+    public AttendanceGateway(SQLiteDatabase database){
         this.database = database;
     }
 
@@ -60,7 +72,7 @@ public class AttendanceGateway implements AttendanceRepository {
      * @return
      */
     public String parseTo(Timestamp timestamp){
-        StringBuilder querybuilder = new StringBuilder("INSERT INTO "+AttendanceDefinition.ATTENDANCES.name+"("+AttendanceDefinition.TYPE.name+", "+AttendanceDefinition.TIMESTAMP.name +") VALUES(")
+        StringBuilder querybuilder = new StringBuilder("INSERT INTO "+ Attendances.TABLE.name+"("+ Attendances.TYPE.name+", "+ Attendances.TIMESTAMP.name +") VALUES(")
                 .append("\"")
                 .append(timestamp.type)
                 .append("\"")
@@ -76,7 +88,7 @@ public class AttendanceGateway implements AttendanceRepository {
     public Timestamp get(int id) {
         Timestamp   timestamp;
 
-        String query  = "SELECT * FROM " + AttendanceDefinition.ATTENDANCES.name + " WHERE " + AttendanceDefinition.ID.name + " = " + id;
+        String query  = "SELECT * FROM " + Attendances.TABLE.name + " WHERE " + Attendances.ID.name + " = " + id;
         Cursor cursor = database.rawQuery(query, null);
         cursor.moveToFirst();
         timestamp = parseFrom(cursor.getString(COL_STR)); //This returns a concatenated timestamp.
@@ -91,7 +103,7 @@ public class AttendanceGateway implements AttendanceRepository {
     @Override
     public List<Timestamp> getAll() {
         List<Timestamp> timestamps = new ArrayList<>();
-        Cursor          cur        = database.rawQuery("SELECT * FROM " + AttendanceDefinition.ATTENDANCES.name + "", null);
+        Cursor          cur        = database.rawQuery("SELECT * FROM " + Attendances.TABLE.name + "", null);
 
         cur.moveToPosition(-1);
         while (cur.moveToNext()){
@@ -131,8 +143,7 @@ public class AttendanceGateway implements AttendanceRepository {
     }
 
     @Override
-    public Timestamp update(Timestamp row) {
+    public void update(Timestamp row) {
         Log.w("UITSTELGEDRAG", "Called update() but should've been calling insert()!");
-        return row;
     }
 }

@@ -1,9 +1,12 @@
 package achan.nl.uitstelgedrag.persistence.definitions;
 
 /**
+ * Represents a database table.
+ *
  * Created by Etienne on 3-4-2016.
  */
 public class Table {
+
     public String   name;
     public Column[] columns;
 
@@ -12,18 +15,31 @@ public class Table {
         this.columns = columns;
     }
 
-    @Override
-    public String toString() {
+    /**
+     * returns a table description.
+     * @return
+     */
+    public String describe(){
+
         StringBuilder sb = new StringBuilder(name).append("(");
+
         for (Column column : columns) {
-            sb.append(column.toString());
+            sb.append(column.describe());
             sb.append(",");
         }
+
         sb.deleteCharAt(sb.length() - 1);
-        //for (TableConstraintDefinition constraint : constraints){
-        //
-        //}
         sb.append(");");
+
         return sb.toString();
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return name;
     }
 }

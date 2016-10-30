@@ -1,14 +1,19 @@
 package achan.nl.uitstelgedrag.persistence;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import achan.nl.uitstelgedrag.persistence.definitions.tables.AttendanceDefinition;
-import achan.nl.uitstelgedrag.persistence.definitions.tables.CategoryDefinition;
-import achan.nl.uitstelgedrag.persistence.definitions.tables.TaskDefinition;
+import achan.nl.uitstelgedrag.persistence.definitions.Column;
+import achan.nl.uitstelgedrag.persistence.definitions.Table;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Attachments;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Attendances;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Notes;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
 
 /**
  * So i'm guessing this is the Service Layer with all the needed repositories.
@@ -18,30 +23,75 @@ import achan.nl.uitstelgedrag.persistence.definitions.tables.TaskDefinition;
 public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
     public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int     DATABASE_SCHEMA_VERSION = 7;
+    public static final int     DATABASE_SCHEMA_VERSION = 23;
 
+    private Context context;
+
+    // For executing custom SQL if needed.
     private final SQLiteDatabase sqlite;
+
+    private final Table[] tables = new Table[]{
+            Tasks.TABLE,
+            Labels.TABLE,
+            Attendances.TABLE,
+            Notes.TABLE,
+            Attachments.TABLE,
+    };
 
     // FIXME: 18-4-2016 How to handle multiple attendances per day / attendances spanning multiple days?
 
     public UitstelgedragOpenHelper(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, DATABASE_NAME, factory, DATABASE_SCHEMA_VERSION);
+        this.context = context;
+        sqlite = getWritableDatabase();
     }
 
     public UitstelgedragOpenHelper(Context context, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
         super(context, DATABASE_NAME, factory, DATABASE_SCHEMA_VERSION, errorHandler);
-    }
-
-    {   // Initializer block.
+        this.context = context;
         sqlite = getWritableDatabase();
     }
 
+    /**
+     * Drops all tables.
+     * Unlike wipe this will destroy all data and the tables.
+     * Think twice: this is nuke-from-orbit style clearing.
+     * @param db
+     */
     private void nuke(SQLiteDatabase db){
-        Log.w("OpenHelper", "Upgraded/Downgraded sqlite, deleted tables.");
-        db.delete(TaskDefinition.TASKS.name, null,null);
-        db.delete(CategoryDefinition.CATEGORIES.name, null,null);
-        db.delete(AttendanceDefinition.ATTENDANCES.name, null,null);
+        Log.w("OpenHelper", "Upgraded/Downgraded sqlite, dropped tables.");
+
+        for (Table table : tables) {
+            db.execSQL("DROP TABLE IF EXISTS " + table);
+            Log.w("OpenHelper", "Dropped table " + table);
+        }
+
         onCreate(db);
+    }
+
+    /**
+     * Deletes all rows but not the tables.
+     * Should typically only be called when the user wants to delete all data.
+     */
+    public void wipe(){
+        Log.w("OpenHelper", "Wiping tables!");
+
+        SQLiteDatabase database = getWritableDatabase();
+        for (Table table : tables) {
+            database.delete(table.name, null, null);
+            Log.w("OpenHelper", "Deleted all rows from table " + table);
+        }
+    }
+
+    /**
+     * Shorthand for SELECT * FROM table WHERE column = key.
+     * @param table
+     * @param column
+     * @param keys one or multiple keys to select by
+     * @return
+     */
+    public Cursor query(Table table, Column column, String...keys){ // FIXME: 29-10-2016 Move SQLiteDatabase to wrapper class for query extension.
+        return getWritableDatabase().query(table.name, null, column.name + " = ?", keys, null, null, null);
     }
 
     @Override
@@ -51,12 +101,15 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE IF NOT EXISTS " + TaskDefinition.TASKS;
-        db.execSQL(query);
-        query = "CREATE TABLE IF NOT EXISTS " + CategoryDefinition.CATEGORIES;
-        db.execSQL(query);
-        query = "CREATE TABLE IF NOT EXISTS " + AttendanceDefinition.ATTENDANCES;
-        db.execSQL(query);
+
+        String create = "CREATE TABLE IF NOT EXISTS ";
+
+        for (Table table : tables){
+            db.execSQL(create + table.describe());
+            Log.w("OpenHelper", "Creating table: " + table);
+        }
+
+        Log.w("OpenHelper", "Recreated tables!");
     }
 
     @Override

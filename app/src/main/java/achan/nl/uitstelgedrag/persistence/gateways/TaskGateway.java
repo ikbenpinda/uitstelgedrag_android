@@ -3,25 +3,29 @@ package achan.nl.uitstelgedrag.persistence.gateways;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
-import achan.nl.uitstelgedrag.persistence.TaskRepository;
+import achan.nl.uitstelgedrag.persistence.Repository;
 import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
-import achan.nl.uitstelgedrag.persistence.definitions.tables.TaskDefinition;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
 
 /**
  * Created by Etienne on 17-4-2016.
  */
-public class TaskGateway implements TaskRepository {
+public class TaskGateway implements Repository<Task> {
 
+    Context context;
     SQLiteDatabase database;
+    List<Task> cache;
 
     public TaskGateway(Context context) {
+        this.context = context;
         this.database = new UitstelgedragOpenHelper(context, null).getWritableDatabase();
     }
 
@@ -40,72 +44,64 @@ public class TaskGateway implements TaskRepository {
 
     @Override
     public Task get(int id) {
-        int col = 0;
-        Task task = new Task("");
-        String query = "SELECT * FROM " + TaskDefinition.TASKS.name + " WHERE " + TaskDefinition.ID.name + " = " + id;
-        Cursor cursor = database.rawQuery(query, null);
+        Task task = null;
+        String taskQuery = "SELECT * FROM " + Tasks.TABLE + " WHERE " + Tasks.ID + " = " + id;
+        Cursor cursor = database.rawQuery(taskQuery, null);
         if(cursor != null && cursor.moveToFirst()) { // Fixes issue where doubleclicking the view would cause the database to get called with a nulled object.
-            task.id = cursor.getInt(col++);
-            task.description = cursor.getString(col++);
-            cursor.close();
-            return task;
-        }
+            task = Tasks.fromCursor(cursor);
+            task.labels = getLabels(task);
+        } // FIXME - why the logging? NPE sometimes happening here.
         Log.w("TaskGateway", "Returned null - cursor was null or moveToFirst returned false!");
-        return null;
+        cursor.close();
+        return task;
     }
 
     @Override
     public List<Task> getAll() {
-        Cursor     cursor = database.rawQuery("SELECT * FROM Tasks", null);
+        Cursor     cursor = database.rawQuery("SELECT * FROM " + Tasks.TABLE, null);
         List<Task> tasks  = new ArrayList<>();
 
         // Cursor starts at -1,
         // first call will make it start at first value of set.
-        cursor.moveToPosition(-1);
+//        cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
-            int id = cursor.getInt(0);
-            String description = cursor.getString(1);
-            //int category_id = cursor.getInt(2);
-            Task task = new Task();
-            task.id = id;
-            task.description = description;
-            tasks.add(task); // TODO: 11-4-2016 category support, etc.
-            Log.i("UITSTELGEDRAG", "OpenHelper.getAll(): cursorPosition:" + cursor.getPosition() + ", Added task: " + id + ".");
+            Task task = Tasks.fromCursor(cursor);
+            task.labels = getLabels(task);
+            tasks.add(task); // TODO: 11-4-2016 category support
+            Log.i("UITSTELGEDRAG", "OpenHelper.getAll(): cursorPosition:" + cursor.getPosition() + ", Added task: " + task.id + ".");
         }
-        cursor.close(); // FIXME: 22-4-2016 Try-catch-finally.
+        cursor.close();
         return tasks;
     }
 
     @Override
-    public Task insert(Task object) {
-        String query = "INSERT INTO Tasks(" + TaskDefinition.DESCRIPTION.name + "," + TaskDefinition.CATEGORY_ID.name + ") VALUES(? ,0)";
-        SQLiteStatement statement = database.compileStatement(query);
-        statement.bindString(1, object.description);
-     // Returns the SQLite-generated primary key generated after the insert.
-        object.id = (int)statement.executeInsert();
-        Log.i("UITSTELGEDRAG", "Added task " + object.id + ":" + object.description);
-        return object;
+    public Task insert(Task task) {
+        task.id = (int) database.insert(Tasks.TABLE.name, null, Tasks.toValues(task));
+        if (!task.labels.isEmpty())
+            for (Label label : task.labels) {
+                label.id = (int) database.insert(Labels.TABLE.name, null, Labels.toValues(task, label));
+            }
+        Log.i("UITSTELGEDRAG", "Added task " + task.id + ":" + task.description);
+        return task;
     }
 
     @Override
-    public Task update(Task row) {
-        Log.w("UITSTELGEDRAG", "Called update() but should've been calling insert()!");
-        return null;
-        //UPDATE table_name
-        //SET column1 = value1, column2 = value2...., columnN = valueN
-        //WHERE [condition];
+    public void update(Task task) {
+        database.update(Tasks.TABLE.name, Tasks.toValues(task), "id = ?", new String[]{"" + task.id});
+        Log.i("UITSTELGEDRAG", "Updated task " + task.id + ":" + task.description);
     }
 
     @Override
     public boolean delete(Task task) {
-
-        if (task == null)
-            return false;
-
-        String query = "DELETE FROM " + TaskDefinition.TASKS.name + " WHERE " + TaskDefinition.ID.name + " = " + task.id + "";
-        database.execSQL(query);
+        database.delete(Tasks.TABLE.name, "id = ?", new String[]{"" + task.id});
         Log.i("UITSTELGEDRAG", "Deleted task " + task.id + ":" + task.description);
         return true;
     }
 
+    private List<Label> getLabels(Task task){
+        Log.i("TaskGateway", "Querying labels for task " + task.id);
+        String labelQuery = "SELECT * FROM " + Labels.TABLE + " WHERE " + Labels.TASK + " = " + task.id;
+        Cursor labelCursor = database.rawQuery(labelQuery, null);
+        return Labels.fromCursor(labelCursor);
+    }
 }
