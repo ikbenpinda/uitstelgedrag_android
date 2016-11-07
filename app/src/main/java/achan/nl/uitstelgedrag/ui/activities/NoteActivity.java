@@ -4,7 +4,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
@@ -16,14 +15,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import java.io.IOException;
 import java.util.Date;
-import java.util.Locale;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Attachment;
 import achan.nl.uitstelgedrag.domain.models.Note;
-import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.hardware.Recorder;
+import achan.nl.uitstelgedrag.hardware.SensorEventListenerBase;
 import achan.nl.uitstelgedrag.persistence.Repository;
 import achan.nl.uitstelgedrag.persistence.gateways.NoteGateway;
 import achan.nl.uitstelgedrag.ui.adapters.NoteAdapter;
@@ -42,12 +40,12 @@ public class NoteActivity extends Base {
     NoteAdapter adapter;
 
     SensorEventListener listener;
-    SensorManager sensors; // important - basic sensors are the proximity sensor and accelerometer.
+    SensorManager       sensors; // important - basic sensors are the proximity sensor and accelerometer.
     //    Sensor proximitySensor; // FIXME Proximity sensor currently broken on device.
     //    Sensor lightSensor; // doesn't compensate for nighttime light levels.
-    Sensor accelerometer;
-    Vibrator vibrator;
-    Recorder recorder;
+    Sensor              accelerometer;
+    Vibrator            vibrator;
+    Recorder            recorder;
 
     @BindView(R.id.noteview_list_notes) RecyclerView notelist;
 
@@ -62,7 +60,7 @@ public class NoteActivity extends Base {
         notes = new NoteGateway(this);
 
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        recorder = new Recorder();
+        recorder = new Recorder(this);
         sensors = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         listener = new AccelerometerListener();
@@ -128,62 +126,8 @@ public class NoteActivity extends Base {
         Log.w("ScreenManager", "Screen is turned off.");
     }
 
-    public class Recorder{
-
-        MediaRecorder recorder;
-        String filename;
-        boolean isRecording = false;
-
-        public String stopRecording() {
-            vibrator.vibrate(250);
-
-            recorder.stop();
-            recorder.release();
-            recorder = null;
-
-            isRecording = false;
-            Log.w("Recorder", "Recording saved to " + filename);
-            return filename;
-        }
-
-        public void startRecording() {
-            vibrator.vibrate(250);
-
-            filename = getFilesDir().getAbsolutePath() + String.format(Locale.ENGLISH, "recording_%d_%s", 4, Timestamp.formatDate(new Date()));
-            recorder = new MediaRecorder(); // FIXME: 30-10-2016 illegal state
-//            recorder.reset();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setOutputFile(filename);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-            try {
-                recorder.prepare();
-            } catch (IOException e) {
-                Log.e("Recorder", "prepare() failed: " + e.getMessage());
-            }
-
-            recorder.start();
-            isRecording = true;
-            Log.w("Recorder", "Recording message.");
-        }
-    }
-
-    public class SensorEventListenerBase implements SensorEventListener {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
-        }
-    }
-
     // region Legacy sensorlisteners.
-    public class ProximitySensorListener implements SensorEventListener{
+    public class ProximitySensorListener extends SensorEventListenerBase {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -222,15 +166,10 @@ public class NoteActivity extends Base {
             //                }
             //
         }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
-        }
     }
 
     // todo - use this for day/night theming.
-    public class LightSensorListener implements SensorEventListener{ // important - light sensor does not detect light as >0 in dimly lit environments.
+    public class LightSensorListener extends SensorEventListenerBase { // important - light sensor does not detect light as >0 in dimly lit environments.
 
         static final int MEASURED_LUX                  = 0;
         static final int LIGHT_LEVEL_DARK              = 1;
@@ -244,15 +183,10 @@ public class NoteActivity extends Base {
         public void onSensorChanged(SensorEvent event) {// IMPORTANT unable to compensate for day/night: night typically returns 0 lux;
             // See ProximitySensorListener logic.
         }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            Log.w(sensor.getName(), "Accuracy changed: " + accuracy);
-        }
     }
     // endregion
 
-    public class AccelerometerListener extends SensorEventListenerBase{
+    public class AccelerometerListener extends SensorEventListenerBase {
         // IMPORTANT - no high-pass filter for gravity applied!
         // TODO/IMPORTANT - background thread!
 
@@ -285,13 +219,13 @@ public class NoteActivity extends Base {
             float device_x_angle = event.values[MEASURED_ACCELERATION_X];
             float device_z_angle = event.values[MEASURED_ACCELERATION_Z];
 
-            Log.i("Accelerometer","Device:\n z-acceleration: " + device_z_angle + ",\nx-acceleration: " + device_x_angle);
+            Log.i("Accelerometer","\nDevice:\n z-acceleration: " + device_z_angle + ",\nx-acceleration: " + device_x_angle);
 
             // Check downwards/nondownwards.
             float z_difference = Math.abs(device_z_angle - DOWNWARDS);
             if (device_z_orientation == DEVICE_ORIENTATION_NONDOWNWARDS){
                 if (z_difference < Z_ANGLE_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_z_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
+                    Log.i("Accelerometer", "Acceleration difference in range: " + z_difference + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     z_accel_count++;
                 }
                 else{
@@ -309,7 +243,7 @@ public class NoteActivity extends Base {
             }
             if (device_z_orientation == DEVICE_ORIENTATION_DOWNWARDS){
                 if (z_difference > Z_ANGLE_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_z_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
+                    Log.i("Accelerometer", "Acceleration difference out of range: " + z_difference + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
                     z_accel_count++;
                 }
                 else {
@@ -322,6 +256,7 @@ public class NoteActivity extends Base {
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_NONDOWNWARDS;
                     if (recorder.isRecording) {
+                        vibrator.vibrate(250);
                         recorder.stopRecording();
                         enableScreen();
                         Note note = new Note();
@@ -339,10 +274,12 @@ public class NoteActivity extends Base {
             // Check landscape/portrait.
             // todo - only check if portrait beforehand / light level OK / not recording.
             // todo - tweak thresholds.
-            float x_difference = Math.abs(device_x_angle - HORIZONTAL);
+            // Both negative and positive are OK values here as long as they are within the threshold.
+            // Where 0 means the location of the home button: [ -9 <-- 0 --> +9 ]
+            float x_difference = Math.abs(Math.abs(device_x_angle) - HORIZONTAL);
             if (device_x_orientation == DEVICE_ORIENTATION_NONHORIZONTAL){
                 if (x_difference < X_ANGLE_THRESHOLD){
-                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_x_angle - HORIZONTAL) + "(threshold =" + X_ANGLE_THRESHOLD + ").");
+                    Log.i("Accelerometer", "Acceleration difference in range: " + x_difference + "(threshold =" + X_ANGLE_THRESHOLD + ").");
                     x_accel_count++;
                 }
                 else{
@@ -360,7 +297,7 @@ public class NoteActivity extends Base {
             }
             if (device_x_orientation == DEVICE_ORIENTATION_HORIZONTAL) {
                 if (x_difference > X_ANGLE_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_x_angle - HORIZONTAL) + "(threshold =" + X_ANGLE_THRESHOLD + ").");
+                    Log.i("Accelerometer", "Acceleration difference out of range: " + x_difference + "(threshold =" + X_ANGLE_THRESHOLD + ").");
                     x_accel_count++;
                 } else {
                     Log.i("Accelerometer", "Acceleration difference in range, not changing state.");
@@ -373,7 +310,7 @@ public class NoteActivity extends Base {
                     device_x_orientation = DEVICE_ORIENTATION_NONHORIZONTAL;
                     /* todo - check for nondownwards/ only activate when held / not-recording */
                     if (true) {
-                        // todo - create attachment for picture
+                        // todo - create attachment for picture, close camera.
                     }
                 }
             }
