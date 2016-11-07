@@ -116,14 +116,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.taskdescription.setText(task.description);
         holder.deadline.setText(Timestamp.formatDate(task.deadline));
 //        String label = task.category != null && task.category.category != null ? task.category.category : ""; FIXME
-        if (task.labels != null || !task.labels.isEmpty()) {
+        holder.labels.removeAllViews();
+        if (task.labels != null && !task.labels.isEmpty()) {
             for (Label label : task.labels) {
                 TextView labelsview = new TextView(context);
                 labelsview.setText(label.title);
                 labelsview.setTextColor(0xFF4081FF);
                 holder.labels.addView(labelsview);
             }
-            holder.itemView.findViewById(R.id.TaskViewNoLabelsTextView).setVisibility(View.GONE);
         }
         holder.view.setOnClickListener(v1 -> {
             Intent intent = new Intent(context, TaskDetailActivity.class);
