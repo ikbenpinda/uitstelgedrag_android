@@ -229,6 +229,7 @@ public class NoteActivity extends Base {
         }
     }
 
+    // todo - use this for day/night theming.
     public class LightSensorListener implements SensorEventListener{ // important - light sensor does not detect light as >0 in dimly lit environments.
 
         static final int MEASURED_LUX                  = 0;
@@ -251,45 +252,54 @@ public class NoteActivity extends Base {
     }
     // endregion
 
-    public class AccelerometerListener extends SensorEventListenerBase{// IMPORTANT - no high-pass filter for gravity applied!
+    public class AccelerometerListener extends SensorEventListenerBase{
+        // IMPORTANT - no high-pass filter for gravity applied!
+        // TODO/IMPORTANT - background thread!
 
-        static final int   DEVICE_ORIENTATION_DOWNWARDS    = 1;
-        static final int   DEVICE_ORIENTATION_NONDOWNWARDS = 0;
-
+        static final int   DEVICE_ORIENTATION_HORIZONTAL    = 1;
+        static final int   DEVICE_ORIENTATION_NONHORIZONTAL = 0;
+        static final int   DEVICE_ORIENTATION_DOWNWARDS     = 1;
+        static final int   DEVICE_ORIENTATION_NONDOWNWARDS  = 0;
 
         static final int COUNT_THRESHOLD = 7; // arbitrary amount of minimum cycles before setState();
                                               // This can be set by either incrementing the count_threshold or this,
                                               // but the count_threshold is unreliable because the polling rate may not be enforced.
 
+        static final float HORIZONTAL              = 10; // -15 with filtering?
         static final float DOWNWARDS               = -9; // -90 with filtering?
+        static final float X_ANGLE_THRESHOLD       = 2;
         static final float Z_ANGLE_THRESHOLD       = 2;  // x10 with filtering? | arbitrary number of deviation in degrees.
+        static final int   MEASURED_ACCELERATION_X = 0;
         static final int   MEASURED_ACCELERATION_Z = 2;
 
-        int device_z_orientation = 0;
-        int accel_count = 0;                  // setState() counter that changes on count > threshold.
+        int device_x_orientation = 0; // portrait/landscape. Avoids android:screenOrientation constraint issues.
+        int device_z_orientation = 0; // facing down or upwards.
+        int x_accel_count        = 0;                  // setState() counter that changes on count > threshold.
+        int z_accel_count        = 0;                  // setState() counter that changes on count > threshold.
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            // todo - accelerometer for camera
-            // todo - if acceleration suddenly changes > threshold
+            // todo - state cohesion and refactorino.
             // todo - prevent trigger on threshold edge.
 
-            float device_angle = event.values[MEASURED_ACCELERATION_Z];
+            float device_x_angle = event.values[MEASURED_ACCELERATION_X];
+            float device_z_angle = event.values[MEASURED_ACCELERATION_Z];
 
-            Log.i("Accelerometer","Device z-acceleration: " + device_angle);
+            Log.i("Accelerometer","Device:\n z-acceleration: " + device_z_angle + ",\nx-acceleration: " + device_x_angle);
 
-            float difference = Math.abs(device_angle - DOWNWARDS);
+            // Check downwards/nondownwards.
+            float z_difference = Math.abs(device_z_angle - DOWNWARDS);
             if (device_z_orientation == DEVICE_ORIENTATION_NONDOWNWARDS){
-                if (difference < Z_ANGLE_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
-                    accel_count++;
+                if (z_difference < Z_ANGLE_THRESHOLD) {
+                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_z_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
+                    z_accel_count++;
                 }
                 else{
                     Log.i("Accelerometer", "Acceleration difference out of range, not changing state.");
-                    accel_count = 0;
+                    z_accel_count = 0;
                 }
 
-                if (accel_count > COUNT_THRESHOLD) {
+                if (z_accel_count > COUNT_THRESHOLD) {
                     Log.w("Accelerometer", "Device flagged as downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_DOWNWARDS;
@@ -297,17 +307,17 @@ public class NoteActivity extends Base {
                     recorder.startRecording();
                 }
             }
-            else {
-                if (difference > Z_ANGLE_THRESHOLD) {
-                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
-                    accel_count++;
+            if (device_z_orientation == DEVICE_ORIENTATION_DOWNWARDS){
+                if (z_difference > Z_ANGLE_THRESHOLD) {
+                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_z_angle - DOWNWARDS) + "(threshold =" + Z_ANGLE_THRESHOLD + ").");
+                    z_accel_count++;
                 }
                 else {
                     Log.i("Accelerometer", "Acceleration difference in range, not changing state.");
-                    accel_count = 0;
+                    z_accel_count = 0;
                 }
 
-                if (accel_count > COUNT_THRESHOLD * 2) {// The threshold only goes for 90- degrees, not upwards.
+                if (z_accel_count > COUNT_THRESHOLD * 2) {// The threshold only goes for 90- degrees, not upwards.
                     Log.w("Accelerometer", "Device flagged as non-downwards facing.");
                     vibrator.vibrate(250);
                     device_z_orientation = DEVICE_ORIENTATION_NONDOWNWARDS;
@@ -326,8 +336,51 @@ public class NoteActivity extends Base {
                 }
             }
 
-            //                todo | if orientation == horizontal (&& lightlevel = light // what if user is in bed or on couch during daytime?)
-            //                openCamera();
+            // Check landscape/portrait.
+            // todo - only check if portrait beforehand / light level OK / not recording.
+            // todo - tweak thresholds.
+            float x_difference = Math.abs(device_x_angle - HORIZONTAL);
+            if (device_x_orientation == DEVICE_ORIENTATION_NONHORIZONTAL){
+                if (x_difference < X_ANGLE_THRESHOLD){
+                    Log.i("Accelerometer", "Acceleration difference in range: " + Math.abs(device_x_angle - HORIZONTAL) + "(threshold =" + X_ANGLE_THRESHOLD + ").");
+                    x_accel_count++;
+                }
+                else{
+                    Log.i("Accelerometer", "Acceleration difference out of range, not changing state.");
+                    x_accel_count = 0;
+                }
+
+                if (x_accel_count > COUNT_THRESHOLD){
+                    vibrator.vibrate(250);
+                    Log.w("Accelerometer", "Device flagged as held in landscape.");
+                    device_x_orientation = DEVICE_ORIENTATION_HORIZONTAL;
+                    openCamera(); // todo - only on right light level?
+                }
+
+            }
+            if (device_x_orientation == DEVICE_ORIENTATION_HORIZONTAL) {
+                if (x_difference > X_ANGLE_THRESHOLD) {
+                    Log.i("Accelerometer", "Acceleration difference out of range: " + Math.abs(device_x_angle - HORIZONTAL) + "(threshold =" + X_ANGLE_THRESHOLD + ").");
+                    x_accel_count++;
+                } else {
+                    Log.i("Accelerometer", "Acceleration difference in range, not changing state.");
+                    x_accel_count = 0;
+                }
+
+                if (x_accel_count > COUNT_THRESHOLD * 2) {
+                    vibrator.vibrate(250);
+                    Log.w("Accelerometer", "Device flagged as held in non-landscape.");
+                    device_x_orientation = DEVICE_ORIENTATION_NONHORIZONTAL;
+                    /* todo - check for nondownwards/ only activate when held / not-recording */
+                    if (true) {
+                        // todo - create attachment for picture
+                    }
+                }
+            }
+        }
+
+        private void openCamera() {
+            Log.i("Accelerometer", "Firing up camera.");
         }
     }
 }
