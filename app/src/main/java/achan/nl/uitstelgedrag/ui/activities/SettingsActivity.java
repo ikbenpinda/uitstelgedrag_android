@@ -21,7 +21,7 @@ import butterknife.OnClick;
 public class SettingsActivity extends Base { // todo sharedpreferences
 
     @BindView(R.id.settings_semi_automatic_attendance_tracking_switch) Switch  attendanceTrackingSwitch;
-    @BindView(R.id.settings_theme_switch)                              Switch  themeSwitch;
+    @BindView(R.id.settings_theme_spinner)                             Spinner  themeSpinner;
     @BindView(R.id.settings_mic_trigger_spinner)                       Spinner micTriggerSwitch;
     @BindView(R.id.settings_wipe_database_button)                      Button  wipeDatabaseButton;
     @BindView(R.id.settings_gesture_based_interaction_switch)          Switch enableGesturesButton;
@@ -36,8 +36,8 @@ public class SettingsActivity extends Base { // todo sharedpreferences
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = this;
         ButterKnife.bind(this);
+        context = this;
     }
 
     // todo proximity / accel setting

@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:text="Set theme to "/>
         <Spinner
-            android:id="@+id/settings_theme_switch"
+            android:id="@+id/settings_theme_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:entries="@array/settings_themes"/>
