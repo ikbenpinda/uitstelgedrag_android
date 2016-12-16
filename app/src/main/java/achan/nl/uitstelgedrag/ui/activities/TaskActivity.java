@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -64,27 +65,55 @@ public class TaskActivity extends Base {
         EditText    descriptionView = (EditText) findViewById(R.id.AddTaskDescription);
         descriptionView.requestFocus();
 
-        String description = descriptionView.getText().toString();
+        if (descriptionView.getText().toString().isEmpty()) {
+            descriptionView.setError("Taak kan niet leeg zijn!");
+            return;
+        }
+
+        List<Task> new_tasks = new ArrayList<>();
+
+        // Split tasks on commas
+        String[] descriptions = descriptionView.getText().toString().split(",");
         String labels = labelsView.getText().toString();
+        Date deadline = planTaskCheckbox.isChecked() ? parseDate() : null;
 
-        Task task = new Task(description);
+        for (String description : descriptions) {
+            description = description.trim();
+            Task task = new Task(description);
+            if (!labels.isEmpty()) // note - Labels are optional, descriptions are not.
+                for (String string : labels.split(",")) {
+                    Label label = new Label();
+                    label.title = string;
+                    task.labels.add(label);
+                }
 
-        if (!labels.isEmpty())
-            for (String string : labels.split(",")) {
-                Label label = new Label();
-                label.title = string;
-                task.labels.add(label);
+            task.deadline = deadline;
+
+            new_tasks.add(task);
+
+            if (new_tasks.size() > 1){
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < descriptions.length; i++) {
+                    builder.append(descriptions[i]);
+                    if (i < descriptions.length - 1) {
+                        builder.append(", ");
+                    }
+                }
+
+                Snackbar.make(v, "Taken toegevoegd: " + builder.toString(), Snackbar.LENGTH_SHORT).show();
             }
+            else
+                Snackbar.make(v, "Taak toegevoegd: " + task.description, Snackbar.LENGTH_SHORT).show();
+
+            descriptionView.setText("");
+        }
+
+        for (Task task : new_tasks) {
+            presenter.addTask(task);
+            adapter.addItem(adapter.getItemCount(), task);
+        }
+
 //            task.labels.addAll(Arrays.asList()); FIXME
-
-        task.deadline = planTaskCheckbox.isChecked() ? parseDate() : null;
-
-
-        presenter.addTask(task);
-        adapter.addItem(adapter.getItemCount(), task);
-        Snackbar.make(v, "Taak toegevoegd: " + task.description, Snackbar.LENGTH_SHORT).show();
-
-        descriptionView.setText("");
 
         // Either clear focus and dismiss the keyboard, or do neither.
         // Otherwise, the keyboard will continue typing while the field is cleared of focus.
