@@ -14,21 +14,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.persistence.Settings;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public abstract class Base extends AppCompatActivity implements Decoratable {
 
-//    String[]              draweritems;
-//    ActionBarDrawerToggle DrawerToggle;
+    public static final int THEME_DARK = R.style.AppTheme;
+    public static final int THEME_LIGHT = R.style.AppTheme_Light;
+
     List<Decoration> decorations = new ArrayList<>(); // Additional items like drawers, (toolbar)menus, etc.
 
-    //@BindView(R.id.settings_menuitem) MenuItem      settingsMenuItem; // FIXME: unnecessary view?
-    //@BindView(R.id.drawer_layout)     DrawerLayout  drawer;
-    //@BindView(R.id.left_drawer)       ListView      drawerlist;
-    //@BindView(R.id.navigation_view)NavigationView navigationView;
     @Nullable // not all activities have a toolbar.
-    @BindView(R.id.toolbar) Toolbar toolbar = null;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     public Toolbar getToolbar() {
         return toolbar;
@@ -49,10 +47,11 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int theme = new Settings(this).getTheme();
+        setTheme(theme); // todo set MaterialDrawer/extra menus Theme.
         super.onCreate(savedInstanceState);
         setContentView(getCurrentActivity().layout);
         ButterKnife.bind(this);
-
         // This can be moved to a seperate activity subclass to differentiate between presets,
         // or be left here to provide a default implementation.
         decorations.add(new ToolbarDecoration(this));
@@ -62,6 +61,9 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
             decor.decorate();
         }
 
+//        int theme = new Settings(this).getTheme();
+        setTheme(theme); // todo set MaterialDrawer/extra menus Theme.
+//        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
     }
 
     @Override

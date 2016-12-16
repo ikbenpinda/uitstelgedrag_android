@@ -24,6 +24,8 @@ public class ToolbarDecoration implements Decoration{
             return;
         }
 
+//        int theme = new Settings(activity).getTheme();
+//        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
         activity.setSupportActionBar(toolbar);
         activity.getSupportActionBar().setTitle(activity.getCurrentActivity().name);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
