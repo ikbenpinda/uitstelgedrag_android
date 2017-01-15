@@ -1,6 +1,7 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,9 +16,15 @@ import android.widget.Switch;
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.persistence.Settings;
 import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
+import achan.nl.uitstelgedrag.ui.Themer;
+import achan.nl.uitstelgedrag.ui.Themes;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static achan.nl.uitstelgedrag.ui.Themes.AUTO;
+import static achan.nl.uitstelgedrag.ui.Themes.DARK;
+import static achan.nl.uitstelgedrag.ui.Themes.LIGHT;
 
 /**
  * Shows basic and advanced settings.
@@ -30,6 +37,7 @@ public class SettingsActivity extends Base { // todo sharedpreferences
     @BindView(R.id.settings_wipe_database_button)                      Button  wipeDatabaseButton;
     @BindView(R.id.settings_gesture_based_interaction_switch)          Switch  enableGesturesButton;
 
+    Activity activity;
     Context context;
     Settings settings;
 
@@ -44,33 +52,38 @@ public class SettingsActivity extends Base { // todo sharedpreferences
         ButterKnife.bind(this);
         context = this;
         settings = new Settings(this);
+        activity = this;
         //set spinner to current theme
         //if current theme is current theme, do nothing
         //else, change.
-        final int theme_dark = 0;
-        final int theme_light = 1;
-        int theme_current = settings.getTheme() == R.style.AppTheme? theme_dark: theme_light;
-        themeSpinner.setSelection(theme_current);
+
+        Themes theme_current = settings.getTheme() == DARK.id? DARK: settings.getTheme() == Themes.LIGHT.id? LIGHT: AUTO;
+        themeSpinner.setSelection(theme_current.id);
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if(themeSpinner.getSelectedItemPosition() == theme_current)
+                if(themeSpinner.getSelectedItemPosition() == theme_current.id)
                     return;
 
+                // Theme will be set so the activity doesn't have to be restarted.
                 Log.i("Settings", "Changed theme! Selector value: " + themeSpinner.getSelectedItemPosition());
                 if (themeSpinner.getSelectedItem().toString().equals("light")) {
-                    setTheme(Settings.THEME_LIGHT);
-                    settings.setTheme(Settings.THEME_LIGHT);
+//                    settings.setTheme(LIGHT.id);
+                    Themer.setTheme(activity, LIGHT);
                     Log.i("Settings", "Changed theme to light theme.");
                 }
-                else{
-                    setTheme(Settings.THEME_DARK);
-                    settings.setTheme(Settings.THEME_DARK);
+                else if (themeSpinner.getSelectedItem().toString().equals("dark")){
+//                    settings.setTheme(DARK.id);
+                    Themer.setTheme(activity, DARK);
                     Log.i("Settings", "Changed theme to dark theme.");
+                } else {
+//                    settings.setTheme(AUTO.id);
+                    Themer.setTheme(activity, AUTO);
+                    Log.i("Settings", "Changed theme to auto theme.");
                 }
 
-                recreate();
+//                recreate();
             }
 
             @Override
@@ -88,7 +101,6 @@ public class SettingsActivity extends Base { // todo sharedpreferences
 //        String state = "";
 //        Log.i("Settings", "Gestures " + state);
 //    }
-
 
     @OnClick(R.id.settings_wipe_database_button) void wipeDatebase(){
         new AlertDialog.Builder(context)

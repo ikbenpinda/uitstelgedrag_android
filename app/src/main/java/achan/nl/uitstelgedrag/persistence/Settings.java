@@ -18,6 +18,7 @@ public class Settings {
     public static final int     THEME_DEFAULT              = R.style.AppTheme_Light;
     public static final int     THEME_LIGHT                = R.style.AppTheme_Light;
     public static final int     THEME_DARK                 = R.style.AppTheme;
+    public static final int     THEME_AUTO                 = 2;
     public static final int     MICROPHONE_TRIGGER_DEFAULT = Sensor.TYPE_PROXIMITY;
     public static final boolean NOTIFY_ME_DEFAULT          = false;
 
