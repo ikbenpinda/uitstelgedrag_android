@@ -12,8 +12,10 @@ import achan.nl.uitstelgedrag.persistence.definitions.Table;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Attachments;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Attendances;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Notes;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
+import achan.nl.uitstelgedrag.persistence.migrations.Migration;
 
 /**
  * So i'm guessing this is the Service Layer with all the needed repositories.
@@ -23,7 +25,9 @@ import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
 public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
     public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int     DATABASE_SCHEMA_VERSION = 23;
+    public static final int     DATABASE_SCHEMA_VERSION = 24;
+
+    public static final String CREATE = "CREATE TABLE IF NOT EXISTS ";
 
     private Context context;
 
@@ -36,6 +40,7 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
             Attendances.TABLE,
             Notes.TABLE,
             Attachments.TABLE,
+            Locations.TABLE
     };
 
     // FIXME: 18-4-2016 How to handle multiple attendances per day / attendances spanning multiple days?
@@ -102,10 +107,8 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String create = "CREATE TABLE IF NOT EXISTS ";
-
         for (Table table : tables){
-            db.execSQL(create + table.describe());
+            db.execSQL(CREATE + table.describe());
             Log.w("OpenHelper", "Creating table: " + table);
         }
 
@@ -114,7 +117,11 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        nuke(db);
+        //nuke(db);
+        Migration m = database -> {
+            database.execSQL(CREATE + Locations.TABLE.describe());
+        };
+        m.migrate(db);
     }
 
     @Override
