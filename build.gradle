@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'            // Gradle plugin
+        classpath 'com.android.tools.build:gradle:2.2.3'            // Gradle plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'  // Butterknife
         classpath 'com.google.gms:google-services:2.1.0'            // Google Services
         classpath 'me.tatarka:gradle-retrolambda:3.2.5'             // RetroLambda
