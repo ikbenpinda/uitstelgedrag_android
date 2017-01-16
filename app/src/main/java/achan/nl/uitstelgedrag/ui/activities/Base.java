@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -15,13 +16,12 @@ import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.persistence.Settings;
+import achan.nl.uitstelgedrag.ui.Themer;
+import achan.nl.uitstelgedrag.ui.Themes;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public abstract class Base extends AppCompatActivity implements Decoratable {
-
-    public static final int THEME_DARK = R.style.AppTheme;
-    public static final int THEME_LIGHT = R.style.AppTheme_Light;
 
     List<Decoration> decorations = new ArrayList<>(); // Additional items like drawers, (toolbar)menus, etc.
 
@@ -47,9 +47,14 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        int theme = new Settings(this).getTheme();
-        setTheme(theme); // todo set MaterialDrawer/extra menus Theme.
+        int themeno = new Settings(this).getTheme();
+        Themes theme = Themes.values()[themeno];
+        // Setting the theme before onCreate() sets the text color.
+        Log.w("Themer", "ThemeBase: " + theme.name + "/#" + themeno);
+        Themer.setTheme(this, theme);
+
         super.onCreate(savedInstanceState);
+
         setContentView(getCurrentActivity().layout);
         ButterKnife.bind(this);
         // This can be moved to a seperate activity subclass to differentiate between presets,
@@ -61,9 +66,20 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
             decor.decorate();
         }
 
-//        int theme = new Settings(this).getTheme();
-        setTheme(theme); // todo set MaterialDrawer/extra menus Theme.
-//        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
+        // todo settheme
+        //Themer.setTheme(this, theme);
+//        setTheme();
+        //        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
+    }
+
+    @Override
+    protected void onResume() { // todo - handle listeners.
+        super.onResume();
+    } // todo - handle listeners and whatever.
+
+    @Override
+    protected void onPause() { // todo - handle listeners.
+        super.onPause();
     }
 
     @Override
@@ -75,10 +91,21 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId()==R.id.settings_menuitem) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
+        switch (item.getItemId()){
+            case R.id.settings_menuitem:
+                Intent settings = new Intent(this, SettingsActivity.class);
+                startActivity(settings);
+                break;
+            case R.id.settings_menuitem_help:
+                Intent help = new Intent(this, HelpActivity.class);
+                startActivity(help);
+                break;
+            case R.id.settings_menuitem_about:
+                //just display an alert with the info, don't bother with an activity tbh.
+//                AlertDialog.Builder b;
+                break;
         }
+
         return true;
     }
 

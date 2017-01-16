@@ -1,6 +1,7 @@
 package achan.nl.uitstelgedrag.ui.presenters;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import java.util.List;
@@ -44,7 +45,13 @@ public class TaskPresenterImpl implements TaskPresenter {
 
     @Override
     public List<Task> viewTasks() {
-        return database.getAll();
+
+        return TaskGateway.sortByCreationDate(database.getAll());
+    }
+
+    @Override
+    public List<Task> filterTasks(List<Task> tasks, Location location){
+        return TaskGateway.filterByLocation(tasks, location);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package achan.nl.uitstelgedrag.ui.presenters;
 
+import android.location.Location;
+
 import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Task;
@@ -13,5 +15,8 @@ public interface TaskPresenter {
     Task deleteTask(Task task);
     Task editTask(Task task);
     List<Task> viewTasks();
+
+    List<Task> filterTasks(List<Task> tasks, Location location);
+
     Task viewTask(Task task);
 }

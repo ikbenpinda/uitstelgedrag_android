@@ -2,6 +2,7 @@ package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
@@ -51,10 +52,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     TaskViewHolder      holder;
     CategoryViewHolder  holder_cat;
-    List<Task>          tasks;
+    public List<Task>          tasks;
     Context             context;
     DayplanGateway      dayplanGateway;
     TaskGateway         taskGateway;
+    Location            current;
 
     public TaskAdapter(List<Task> tasks, Context context){
         this.tasks = tasks;
