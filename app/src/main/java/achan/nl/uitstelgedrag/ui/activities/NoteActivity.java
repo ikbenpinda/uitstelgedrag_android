@@ -1,11 +1,15 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
@@ -15,11 +19,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Attachment;
 import achan.nl.uitstelgedrag.domain.models.Note;
+import achan.nl.uitstelgedrag.hardware.Callback;
 import achan.nl.uitstelgedrag.hardware.Recorder;
 import achan.nl.uitstelgedrag.hardware.SensorEventListenerBase;
 import achan.nl.uitstelgedrag.persistence.Repository;
@@ -30,11 +38,11 @@ import butterknife.ButterKnife;
 
 public class NoteActivity extends Base {
 
-    public static final int LIGHTSENSOR_SAMPLING_RATE_MS  = 500;
-    public static final int ACCELEROMETER_SAMPLING_RATE_MS= 1000;
-    public static final int ACCELEROMETER_STATE_LANDSCAPE = 1;
-    public static final int ACCELEROMETER_STATE_PORTRAIT  = 2;
-    public static final int ACCELEROMETER_STATE_DOWNWARDS = 3;
+    public static final int LIGHTSENSOR_SAMPLING_RATE_MS   = 500;
+    public static final int ACCELEROMETER_SAMPLING_RATE_MS = 1000;
+    public static final int ACCELEROMETER_STATE_LANDSCAPE  = 1;
+    public static final int ACCELEROMETER_STATE_PORTRAIT   = 2;
+    public static final int ACCELEROMETER_STATE_DOWNWARDS  = 3;
 
     Repository<Note> notes;
     NoteAdapter adapter;
@@ -46,6 +54,66 @@ public class NoteActivity extends Base {
     Sensor              accelerometer;
     Vibrator            vibrator;
     Recorder            recorder;
+
+    // region Camera intent code.
+
+    private static final int REQUEST_IMAGE_CAPTURE         = 1;
+
+    private String mCurrentPhotoPath;
+
+    Callback callback = () -> {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                // Create an image file name
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                String imageFileName = "JPEG_" + timeStamp + "_";
+                File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                File image = File.createTempFile(
+                        imageFileName,  // prefix
+                        ".jpg",         // suffix
+                        storageDir      // directory
+                );
+
+                // Save a file: path for use with ACTION_VIEW intents
+                mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+                photoFile = image;
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Log.e("Camera", "IOException");
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    };
+
+    @Override // todo - note creation with attachment.
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+//            try {
+                //mImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(mCurrentPhotoPath));
+                //mImageView.setImageBitmap(mImageBitmap);
+                Note note = new Note();
+                note.text = "Foto";
+                note.created = new Date();
+                note.attachment = new Attachment();
+                note.attachment.path = mCurrentPhotoPath;
+                note.attachment.type = Attachment.ATTACHMENT_TYPE_PHOTO;
+                notes.insert(note);
+                adapter.addItem(adapter.getItemCount(), note);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+        }
+    }
+
+    // endregion
 
     @BindView(R.id.noteview_list_notes) RecyclerView notelist;
 
@@ -192,6 +260,7 @@ public class NoteActivity extends Base {
 
         static final int   DEVICE_ORIENTATION_HORIZONTAL    = 1;
         static final int   DEVICE_ORIENTATION_NONHORIZONTAL = 0;
+
         static final int   DEVICE_ORIENTATION_DOWNWARDS     = 1;
         static final int   DEVICE_ORIENTATION_NONDOWNWARDS  = 0;
 
@@ -199,17 +268,18 @@ public class NoteActivity extends Base {
                                               // This can be set by either incrementing the count_threshold or this,
                                               // but the count_threshold is unreliable because the polling rate may not be enforced.
 
-        static final float HORIZONTAL              = 10; // -15 with filtering?
+        static final float HORIZONTAL              = 10; // Uncorrected value.
         static final float DOWNWARDS               = -9; // -90 with filtering?
         static final float X_ANGLE_THRESHOLD       = 2;
         static final float Z_ANGLE_THRESHOLD       = 2;  // x10 with filtering? | arbitrary number of deviation in degrees.
+
         static final int   MEASURED_ACCELERATION_X = 0;
         static final int   MEASURED_ACCELERATION_Z = 2;
 
         int device_x_orientation = 0; // portrait/landscape. Avoids android:screenOrientation constraint issues.
         int device_z_orientation = 0; // facing down or upwards.
-        int x_accel_count        = 0;                  // setState() counter that changes on count > threshold.
-        int z_accel_count        = 0;                  // setState() counter that changes on count > threshold.
+        int x_accel_count        = 0; // setState() counter that changes on count > threshold.
+        int z_accel_count        = 0; // setState() counter that changes on count > threshold.
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -220,6 +290,11 @@ public class NoteActivity extends Base {
             float device_z_angle = event.values[MEASURED_ACCELERATION_Z];
 
             Log.i("Accelerometer","\nDevice:\n z-acceleration: " + device_z_angle + ",\nx-acceleration: " + device_x_angle);
+            checkVerticalAcceleration(device_z_angle);
+            checkHorizontalAcceleration(device_x_angle);
+        }
+
+        private void checkVerticalAcceleration(float device_z_angle){
 
             // Check downwards/nondownwards.
             float z_difference = Math.abs(device_z_angle - DOWNWARDS);
@@ -270,6 +345,9 @@ public class NoteActivity extends Base {
                     }
                 }
             }
+        }
+
+        private void checkHorizontalAcceleration(float device_x_angle){
 
             // Check landscape/portrait.
             // todo - only check if portrait beforehand / light level OK / not recording.
@@ -309,15 +387,17 @@ public class NoteActivity extends Base {
                     Log.w("Accelerometer", "Device flagged as held in non-landscape.");
                     device_x_orientation = DEVICE_ORIENTATION_NONHORIZONTAL;
                     /* todo - check for nondownwards/ only activate when held / not-recording */
-                    if (true) {
-                        // todo - create attachment for picture, close camera.
-                    }
+                    //                    if (true) {
+                    //                        // todo - create attachment for picture, close camera.
+                    //                        // todo - attachment making on activity callback.
+                    //                    }
                 }
             }
         }
 
         private void openCamera() {
             Log.i("Accelerometer", "Firing up camera.");
+            callback.execute();
         }
     }
 }

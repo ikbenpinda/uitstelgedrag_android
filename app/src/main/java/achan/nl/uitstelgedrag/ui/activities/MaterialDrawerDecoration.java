@@ -16,7 +16,6 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 
 import achan.nl.uitstelgedrag.R;
@@ -76,10 +75,10 @@ public class MaterialDrawerDecoration implements Decoration {
                 notities = new PrimaryDrawerItem().withName(notes.name).withIdentifier(notes.id),
                 aanwezigheid = new PrimaryDrawerItem().withName(attendance.name).withIdentifier(attendance.id);
 
-        SecondaryDrawerItem
-                handleiding = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(help.name).withIdentifier(help.id),
-                instellingen = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(settings.name).withIdentifier(settings.id),
-                over = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(about.name).withIdentifier(about.id);
+//        SecondaryDrawerItem
+//                handleiding = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(help.name).withIdentifier(help.id),
+//                instellingen = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(settings.name).withIdentifier(settings.id),
+//                over = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(about.name).withIdentifier(about.id);
 
         //create the drawer and remember the 'Drawer' result object.
         DrawerBuilder drawerBuilder = new DrawerBuilder()
@@ -91,10 +90,10 @@ public class MaterialDrawerDecoration implements Decoration {
                         taken,
                         notities,
                         aanwezigheid,
-                        new DividerDrawerItem(),
-                        handleiding,
-                        instellingen,
-                        over
+                        new DividerDrawerItem()//,
+//                        handleiding,
+//                        instellingen,
+//                        over
                 )
                 .withOnDrawerItemClickListener((view, position, drawerItem) -> {
                     String name = ((PrimaryDrawerItem)drawerItem).getName().getText();
