@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,9 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
@@ -41,12 +45,21 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEWTYPE_RECORDING = 2;
     private static final int VIEWTYPE_PHOTO = 3;
 
+    private SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     Context context;
     List<Note> notes;
+    private OnListChangedListener callback;
+    public NoteRecordingAttachmentViewHolder lastCaller;
+    private MediaPlayer player;
 
-    public NoteAdapter(List<Note> notes, Context context) {
+    public NoteAdapter(List<Note> notes, Context context, MediaPlayer player) {
         this.notes = notes;
         this.context = context;
+        this.player = player; // has to be managed outside of the adapter due to lifecycle issues.
+    }
+
+    public void setOnListChangedListener(OnListChangedListener callback){
+        this.callback = callback;
     }
 
     public void addItem(final int position, Note note) {
@@ -76,10 +89,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return VIEWTYPE_NOTE;
         else if (note.attachment.type == Attachment.ATTACHMENT_TYPE_AUDIO)
             return VIEWTYPE_RECORDING;
-        else if (note.attachment.type == Attachment.ATTACHMENT_TYPE_PHOTO)
+        else //(note.attachment.type == Attachment.ATTACHMENT_TYPE_PHOTO)
             return VIEWTYPE_PHOTO;
-        else
-            return -1;
     }
 
     @Override
@@ -92,7 +103,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 holder = new NoteRecordingAttachmentViewHolder(view, context);
                 break;
             case VIEWTYPE_PHOTO:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_note_photo, parent, false);
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_recording, parent, false);
                 holder = new NotePhotoAttachmentViewHolder(view, context);
                 break;
             case VIEWTYPE_NOTE:
@@ -116,6 +127,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putExtra("note_id", note.id);
                 context.startActivity(intent);
             });
+
             noteview.itemView.setOnLongClickListener(v ->
             {
                 PopupMenu popup = new PopupMenu(context, v);
@@ -142,23 +154,87 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             noteview.timestamp.setText(Timestamp.formatDate(note.created));
 
         } else if(holder instanceof NoteRecordingAttachmentViewHolder){
+            NoteRecordingAttachmentViewHolder recordingView = (NoteRecordingAttachmentViewHolder) holder;
+            //MediaPlayer player = MediaPlayer.create(recordingView.context, Uri.parse(note.attachment.path)); note fixes non-final player issue.
+            recordingView.title.setText(note.text);
 
-            NoteRecordingAttachmentViewHolder recordingview = (NoteRecordingAttachmentViewHolder) holder;
-            MediaPlayer player = MediaPlayer.create(recordingview.context, Uri.parse(note.attachment.path));
-            recordingview.title.setText(note.text);
-            recordingview.mediaButton.setOnClickListener(v -> {
-                if (!player.isPlaying()) {
-                    player.start();
-                    v.setPressed(true);
-                    Log.i("MediaPlayer", "Playing file: " + note.text + "(" + note.attachment.path + ")");
+            // fixme - take this out of the onBind().
+            // If the player is still playing, stop it and set it to the new file.
+            if (player != null) {
+                if (player.isPlaying()) {
+                    player.pause();
+                    if (lastCaller != null)
+                        lastCaller.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_black_24dp));
+                }
+                player.stop();
+                player.reset();
+//                    player.release();
+            }
+
+            // Create it for reading data, not for playback. Not yet.
+            player = player.create(context, Uri.parse(note.attachment.path));
+
+            // Measure metadata: get track length in minutes:seconds.
+            int length = player.getDuration(); // Length in milliseconds.
+            int current_position = player.getCurrentPosition(); // Current position in milliseconds.
+
+            int display_seconds = length/1000%60;
+            int display_minutes = Math.round(length/1000/60);
+
+            int length_seconds = length/1000;
+            int length_minutes = Math.round(length_seconds / 60);// fixme modulo shit
+            int current_seconds = current_position/1000;
+            int current_minutes = current_seconds/60;// fixme modulo shit
+
+            Log.i("MediaPlayer", String.format("path: %s, length: %d, current: %d", note.attachment.path, length, current_position));
+
+            recordingView.title.setText("Opname");
+            recordingView.created.setText("toegevoegd op " + sf.format(note.created));
+            recordingView.current.setText("00:00"); // Player has not started yet anyway.
+//                recordingView.current.setText(String.format("%02d:%02d", current_minutes, current_seconds));
+            recordingView.length.setText(String.format("%02d:%02d", display_minutes, display_seconds));
+            recordingView.seekbar.setMax(length);
+
+            player.reset(); // Free it up to let other viewholder bind.
+
+            recordingView.setOnPlayerStateChangedListener(() -> {
+                recordingView.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_black_24dp));
+            });
+            recordingView.playPause.setOnClickListener(v -> {
+
+                // fixme - change imagebutton state when other viewholder is toggled.
+                // todo - seekbar
+//
+                if (player.isPlaying() && lastCaller == recordingView) {
+                    Log.i("LogViewAdapter", "OnClickListener: paused mediaplayer.");
+                    player.pause();
+                    recordingView.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_black_24dp));
                 }
                 else {
-                    player.stop();
-                    v.setPressed(false);
-                    Log.i("MediaPlayer", "Stopped playing file: " + note.text + "(" + note.attachment.path + ")");
+                    if (player != null) {
+                        if (player.isPlaying()) {
+                            player.pause();
+                        }
+                        player.stop();
+                        player.reset();
+//                          player.release();
+                        player = player.create(context, Uri.parse(note.attachment.path));
+                    }
+
+                    Log.i("LogViewAdapter", "OnClickListener: started mediaplayer.");
+                    if (lastCaller != null)
+                        lastCaller.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_black_24dp));
+                    player.start();
+                    player.setOnCompletionListener(mp -> {
+                        Log.i("LogViewAdapter", "Mediaplayer finished playing.");
+                        lastCaller.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_black_24dp));
+                    });
+                    recordingView.playPause.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_pause_black_24dp));
+                    lastCaller = recordingView;
                 }
             });
-            recordingview.itemView.setOnLongClickListener(v -> {
+
+            recordingView.itemView.setOnLongClickListener(v -> {
 
                 PopupMenu popup = new PopupMenu(context, v);
                 popup.setOnMenuItemClickListener(item -> {
@@ -169,7 +245,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         case R.id.popup_delete:
                             if (player != null && player.isPlaying())
                                 player.stop();
-                            removeItem(recordingview.getAdapterPosition());
+                            removeItem(recordingView.getAdapterPosition());
                             new NoteGateway(context).delete(note);
                             Snackbar.make(v, "Geluidsfragment verwijderd! ", Snackbar.LENGTH_SHORT).show();
                             break;
@@ -224,6 +300,51 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+//    public void addPopupMenu(RecyclerView.ViewHolder holder, View view, Note note, int position){
+//        view.setOnClickListener(v ->{
+//            PopupMenu popup = new PopupMenu(context, v);
+//            MenuInflater inflater = popup.getMenuInflater();
+//            inflater.inflate(R.menu.popup, popup.getMenu());
+//            popup.setOnMenuItemClickListener(item -> {
+//                switch (item.getItemId()){
+//                    case R.id.popup_edit:
+//                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+//                        alertBuilder.setTitle("Item bijwerken");
+//                        alertBuilder.setView(R.layout.dialog_edit);
+//                        alertBuilder.setNegativeButton("Annuleren", null);
+//                        alertBuilder.setPositiveButton("Opslaan",
+//                                (dialog, which) -> Snackbar.make(v, "Item bijgewerkt!", Snackbar.LENGTH_SHORT).show());
+//
+//                        // depending on attachment
+//                        // edit title/content
+//                        // open camera
+//                        // start recording
+//                        //
+//                        // feedback edit succ
+//                        alertBuilder.show();
+//                        break;
+//                    case R.id.popup_delete:
+//                        // Calling getAdapterPosition after changing the list causes an IndexOutOfBoundsException.
+//                        int adapterposition = holder.getAdapterPosition();
+//                        removeItem(adapterposition);
+//                        Snackbar.make(v, "Item verwijderd! ", Snackbar.LENGTH_SHORT)
+//                                .setAction("Ongedaan maken", v1 -> {addItem(adapterposition, note);
+//                                })
+//                                .setCallback(new Snackbar.Callback() {
+//                                    @Override
+//                                    public void onDismissed(Snackbar snackbar, int event) {
+//                                        super.onDismissed(snackbar, event);
+//                                        new NoteGateway(context).delete(note);// note - log relationship.
+//                                    }
+//                                }).show();
+//                        break;
+//                }
+//                return true;
+//            });
+//            popup.show();
+//        });
+//    }
+
     @Override
     public int getItemCount() {
         return notes.size();
@@ -245,17 +366,25 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class NoteRecordingAttachmentViewHolder extends RecyclerView.ViewHolder{
 
-        @BindView(R.id.rowlayout_note_recording_mediabutton)
-        ImageButton mediaButton;
-        @BindView(R.id.rowlayout_note_recording_title)
-        TextView title;
+        @BindView(R.id.recording_created)           TextView    created;
+        @BindView(R.id.recording_title)             TextView    title;
+        @BindView(R.id.recording_playpause)         ImageButton playPause;
+        @BindView(R.id.recording_current_position)  TextView    current;
+        @BindView(R.id.recording_seekbar)           SeekBar     seekbar;
+        @BindView(R.id.recording_length)            TextView    length;
+        @BindView(R.id.recording_layout)            CardView    layout;
 
         Context context;
+        PlayerStateChangeListener listener;
 
         public NoteRecordingAttachmentViewHolder(View itemView, Context context) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             this.context = context;
+        }
+
+        public void setOnPlayerStateChangedListener(PlayerStateChangeListener listener) {
+            this.listener = listener;
         }
     }
 
@@ -271,5 +400,21 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this, itemView);
             this.context = context;
         }
+    }
+
+    /**
+     * Callback for list changes.
+     */
+    public interface OnListChangedListener {
+
+        void onListChanged();
+    }
+
+    /**
+     * Listener to detect changes to the media player.
+     */
+    public interface PlayerStateChangeListener{
+
+        void onChange();
     }
 }
