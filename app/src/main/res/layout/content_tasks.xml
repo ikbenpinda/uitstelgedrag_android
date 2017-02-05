@@ -11,20 +11,32 @@
               android:paddingTop="@dimen/activity_vertical_margin"
               app:layout_behavior="@string/appbar_scrolling_view_behavior"
               tools:context=".ui.activities.TaskActivity"
-              tools:showIn="@layout/activity_task">
+              tools:showIn="@layout/activity_task"
+    android:weightSum="1">
 
     <Spinner
         android:id="@+id/task_filter_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/task_filters"/>
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/MainList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
-    </android.support.v7.widget.RecyclerView>
+
+        <achan.nl.uitstelgedrag.ui.views.TaskRecyclerView
+            android:id="@+id/MainList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        </achan.nl.uitstelgedrag.ui.views.TaskRecyclerView>
+
+        <TextView
+            android:id="@+id/emptyListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textColor="@color/colorAccent"
+            android:text="Deze lijst is leeg! \n :')"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -32,24 +44,23 @@
         android:layout_gravity="bottom"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:orientation="horizontal"
-            android:id="@+id/task_labels_layout">
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="16dp"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:id="@+id/task_labels_layout">-->
 
-        </LinearLayout>
+            <!--<android.support.v7.widget.RecyclerView-->
+                <!--android:id="@+id/task_labels_list"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+
+            <!--</android.support.v7.widget.RecyclerView>-->
+        <!--</LinearLayout>-->
         <!--<achan.nl.uitstelgedrag.ui.views.CategoryView-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:text="AAAAABCMIjL"/>-->
-        <Button
-            android:text="Nieuwe taak"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bottom_sheet_open"
-            android:layout_weight="1"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -73,6 +84,7 @@
 
             <ImageButton
                 android:id="@+id/imageButton"
+                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/ic_public_black_24dp"

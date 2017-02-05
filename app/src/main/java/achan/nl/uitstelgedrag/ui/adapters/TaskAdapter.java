@@ -45,18 +45,18 @@ import butterknife.ButterKnife;
  */
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    public static final int VIEWTYPE_CATEGORY = 1;
-    public static final int VIEWTYPE_TASK = 2;
-
     @BindColor(R.color.colorAccent) int accent;
 
-    TaskViewHolder      holder;
-    CategoryViewHolder  holder_cat;
-    public List<Task>          tasks;
-    Context             context;
-    DayplanGateway      dayplanGateway;
-    TaskGateway         taskGateway;
-    Location            current;
+    public static final int ITEM = 2;
+    public static final int EMPTY = 1;
+
+    public List<Task>       tasks;
+    TaskViewHolder          holder;
+    Context                 context;
+    DayplanGateway          dayplanGateway;
+    TaskGateway             taskGateway;
+    Location                current;
+    OnListChangedListener   callback;
 
     public TaskAdapter(List<Task> tasks, Context context){
         this.tasks = tasks;
@@ -73,6 +73,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             notifyItemInserted(position); // Exception - Inconsistency detected.
             //notifyDataSetChanged(); Stops animation and re-layout.
         });
+        if (callback != null)
+            callback.onListChanged();
     }
 
     public void removeItem(final int position) {
@@ -83,38 +85,36 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             //notifyDataSetChanged(); is obsolete because notifyItemRemoved specifies what changed.
             //                        Same goes for notifyItemInserted.
         });
+        if (callback != null)
+            callback.onListChanged();
+    }
+
+    public void setOnListChangedListener(OnListChangedListener callback){
+        this.callback = callback;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return tasks.get(position) instanceof Task ? 2 : 1;
+        return tasks.get(position) != null/*instanceof Task*/ ? ITEM : EMPTY;
     }
 
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        if (viewType == VIEWTYPE_TASK) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
-            holder = new TaskViewHolder(view, context);
-            return holder;
-//        } else {
-//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
-//            holder_cat = new CategoryViewHolder(view);
-//            return holder;
-//        }
-  //      return holder;
-    }
+        TaskViewHolder holder;
+        View view;
 
-    // TODO: 16-5-2016 haal items binnen
-    // TODO: 16-5-2016 Sorteer op categorie
-    // TODO: 16-5-2016 voeg categorieen samen met header views
-    // TODO: 16-5-2016 push uiteindelijke lijst naar adapter
-    // TODO: 16-5-2016 implementeer getViewType en de verschillende holders
+        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_task, parent, false);
+        holder = new TaskViewHolder(view, context);
+
+        return holder;
+    }
 
     @Override
     public void onBindViewHolder(final TaskViewHolder holder, final int position) {
 
         // FIXME: 29-4-2016 Document what the hell is going on here.
         Task task = tasks.get(holder.getAdapterPosition());
+
         holder.taskdescription.setText(task.description);
         holder.deadline.setText(Timestamp.formatDate(task.deadline));
 //        String label = task.category != null && task.category.category != null ? task.category.category : ""; FIXME
@@ -130,12 +130,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.view.setOnClickListener(v1 -> {
             Intent intent = new Intent(context, TaskDetailActivity.class);
             intent.putExtra("task_id", task.id);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
         holder.view.setOnLongClickListener(v -> {
-            PopupMenu    popup    = new PopupMenu(context, v);
+            PopupMenu popup = new PopupMenu(context, v);
             popup.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.popup_edit:
                         Snackbar.make(v, "Nog niet beschikbaar :')", Snackbar.LENGTH_SHORT).show();
                         break;
@@ -157,7 +158,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
                         Snackbar.make(v, "Gepland voor vandaag! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
                         break;
-                    case  R.id.popup_plan_tomorrow:
+                    case R.id.popup_plan_tomorrow:
                         Snackbar.make(v, "Gepland voor morgen! " + holder.taskdescription.getText().toString(), Snackbar.LENGTH_SHORT).show();
                         // TODO: 24-5-2016 move to planner
                         break;
@@ -175,46 +176,46 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.taskDone.setOnCheckedChangeListener(
                 new OnCheckedChangeListener() {
 
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if (!isChecked)
-                    return;
+                        if (!isChecked)
+                            return;
 
-                final int adapterposition = holder.getAdapterPosition();
+                        final int adapterposition = holder.getAdapterPosition();
 
-                Log.i("UITSTELGEDRAG", "Adapterpos=" + adapterposition);
+                        Log.i("UITSTELGEDRAG", "Adapterpos=" + adapterposition);
 
-                final Task selected = tasks.get(adapterposition);
+                        final Task selected = tasks.get(adapterposition);
 
-                removeItem(adapterposition);
-                Log.w("", selected.toString());
+                        removeItem(adapterposition);
+                        Log.w("", selected.toString());
 
-                // http://stackoverflow.com/questions/30850494/confirmation-and-undo-removing-in-recyclerview
+                        // http://stackoverflow.com/questions/30850494/confirmation-and-undo-removing-in-recyclerview
 
-                Log.i("UITSTELGEDRAG", "Task #" + selected.id + " removed: " + selected.description);
+                        Log.i("UITSTELGEDRAG", "Task #" + selected.id + " removed: " + selected.description);
 
-                Snackbar.make(holder.itemView, "Taak verwijderd: " + selected.description, Snackbar.LENGTH_SHORT)
-                    .setAction("Ongedaan maken", v -> {
-                        final int bottom = getItemCount();
-                        addItem(adapterposition, selected);
-                    })
-                    .setCallback(new Snackbar.Callback() {
-                        @Override
-                        public void onDismissed(Snackbar snackbar, int event) {
-                            super.onDismissed(snackbar, event);
-                         // User consciously deletes the item.
-                            if (event == DISMISS_EVENT_SWIPE
-                                    | event == DISMISS_EVENT_TIMEOUT
-                                    | event == DISMISS_EVENT_CONSECUTIVE){
-                                new TaskGateway(context).delete(selected);
-                                Log.i("Snackbar", "Item removed. pos=" + adapterposition);
-                            }
-                        }
-                    })
-                    .show();
-            }
-        });
+                        Snackbar.make(holder.itemView, "Taak verwijderd: " + selected.description, Snackbar.LENGTH_SHORT)
+                                .setAction("Ongedaan maken", v -> {
+                                    final int bottom = getItemCount();
+                                    addItem(adapterposition, selected);
+                                })
+                                .setCallback(new Snackbar.Callback() {
+                                    @Override
+                                    public void onDismissed(Snackbar snackbar, int event) {
+                                        super.onDismissed(snackbar, event);
+                                        // User consciously deletes the item.
+                                        if (event == DISMISS_EVENT_SWIPE
+                                                | event == DISMISS_EVENT_TIMEOUT
+                                                | event == DISMISS_EVENT_CONSECUTIVE) {
+                                            new TaskGateway(context).delete(selected);
+                                            Log.i("Snackbar", "Item removed. pos=" + adapterposition);
+                                        }
+                                    }
+                                })
+                                .show();
+                    }
+                });
     }
 
     @Override
@@ -225,9 +226,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     //  Custom ViewHolders for TaskAdapter.
     //  Caches UI views by holding findviewbyid() results in-memory. Reduces performance hit.
 
-    /**
-     * ViewHolder for tasks, natural style.
-     */
     public class TaskViewHolder extends RecyclerView.ViewHolder{
 
         // binding happens here.
@@ -240,23 +238,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         public Context context;
 
-        public TaskViewHolder(final View itemView, final Context context) {
-            super(itemView);
-            this.context = context;
-            ButterKnife.bind(this, itemView);
-        }
-    }
-
-    /**
-     * ViewHolder for categories, ButterKnife'd.
-     */
-    public class CategoryViewHolder extends RecyclerView.ViewHolder{
-
-        public @BindView(R.id.categoryHeader) TextView category;
-
-        public CategoryViewHolder(View itemView) {
+        public TaskViewHolder(View itemView, Context context) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
+
     }
 }
