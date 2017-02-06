@@ -6,4 +6,8 @@ package achan.nl.uitstelgedrag.domain.models;
 public class Label {
     public int id = -1;
     public String title;
+    public String description;
+
+    // Note - Subclassing Label just makes things harder without any substantial gain.
+    public android.location.Location location;
 }
