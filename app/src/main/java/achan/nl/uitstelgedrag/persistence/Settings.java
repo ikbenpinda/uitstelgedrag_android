@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 
-import achan.nl.uitstelgedrag.R;
-
 /**
  * Created by Etienne on 16-11-2016.
  */
@@ -15,9 +13,10 @@ public class Settings {
     public static final String PREFS_NOTIFICATIONS_ENABLED = "Notifications";
     public static final String PREFS_MICROPHONE_TRIGGER    = "Microphonesensor";
 
-    public static final int     THEME_DEFAULT              = R.style.AppTheme_Light;
-    public static final int     THEME_LIGHT                = R.style.AppTheme_Light;
-    public static final int     THEME_DARK                 = R.style.AppTheme;
+    // important - see Themes.java.
+    public static final int     THEME_DEFAULT              = 0;
+    public static final int     THEME_LIGHT                = 0;
+    public static final int     THEME_DARK                 = 1;
     public static final int     THEME_AUTO                 = 2;
     public static final int     MICROPHONE_TRIGGER_DEFAULT = Sensor.TYPE_PROXIMITY;
     public static final boolean NOTIFY_ME_DEFAULT          = false;

@@ -57,14 +57,15 @@ public class SettingsActivity extends Base { // todo sharedpreferences
         //if current theme is current theme, do nothing
         //else, change.
 
-        Themes theme_current = settings.getTheme() == DARK.id? DARK: settings.getTheme() == Themes.LIGHT.id? LIGHT: AUTO;
+        Themes theme_current = settings.getTheme() < 2? LIGHT : DARK;
         themeSpinner.setSelection(theme_current.id);
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if(themeSpinner.getSelectedItemPosition() == theme_current.id)
-                    return;
+                // fixme - default id vs selecteditempos.
+//                if(themeSpinner.getSelectedItemPosition() == theme_current.id)
+//                    return;
 
                 // Theme will be set so the activity doesn't have to be restarted.
                 Log.i("Settings", "Changed theme! Selector value: " + themeSpinner.getSelectedItemPosition());
@@ -83,7 +84,7 @@ public class SettingsActivity extends Base { // todo sharedpreferences
                     Log.i("Settings", "Changed theme to auto theme.");
                 }
 
-//                recreate();
+//                recreate(); note - causes loop
             }
 
             @Override

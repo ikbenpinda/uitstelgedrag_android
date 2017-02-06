@@ -16,7 +16,6 @@ import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.persistence.Settings;
-import achan.nl.uitstelgedrag.ui.Themer;
 import achan.nl.uitstelgedrag.ui.Themes;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,10 +47,14 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         int themeno = new Settings(this).getTheme();
+        Log.i("Themer", "Themeno: " + themeno);
+        if (themeno > 2)
+            themeno = 1;
         Themes theme = Themes.values()[themeno];
         // Setting the theme before onCreate() sets the text color.
         Log.w("Themer", "ThemeBase: " + theme.name + "/#" + themeno);
-        Themer.setTheme(this, theme);
+//        Themer.setTheme(this, theme);
+        setTheme(theme.style);
 
         super.onCreate(savedInstanceState);
 
@@ -67,8 +70,8 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
         }
 
         // todo settheme
-        //Themer.setTheme(this, theme);
-//        setTheme();
+//        Themer.setTheme(this, theme);
+        setTheme(theme.style);
         //        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
     }
 

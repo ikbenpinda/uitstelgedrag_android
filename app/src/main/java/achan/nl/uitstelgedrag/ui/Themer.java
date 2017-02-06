@@ -39,7 +39,7 @@ public class Themer {
             case DARK:
                 Log.w("Themer", "Theme = Dark");
 //                unregisterLightListener();
-                if (currentTheme == null || currentTheme != DARK) {
+                if (/*currentTheme == null | */currentTheme != DARK) {
                     currentTheme = DARK;
                     new Settings(activity).setTheme(DARK.id);
                     activity.setTheme(DARK.style);
@@ -49,7 +49,7 @@ public class Themer {
             case LIGHT:
                 Log.w("Themer", "Theme = Light");
 //                unregisterLightListener();
-                if (currentTheme == null || currentTheme != LIGHT) {
+                if (currentTheme != LIGHT) {
                     currentTheme = LIGHT;
                     new Settings(activity).setTheme(LIGHT.id);
                     activity.setTheme(LIGHT.style);
@@ -60,10 +60,10 @@ public class Themer {
                 if (!listening) {
                     listening = true;
                     // register only once.
-                    manager = ((SensorManager) activity.getSystemService(activity.SENSOR_SERVICE));
-                    lightSensor = manager.getDefaultSensor(Sensor.TYPE_LIGHT);
-                    manager.unregisterListener(lightListener);
-                    manager.registerListener(lightListener, lightSensor, 2_500_000);
+//                    manager = ((SensorManager) activity.getSystemService(activity.SENSOR_SERVICE));
+//                    lightSensor = manager.getDefaultSensor(Sensor.TYPE_LIGHT);
+//                    manager.unregisterListener(lightListener);
+//                    manager.registerListener(lightListener, lightSensor, 2_500_000);
                 }
                 break;
         }
@@ -71,6 +71,7 @@ public class Themer {
 
     public static class LightListener extends LightSensorListener{
         public LightListener(Activity activity) {
+            super(activity);
             callback = (event) -> {
                 float lux = event.values[LightSensorListener.MEASURED_LUX];
                 Log.i("LightSensor", "Light sensor measured lux: " + lux);
