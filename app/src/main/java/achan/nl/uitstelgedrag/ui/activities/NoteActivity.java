@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -54,6 +55,7 @@ public class NoteActivity extends Base {
     Sensor              accelerometer;
     Vibrator            vibrator;
     Recorder            recorder;
+    MediaPlayer player;
 
     // region Camera intent code.
 
@@ -125,6 +127,7 @@ public class NoteActivity extends Base {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
 
+        player = new MediaPlayer();
         notes = new NoteGateway(this);
 
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -141,7 +144,7 @@ public class NoteActivity extends Base {
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
-        adapter = new NoteAdapter(notes.getAll(), this);
+        adapter = new NoteAdapter(notes.getAll(), this, player);
         notelist.setLayoutManager(manager);
         notelist.setAdapter(adapter);
 

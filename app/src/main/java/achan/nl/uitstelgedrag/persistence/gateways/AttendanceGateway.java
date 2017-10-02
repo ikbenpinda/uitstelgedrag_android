@@ -39,6 +39,7 @@ public class AttendanceGateway implements Repository<Timestamp> {
     }
 
     /**
+     * Note - this is from before I *cough* remembered *cough* SimpleDateFormat.
      * Returns the timestamp from an inserted timestamp.toString().
      * @param timestampstr
      * @return Timestamp a Timestamp object devoid of type or id!

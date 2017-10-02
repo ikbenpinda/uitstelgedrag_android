@@ -7,4 +7,10 @@
     <item android:id="@+id/settings_menuitem_checkforupdates"
           android:title="controleren op updates"
           app:showAsAction="never"/>
+    <item android:id="@+id/settings_menuitem_help"
+        android:title="help"
+        app:showAsAction="never"/>
+    <item android:id="@+id/settings_menuitem_about"
+        android:title="over"
+        app:showAsAction="never"/>
 </menu>

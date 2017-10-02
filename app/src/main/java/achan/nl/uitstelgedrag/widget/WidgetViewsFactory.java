@@ -55,7 +55,8 @@ public class WidgetViewsFactory implements WidgetService.RemoteViewsFactory{
         Task task = tasks.get(position);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_rowlayout);
-        views.setTextViewText(R.id.widget_id_textview, String.valueOf(task.id));
+        String title = !task.labels.isEmpty()? task.labels.get(0).title: "";
+        views.setTextViewText(R.id.widget_id_textview, title);
         views.setTextViewText(R.id.widget_desc_textview, task.description);
         Log.i("Widget", "View set to task(" + task.description + ")");
 

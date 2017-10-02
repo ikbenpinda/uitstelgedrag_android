@@ -6,8 +6,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
@@ -44,27 +47,23 @@ import butterknife.OnLongClick;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 public class TaskActivity extends Base {
 
 
-    @BindView(R.id.task_coord)
-    CoordinatorLayout coordlayout;
-    @BindView(R.id.AddTaskButton)
-    Button AddTaskButton;
-    @BindView(R.id.MainList)
-    TaskRecyclerView list;
-    @BindView(R.id.emptyListView)
-    TextView emptyView;
-    @BindView(R.id.TaskIsPlanned)
-    CheckBox planTaskCheckbox;
-    @BindView(R.id.imageButton)
-    ImageButton addLocationButton;
-    @BindView(R.id.TaskIsPlannedFor)
-    Spinner planTaskSpinner;
+    private static final int REQUEST_CODE = 1; // Arbitrary activity-identifying permission-request code.
+
+    @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
+    @BindView(R.id.AddTaskButton)       Button              AddTaskButton;
+    @BindView(R.id.MainList)            TaskRecyclerView    list;
+    @BindView(R.id.emptyListView)       TextView            emptyView;
+    @BindView(R.id.TaskIsPlanned)       CheckBox            planTaskCheckbox;
+    @BindView(R.id.imageButton)         ImageButton         addLocationButton;
+    @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
 //    @BindView(R.id.task_filter_spinner) Spinner           category_spinner;
-    @BindView(R.id.AddTaskCategoryAuto)
-    AutoCompleteTextView labelsview;
+    @BindView(R.id.AddTaskCategoryAuto) AutoCompleteTextView labelsview;
 
     AlertDialog waitingForLocationDialog;
 
@@ -199,6 +198,15 @@ public class TaskActivity extends Base {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
 
+        // Android 6.0 - Check permissions
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE);
+        }
+
         context = getApplicationContext();
         presenter = new TaskPresenterImpl(context);
         tasks = presenter.viewTasks();
@@ -302,6 +310,16 @@ public class TaskActivity extends Base {
         list.setEmptyView(emptyView);
 
 //        checkListSize();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length < 1){
+            // permission not granted
+            Log.wtf("Permissions", "Fatal permission not granted.");
+            System.exit(0);
+        }
     }
 
     public final int VIEW_LIST = 0;

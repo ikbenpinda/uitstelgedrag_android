@@ -119,7 +119,7 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //nuke(db);
         Migration m = database -> {
-            database.execSQL(CREATE + Locations.TABLE.describe());
+            //
         };
         m.migrate(db);
     }

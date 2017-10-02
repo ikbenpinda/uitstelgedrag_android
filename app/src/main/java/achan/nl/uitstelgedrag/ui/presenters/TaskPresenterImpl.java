@@ -45,7 +45,6 @@ public class TaskPresenterImpl implements TaskPresenter {
 
     @Override
     public List<Task> viewTasks() {
-
         return TaskGateway.sortByCreationDate(database.getAll());
     }
 
@@ -58,5 +57,20 @@ public class TaskPresenterImpl implements TaskPresenter {
     public Task viewTask(Task task) {
         Log.i("TaskPresenter", "Showing task!");
         return database.get(task.id);
+    }
+
+    @Override
+    public Location getCurrentLocation() {
+        return null;
+    }
+
+    @Override
+    public Location geocode(String address) {
+        return null;
+    }
+
+    @Override
+    public String reverseGeocode(Location location) {
+        return null;
     }
 }

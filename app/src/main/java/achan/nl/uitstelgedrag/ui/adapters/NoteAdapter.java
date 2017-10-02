@@ -45,9 +45,9 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEWTYPE_RECORDING = 2;
     private static final int VIEWTYPE_PHOTO = 3;
 
-    private SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     Context context;
     List<Note> notes;
+    private SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     private OnListChangedListener callback;
     public NoteRecordingAttachmentViewHolder lastCaller;
     private MediaPlayer player;
@@ -99,11 +99,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         View view;
         switch (viewType) {
             case VIEWTYPE_RECORDING:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_note_recording, parent, false);
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_recording, parent, false);
                 holder = new NoteRecordingAttachmentViewHolder(view, context);
                 break;
             case VIEWTYPE_PHOTO:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_recording, parent, false);
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_note_photo, parent, false);
                 holder = new NotePhotoAttachmentViewHolder(view, context);
                 break;
             case VIEWTYPE_NOTE:
@@ -300,51 +300,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-//    public void addPopupMenu(RecyclerView.ViewHolder holder, View view, Note note, int position){
-//        view.setOnClickListener(v ->{
-//            PopupMenu popup = new PopupMenu(context, v);
-//            MenuInflater inflater = popup.getMenuInflater();
-//            inflater.inflate(R.menu.popup, popup.getMenu());
-//            popup.setOnMenuItemClickListener(item -> {
-//                switch (item.getItemId()){
-//                    case R.id.popup_edit:
-//                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
-//                        alertBuilder.setTitle("Item bijwerken");
-//                        alertBuilder.setView(R.layout.dialog_edit);
-//                        alertBuilder.setNegativeButton("Annuleren", null);
-//                        alertBuilder.setPositiveButton("Opslaan",
-//                                (dialog, which) -> Snackbar.make(v, "Item bijgewerkt!", Snackbar.LENGTH_SHORT).show());
-//
-//                        // depending on attachment
-//                        // edit title/content
-//                        // open camera
-//                        // start recording
-//                        //
-//                        // feedback edit succ
-//                        alertBuilder.show();
-//                        break;
-//                    case R.id.popup_delete:
-//                        // Calling getAdapterPosition after changing the list causes an IndexOutOfBoundsException.
-//                        int adapterposition = holder.getAdapterPosition();
-//                        removeItem(adapterposition);
-//                        Snackbar.make(v, "Item verwijderd! ", Snackbar.LENGTH_SHORT)
-//                                .setAction("Ongedaan maken", v1 -> {addItem(adapterposition, note);
-//                                })
-//                                .setCallback(new Snackbar.Callback() {
-//                                    @Override
-//                                    public void onDismissed(Snackbar snackbar, int event) {
-//                                        super.onDismissed(snackbar, event);
-//                                        new NoteGateway(context).delete(note);// note - log relationship.
-//                                    }
-//                                }).show();
-//                        break;
-//                }
-//                return true;
-//            });
-//            popup.show();
-//        });
-//    }
-
     @Override
     public int getItemCount() {
         return notes.size();
@@ -400,14 +355,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this, itemView);
             this.context = context;
         }
-    }
-
-    /**
-     * Callback for list changes.
-     */
-    public interface OnListChangedListener {
-
-        void onListChanged();
     }
 
     /**

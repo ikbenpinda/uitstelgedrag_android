@@ -17,6 +17,8 @@ public class Application extends MultiDexApplication {
 
         // todo handle singleton initialization
         // todo handle time-based or async stuff that should happen on startup/service communication
+
+        // database, settings, hardwareservices
     }
 
 }

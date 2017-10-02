@@ -34,7 +34,9 @@ public class Labels {
         if (label.id > 0)
             values.put(ID.name, label.id);
         values.put(TITLE.name, label.title);
-        values.put(TASK.name, task.id);
+
+        if (task != null)
+            values.put(TASK.name, task.id);
 
         return values;
     }
