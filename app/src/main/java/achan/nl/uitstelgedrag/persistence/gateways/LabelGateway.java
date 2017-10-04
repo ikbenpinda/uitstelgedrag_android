@@ -32,6 +32,17 @@ public class LabelGateway {
         return Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id)).get(0);
     }
 
+    /**
+     * Tries to find the given label by its title in the database.
+     * Returns null if nothing was found, or the item if it was.
+     * @param label the label to look for.
+     */
+    public Label find(Label label){
+        List<Label> results = Labels.fromCursor(helper.query(Labels.TABLE, Labels.TITLE, label.title));
+        return results.isEmpty()?
+                null : results.get(0);
+    }
+
     public List<Label> getAll() {
         Cursor cursor = database.rawQuery("SELECT * FROM " + Labels.TABLE, null);
         List<Label> labels = Labels.fromCursor(cursor);
@@ -39,10 +50,10 @@ public class LabelGateway {
         return labels;
     }
 
-    public Label insert(Task task, Label label) {
-        label.id = (int) database.insert(Labels.TABLE.name, null, Labels.toValues(task, label));
-        if (label.location != null && label.id > 0)
-            insertLocation(label, label.location);
+    public Label insert(Label label) {
+        label.id = (int) database.insert(Labels.TABLE.name, null, Labels.toValues(label));
+//        if (label.location != null && label.id > 0) todo - not implemented yet.
+//            insertLocation(label, label.location);
         return label;
     }
 
@@ -51,9 +62,9 @@ public class LabelGateway {
         database.insert(Locations.TABLE.name, null, Locations.toValues(label, location));
     }
 
-    public void update(Task task, Label label) {
+    public void update(Label label) {
         delete(label);
-        insert(task, label);
+        insert(label);
     }
 
     public boolean delete(Label label) {

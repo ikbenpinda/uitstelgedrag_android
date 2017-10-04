@@ -38,9 +38,6 @@ public class Tasks{
 
         values.put(DESCRIPTION.name, task.description);
 
-        if (!task.labels.isEmpty()) {
-            Log.w("Tasks", "Labels will not be inserted, use a seperate query!");
-        }
         if (task.createdOn != null)
             values.put(CREATED_ON.name, Timestamp.formatDate(task.createdOn));
         if (task.deadline != null)

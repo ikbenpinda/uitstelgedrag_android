@@ -15,6 +15,7 @@ import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Notes;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks_Labels;
 import achan.nl.uitstelgedrag.persistence.migrations.Migration;
 
 /**
@@ -25,7 +26,7 @@ import achan.nl.uitstelgedrag.persistence.migrations.Migration;
 public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
     public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int     DATABASE_SCHEMA_VERSION = 24;
+    public static final int     DATABASE_SCHEMA_VERSION = 28;
 
     public static final String CREATE = "CREATE TABLE IF NOT EXISTS ";
 
@@ -37,6 +38,7 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
     private final Table[] tables = new Table[]{
             Tasks.TABLE,
             Labels.TABLE,
+            Tasks_Labels.TABLE,
             Attendances.TABLE,
             Notes.TABLE,
             Attachments.TABLE,
@@ -119,7 +121,8 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //nuke(db);
         Migration m = database -> {
-            //
+            Log.w("OpenHelper", "Migrations are not yet supported.");
+            nuke(db);
         };
         m.migrate(db);
     }

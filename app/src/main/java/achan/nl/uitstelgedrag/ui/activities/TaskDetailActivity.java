@@ -46,6 +46,7 @@ public class TaskDetailActivity extends Base {
         if (t.deadline != null)
             taskdetailDeadline.setText(Timestamp.formatDate(t.deadline));
         if (!t.labels.isEmpty())
+            taskdetailLabelsLayout.removeAllViews();
             for (Label label : t.labels) {
                 TextView view = new TextView(this);
                 view.setText(label.title);

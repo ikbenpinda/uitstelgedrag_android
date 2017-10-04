@@ -254,34 +254,10 @@ public class TaskActivity extends Base {
         label2.title = "werk";
         Label label3 = new Label();
         label3.title = "school";
-//        Label label4 = new Label();
-//        label4.title = "oma";
-//        Label label5 = new Label();
-//        label5.title = "pap";
-//        Label label6 = new Label();
-//        label6.title = "mam";
-//        Label label7 = new Label();
-//        label7.title = "familie";
-//        Label label8 = new Label();
-//        label8.title = "vrienden";
-//        Label label9 = new Label();
-//        label9.title = "collegas";
-//        Label label10 = new Label();
-//        label10.title = "Huidige locatie";
-//        Label label11 = new Label();
-//        label11.title = "Nieuwe locatie";
 
         labels.add(label1);
         labels.add(label2);
         labels.add(label3);
-//        labels.add(label4);
-//        labels.add(label5);
-//        labels.add(label6);
-//        labels.add(label7);
-//        labels.add(label8);
-//        labels.add(label9);
-//        labels.add(label10);
-//        labels.add(label11);
 
         categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, labels);
 
@@ -441,18 +417,18 @@ public class TaskActivity extends Base {
         // Check all labels for location.
         // If matches, use those instead.
         List<Task> new_tasks = new ArrayList<>();
-        String[] unprocessedLabels = labelsview.getText().toString().split(",");
         List<Label> processedLabels = new ArrayList<>();
+        String[] unprocessedLabels = labelsview.getText().toString().split(",");
         for (String unprocessedLabel : unprocessedLabels) {
             Label processedLabel = new Label();
             processedLabel.title = unprocessedLabel;
 
-            for (Label label : allLabels) {
-                if (label.title.equals(unprocessedLabel))
-                    processedLabel = label;
-                else
-                    labeldb.insert(null, label);
-            }
+//            for (Label label : allLabels) {
+//                if (label.title.equals(unprocessedLabel))
+//                    processedLabel = label;
+//                else
+//                    labeldb.insert(label);
+//            }
 
             processedLabels.add(processedLabel);
         }
@@ -467,6 +443,11 @@ public class TaskActivity extends Base {
             Task task = new Task(description);
             if (!labels.isEmpty()) // note - Labels are optional, descriptions are not.
                 for (Label label : processedLabels) {
+                    Log.i("TaskActivity", "Adding processed labels...");
+                    Log.i("TaskActivity", "label id: " + label.id);
+
+//                    label.id = labeldb.
+
                     task.labels.add(label);
 //                    TextView labelView = new TextView(context);
 //                    labelView.setBackgroundColor(Color.argb(0, 0, 0, 255));
@@ -484,6 +465,7 @@ public class TaskActivity extends Base {
 
             task.deadline = deadline;
 
+            // fill buffer with new tasks
             new_tasks.add(task);
 
             if (new_tasks.size() > 1){
@@ -505,7 +487,7 @@ public class TaskActivity extends Base {
 
         for (Task task : new_tasks) {
             adapter.addItem(adapter.getItemCount(), task);
-            presenter.addTask(task);
+            presenter.addTask(task); // FIXME: 3-10-2017 - SQLiteConstraintException: UNIQUE constraint failed.
         }
 
 //        filterItems();

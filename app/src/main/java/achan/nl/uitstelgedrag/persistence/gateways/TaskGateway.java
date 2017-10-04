@@ -17,6 +17,7 @@ import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks_Labels;
 
 /**
  * Created by Etienne on 17-4-2016.
@@ -24,12 +25,17 @@ import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
 public class TaskGateway implements Repository<Task> {
 
     Context context;
+    UitstelgedragOpenHelper helper;
     SQLiteDatabase database;
-    List<Task> cache;
+
+    // Cascade label operations within this gateway to a separate gateway.
+    LabelGateway labelGateway;
 
     public TaskGateway(Context context) {
         this.context = context;
-        this.database = new UitstelgedragOpenHelper(context, null).getWritableDatabase();
+        this.helper =  new UitstelgedragOpenHelper(context, null);
+        this.database = helper.getWritableDatabase();
+        labelGateway = new LabelGateway(context);
     }
 
     /**
@@ -70,8 +76,8 @@ public class TaskGateway implements Repository<Task> {
         while (cursor.moveToNext()) {
             Task task = Tasks.fromCursor(cursor);
             task.labels = getLabels(task);
-            tasks.add(task); // TODO: 11-4-2016 category support
-            Log.i("UITSTELGEDRAG", "OpenHelper.getAll(): cursorPosition:" + cursor.getPosition() + ", Added task: " + task.id + ".");
+            tasks.add(task);
+            Log.i("TaskGateway", "OpenHelper.getAll(): cursorPosition:" + cursor.getPosition() + ", Added task: " + task.id + ".");
         }
         cursor.close();
         return tasks;
@@ -80,42 +86,64 @@ public class TaskGateway implements Repository<Task> {
     @Override
     public Task insert(Task task) {
         task.id = (int) database.insert(Tasks.TABLE.name, null, Tasks.toValues(task));
-        if (!task.labels.isEmpty())
+
+        if (!task.labels.isEmpty()) {
+            task.labels.stream().forEach(label -> Log.i("TaskGateway", "Labels found:" + label.title) );
+
             for (Label label : task.labels) {
-                label.id = (int) database.insert(Labels.TABLE.name, null, Labels.toValues(task, label));
-                if (label.location != null)
-                    database.insert(Locations.TABLE.name, null, Locations.toValues(label, label.location));
+
+                // Check if label exists
+                Label result = labelGateway.find(label);
+                if (result == null)
+                    label = labelGateway.insert(label);
+                else
+                    label = result;
+
+                // Add pairing.
+                Log.i("TaskGateway","Adding pairing for task(#"+task.id+") with label "+label.title+"(#"+label.id +")");
+                database.insert(Tasks_Labels.TABLE.name, null, Tasks_Labels.toValues(task, label));
+
+//                if (label.location != null) todo - not implemented yet.
+//                    database.insert(Locations.TABLE.name, null, Locations.toValues(label, label.location));
             }
-        Log.i("UITSTELGEDRAG", "Added task " + task.id + ":" + task.description);
+        }
+
+        // Returns the task with the id set.
         return task;
     }
 
     @Override
     public void update(Task task) {
         database.update(Tasks.TABLE.name, Tasks.toValues(task), "id = ?", new String[]{"" + task.id});
-        Log.i("UITSTELGEDRAG", "Updated task " + task.id + ":" + task.description);
+        Log.i("TaskGateway", "Updated task " + task.id + ":" + task.description);
     }
 
     @Override
     public boolean delete(Task task) {
         database.delete(Tasks.TABLE.name, "id = ?", new String[]{"" + task.id});
-        Log.i("UITSTELGEDRAG", "Deleted task " + task.id + ":" + task.description);
+        Log.i("TaskGateway", "Deleted task " + task.id + ":" + task.description);
         return true;
     }
 
     private List<Label> getLabels(Task task){
-        Log.i("TaskGateway", "Querying labels for task " + task.id);
-        String labelQuery = "SELECT * FROM " + Labels.TABLE + " WHERE " + Labels.TASK + " = " + task.id;
-        Cursor labelCursor = database.rawQuery(labelQuery, null);
 
+        Log.i("TaskGateway", "Querying labels for task " + task.id);
+        List<int[]> label_ids = Tasks_Labels.fromCursor(helper.query(Tasks_Labels.TABLE, Tasks_Labels.TASK_ID, "" + task.id));
         List<Label> labels = new ArrayList<>();
-        for (Label label : Labels.fromCursor(labelCursor)){
-            String locationQuery = "SELECT * FROM " + Locations.TABLE + " WHERE " + Locations.LABEL_ID + " = " + label.id;
-            Cursor locationCursor = database.rawQuery(locationQuery, null);
-            label.location = Locations.fromCursor(locationCursor);
-            Log.i("TaskGateway", "Location: lon:" + label.location.getLongitude() + " / lat:" + label.location.getLatitude());
-            labels.add(label);
+        for (int[] id : label_ids) {
+            labels.add(Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id[Tasks_Labels.DATA_LABEL_ID])).get(0));
         }
+//        String labelQuery = "SELECT * FROM " + Labels.TABLE + " WHERE " + Labels.TASK + " = " + task.id;
+//        Cursor labelCursor = database.rawQuery(labelQuery, null);
+
+        // todo - not implemented yet.
+//        for (Label label : Labels.fromCursor(labelCursor)){
+//            String locationQuery = "SELECT * FROM " + Locations.TABLE + " WHERE " + Locations.LABEL_ID + " = " + label.id;
+//            Cursor locationCursor = database.rawQuery(locationQuery, null);
+//            label.location = Locations.fromCursor(locationCursor);
+//            Log.i("TaskGateway", "Location: lon:" + label.location.getLongitude() + " / lat:" + label.location.getLatitude());
+//            labels.add(label);
+//        }
 
         return labels;
     }

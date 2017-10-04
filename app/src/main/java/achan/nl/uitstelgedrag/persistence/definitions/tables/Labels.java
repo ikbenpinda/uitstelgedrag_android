@@ -18,25 +18,23 @@ import achan.nl.uitstelgedrag.persistence.definitions.Types;
  */
 public class Labels {
 
+    public static final int DEFAULT_ID_VALUE = 0;
+
     public static final Column ID    = new Column("id", Types.INTEGER, Constraints.PRIMARY_KEY_AUTOINCREMENT);
     public static final Column TITLE = new Column("title", Types.TEXT, Constraints.NOT_NULL);
-    public static final Column TASK  = new Column("task_id", Types.TEXT, Constraints.FOREIGN_KEY_REFERENCES(Tasks.TABLE, Tasks.ID));
-    public static final Table  TABLE = new Table("Labels", ID, TITLE, TASK);
+    public static final Table  TABLE = new Table("Labels", ID, TITLE);
 
     /**
      * Fills a ContentValues object with the given model.
      * @param label
      * @return
      */
-    public static ContentValues toValues(Task task, Label label){
+    public static ContentValues toValues(Label label){
         ContentValues values = new ContentValues();
 
-        if (label.id > 0)
+        if (label.id > DEFAULT_ID_VALUE)
             values.put(ID.name, label.id);
         values.put(TITLE.name, label.title);
-
-        if (task != null)
-            values.put(TASK.name, task.id);
 
         return values;
     }

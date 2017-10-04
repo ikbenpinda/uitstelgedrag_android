@@ -8,6 +8,7 @@ import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.persistence.Repository;
+import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 
 /**
@@ -15,7 +16,9 @@ import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
  */
 public class TaskPresenterImpl implements TaskPresenter {
 
-    Repository<Task> database;
+    // Note - there is no gateway for labels because they
+    // are but extra data/part of to other entities.
+    TaskGateway database;
     Context    context;
 
     public TaskPresenterImpl(Context context) {
