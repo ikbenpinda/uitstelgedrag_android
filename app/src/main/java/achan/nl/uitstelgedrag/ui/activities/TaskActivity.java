@@ -18,22 +18,27 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import achan.nl.uitstelgedrag.ui.adapters.LabelAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
@@ -62,7 +67,7 @@ public class TaskActivity extends Base {
     @BindView(R.id.imageButton)         ImageButton         addLocationButton;
     @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
-//    @BindView(R.id.task_filter_spinner) Spinner           category_spinner;
+    @BindView(R.id.task_filter_spinner) Spinner           category_spinner;
     @BindView(R.id.AddTaskCategoryAuto) AutoCompleteTextView labelsview;
 
     AlertDialog waitingForLocationDialog;
@@ -94,7 +99,7 @@ public class TaskActivity extends Base {
     // Chndwn
     char LOCATION_SIGN = '@';
     char LABEL_SIGN = '#';
-    String DELIMITER_SIGN = ",";
+    String DELIMITER_SIGN = ","; // note '\n' as alternative?
     int MIN_INPUT = 2;
 
     TextWatcher locationLabelListener = new TextWatcher() {
@@ -199,11 +204,15 @@ public class TaskActivity extends Base {
         ButterKnife.bind(this);
 
         // Android 6.0 - Check permissions
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
+        if (
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                            android.Manifest.permission.ACCESS_FINE_LOCATION
+            },
                     REQUEST_CODE);
         }
 
@@ -245,20 +254,14 @@ public class TaskActivity extends Base {
                 .setView(waitingForLocationsDialogView)
                 .create();
 
-        // CATEGORY(LOCATION) - todo - can also be a list. - currently mocked, fixme.
-        List<Label> labels = new ArrayList<>();
+        setFilterOptions();
 
-        Label label1 = new Label();
-        label1.title = "thuis";
-        Label label2 = new Label();
-        label2.title = "werk";
-        Label label3 = new Label();
-        label3.title = "school";
-
-        labels.add(label1);
-        labels.add(label2);
-        labels.add(label3);
-
+        // note - Applies to the category EditText at the bottom of the layout.
+        Label home = new Label(), work = new Label(), school = new Label();
+        home.title = "thuis";
+        work.title = "werk";
+        school.title = "school";
+        List<Label> labels = Arrays.asList(home, work, school);
         categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, labels);
 
         labelsview.setAdapter(categoryAdapter);
@@ -309,6 +312,29 @@ public class TaskActivity extends Base {
 //            listSwitcher.setDisplayedChild(VIEW_EMPTY);
 //        else
 //            listSwitcher.setDisplayedChild(VIEW_LIST); // fixme - inconsistency detected
+    }
+
+    private void setFilterOptions(){
+        HashSet labels = new HashSet();
+        labels.addAll(labeldb.getAll());
+
+        List<Label> filteredList = new ArrayList<>();
+        Label label = new Label();
+        label.title = "Alles"; // fixme dynamic language, code smell
+        filteredList.add(0, label);
+        filteredList.addAll(labels);
+
+        category_spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, filteredList));
+
+        // todo - optional: caching?
+
+        // todo - auto-set default label to location if needed
+
+
+    }
+
+    private void filterTasks(){
+
     }
 
     private void filterItems(){
