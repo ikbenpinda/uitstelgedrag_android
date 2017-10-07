@@ -10,4 +10,14 @@ public class Label {
 
     // Note - Subclassing Label just makes things harder without any substantial gain.
     public android.location.Location location;
+
+    @Override
+    public String toString() {
+        return title;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return ((Label) obj).title.equals(title);
+    }
 }

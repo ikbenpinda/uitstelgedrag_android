@@ -18,6 +18,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -56,7 +57,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class TaskActivity extends Base {
 
-
     private static final int REQUEST_CODE = 1; // Arbitrary activity-identifying permission-request code.
 
     @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
@@ -67,7 +67,7 @@ public class TaskActivity extends Base {
     @BindView(R.id.imageButton)         ImageButton         addLocationButton;
     @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
-    @BindView(R.id.task_filter_spinner) Spinner           category_spinner;
+    @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
     @BindView(R.id.AddTaskCategoryAuto) AutoCompleteTextView labelsview;
 
     AlertDialog waitingForLocationDialog;
@@ -90,11 +90,6 @@ public class TaskActivity extends Base {
     SmartLocation smartLocation;
     Location current;
     Address current_address;
-
-    /**
-     * Keeps the labels in cache until a task is added or all fields are cleared.
-     */
-    List<Label> cachedlabels;
 
     // Chndwn
     char LOCATION_SIGN = '@';
@@ -226,26 +221,27 @@ public class TaskActivity extends Base {
         labeldb = new LabelGateway(this);
         allLabels = labeldb.getAll();
 
-//        category_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                if (category_spinner.getSelectedItem().toString().equals("alles")) {
-//                    Log.w("FILTERS", "Filtering enabled!");
-//                    filterByLocation = false;
-//                }
-//                else {
-//                    Log.w("FILTERS", "Filtering disabled!");
-//                    filterByLocation = true;
-//                }
-//
-//                filterItems();
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
+        category_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Label selected = (Label)category_spinner.getSelectedItem();
+                Log.i("FILTERS", "onItemSelected: " + selected.toString());
+
+                if (selected.title.equals("Alles")) { // todo- architect a default case.
+                    filterTasks(null);
+                }
+                else {
+                    filterTasks(selected);
+                }
+
+                // todo - filter by location.
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         // Prepares dialogs.
         final View waitingForLocationsDialogView = LayoutInflater.from(this).inflate(R.layout.dialog_waitingforlocation, null);
@@ -274,16 +270,13 @@ public class TaskActivity extends Base {
 //        });
 
 
-//        filterItems();
         adapter = new TaskAdapter(tasks, context);
-        adapter.setOnListChangedListener(() -> checkListSize());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
         list.setEmptyView(emptyView);
 
-//        checkListSize();
     }
 
     @Override
@@ -296,34 +289,39 @@ public class TaskActivity extends Base {
         }
     }
 
-    public final int VIEW_LIST = 0;
-    public final int VIEW_EMPTY = 1;
-
-    private void checkListSize() {
-
-        // FIXME set view _before_ adding shit.
-
-//        if (tasks.isEmpty())
-//            listSwitcher.setDisplayedChild(VIEW_EMPTY);
-//        else
-//            listSwitcher.setDisplayedChild(VIEW_LIST); // fixme - inconsistency detected
-    }
-
     private void setFilterOptions(){
 
         List<Label> spinner_labels = new ArrayList<>();
 
-        Label label = new Label(); // todo - sensibly presets?
+        Label label = new Label(); // todo - sensible presets?
         label.title = "Alles"; // fixme dynamic language, code smell
 
         spinner_labels.add(0, label);
         spinner_labels.addAll(allLabels);
-
-        category_spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels));
+        ArrayAdapter<Label> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        category_spinner.setAdapter(adapter);
     }
 
-    private void filterTasks(){
+    private void filterTasks(Label label){//// FIXME: 7-10-2017 list stays outdated
+        List<Task> results = new ArrayList<>();
+        if (label == null){
+            results = presenter.viewTasks();
+        }
+        else {
+            for (Task task : presenter.viewTasks()) {
+                Log.i("Filter", "Labels for task:" + task.labels.get(0).toString());
+                if (task.labels.contains(label))
+                    results.add(task);
+            }
+        }
 
+        for (Task task : results){
+            Log.i("Filter", "Results: " + task.labels.get(0));
+        }
+
+        adapter.tasks = results;
+        list.getAdapter().notifyDataSetChanged(); // FIXME/VERIFY - More efficient solutions?
     }
 
     private void filterItems(){
