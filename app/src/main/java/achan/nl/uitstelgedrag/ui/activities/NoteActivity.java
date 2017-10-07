@@ -1,5 +1,6 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
+import android.Manifest;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,8 +12,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +41,8 @@ import achan.nl.uitstelgedrag.ui.adapters.NoteAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 public class NoteActivity extends Base {
 
     public static final int LIGHTSENSOR_SAMPLING_RATE_MS   = 500;
@@ -44,6 +50,7 @@ public class NoteActivity extends Base {
     public static final int ACCELEROMETER_STATE_LANDSCAPE  = 1;
     public static final int ACCELEROMETER_STATE_PORTRAIT   = 2;
     public static final int ACCELEROMETER_STATE_DOWNWARDS  = 3;
+    private static final int REQUEST_CODE = 1;
 
     Repository<Note> notes;
     NoteAdapter adapter;
@@ -127,6 +134,26 @@ public class NoteActivity extends Base {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
 
+        // Android 6.0 - Check permissions
+        if (
+                // VERIFY - Needed at startup of application or only here?
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) != PERMISSION_GRANTED
+                ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE);
+        }
+
         player = new MediaPlayer();
         notes = new NoteGateway(this);
 
@@ -187,6 +214,16 @@ public class NoteActivity extends Base {
 //        sensors.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_FASTEST);
 //        sensors.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         Log.e("NoteActivity", "Resumed activity.");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length < 1){
+            // permission not granted
+            Log.wtf("Permissions", "Fatal permission not granted.");
+            System.exit(0);
+        }
     }
 
     private void enableScreen() {
