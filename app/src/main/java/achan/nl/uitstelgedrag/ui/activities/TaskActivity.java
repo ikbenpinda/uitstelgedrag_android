@@ -257,12 +257,7 @@ public class TaskActivity extends Base {
         setFilterOptions();
 
         // note - Applies to the category EditText at the bottom of the layout.
-        Label home = new Label(), work = new Label(), school = new Label();
-        home.title = "thuis";
-        work.title = "werk";
-        school.title = "school";
-        List<Label> labels = Arrays.asList(home, work, school);
-        categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, labels);
+        categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, allLabels);
 
         labelsview.setAdapter(categoryAdapter);
         labelsview.setOnFocusChangeListener((view, focused) -> {
