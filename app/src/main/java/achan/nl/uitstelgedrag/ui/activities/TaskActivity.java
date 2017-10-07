@@ -297,7 +297,7 @@ public class TaskActivity extends Base {
         label.title = "Alles"; // fixme dynamic language, code smell
 
         spinner_labels.add(0, label);
-        spinner_labels.addAll(allLabels);
+        spinner_labels.addAll(labeldb.getAll());
         ArrayAdapter<Label> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         category_spinner.setAdapter(adapter);
@@ -501,6 +501,7 @@ public class TaskActivity extends Base {
         for (Task task : new_tasks) {
             adapter.addItem(adapter.getItemCount(), task);
             presenter.addTask(task); // FIXME: 3-10-2017 - SQLiteConstraintException: UNIQUE constraint failed.
+            setFilterOptions();
         }
 
 //        filterItems();
