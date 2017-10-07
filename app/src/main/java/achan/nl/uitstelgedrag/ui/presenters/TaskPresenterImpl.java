@@ -29,6 +29,7 @@ public class TaskPresenterImpl implements TaskPresenter {
     @Override
     public Task addTask(Task task) {
         Log.i("TaskPresenter", "Added task!");
+        task.labels.forEach(label -> {label.title = label.title.trim().toLowerCase();});
         return database.insert(task);
     }
 
