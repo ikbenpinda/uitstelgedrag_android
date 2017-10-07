@@ -315,22 +315,16 @@ public class TaskActivity extends Base {
     }
 
     private void setFilterOptions(){
-        HashSet labels = new HashSet();
-        labels.addAll(labeldb.getAll());
 
-        List<Label> filteredList = new ArrayList<>();
-        Label label = new Label();
+        List<Label> spinner_labels = new ArrayList<>();
+
+        Label label = new Label(); // todo - sensibly presets?
         label.title = "Alles"; // fixme dynamic language, code smell
-        filteredList.add(0, label);
-        filteredList.addAll(labels);
 
-        category_spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, filteredList));
+        spinner_labels.add(0, label);
+        spinner_labels.addAll(allLabels);
 
-        // todo - optional: caching?
-
-        // todo - auto-set default label to location if needed
-
-
+        category_spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels));
     }
 
     private void filterTasks(){
