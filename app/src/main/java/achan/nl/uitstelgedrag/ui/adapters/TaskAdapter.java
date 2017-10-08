@@ -123,18 +123,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             for (Label label : task.labels) {
                 TextView labelsview = new TextView(context);
                 labelsview.setText(label.title);
-                labelsview.setTextColor(0xFF4081FF);
+                labelsview.setTextColor(0xFF4081FF); // TODO: 8-10-2017 Dynamic Palette colors.
                 holder.labels.addView(labelsview);
             }
         }
+
+        // Opens the detail view for this task.
         holder.view.setOnClickListener(v1 -> {
             Intent intent = new Intent(context, TaskDetailActivity.class);
             intent.putExtra("task_id", task.id);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
+
+        // Opens a popupmenu when a task is held.
         holder.view.setOnLongClickListener(v -> {
-            PopupMenu popup = new PopupMenu(context, v);
+            PopupMenu popup = new PopupMenu(v.getContext(), v);
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case R.id.popup_edit:

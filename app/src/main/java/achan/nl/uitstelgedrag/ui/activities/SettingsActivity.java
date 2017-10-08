@@ -57,7 +57,7 @@ public class SettingsActivity extends Base { // todo sharedpreferences
         //if current theme is current theme, do nothing
         //else, change.
 
-        Themes theme_current = settings.getTheme() < 2? LIGHT : DARK;
+        Themes theme_current = settings.getTheme() == 0? LIGHT : DARK;
         themeSpinner.setSelection(theme_current.id);
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -67,24 +67,26 @@ public class SettingsActivity extends Base { // todo sharedpreferences
 //                if(themeSpinner.getSelectedItemPosition() == theme_current.id)
 //                    return;
 
-                // Theme will be set so the activity doesn't have to be restarted.
+                boolean changed = false;
+
                 Log.i("Settings", "Changed theme! Selector value: " + themeSpinner.getSelectedItemPosition());
                 if (themeSpinner.getSelectedItem().toString().equals("light")) {
 //                    settings.setTheme(LIGHT.id);
-                    Themer.setTheme(activity, LIGHT);
+                    changed = Themer.setTheme(activity, LIGHT);
                     Log.i("Settings", "Changed theme to light theme.");
                 }
                 else if (themeSpinner.getSelectedItem().toString().equals("dark")){
 //                    settings.setTheme(DARK.id);
-                    Themer.setTheme(activity, DARK);
+                    changed = Themer.setTheme(activity, DARK);
                     Log.i("Settings", "Changed theme to dark theme.");
                 } else {
 //                    settings.setTheme(AUTO.id);
-                    Themer.setTheme(activity, AUTO);
+                    changed = Themer.setTheme(activity, AUTO);
                     Log.i("Settings", "Changed theme to auto theme.");
                 }
 
-//                recreate(); note - causes loop
+                if (changed)
+                    recreate(); // note - causes loop
             }
 
             @Override
@@ -103,7 +105,7 @@ public class SettingsActivity extends Base { // todo sharedpreferences
 //        Log.i("Settings", "Gestures " + state);
 //    }
 
-    @OnClick(R.id.settings_wipe_database_button) void wipeDatebase(){
+    @OnClick(R.id.settings_wipe_database_button) void wipeDatabase(){
         new AlertDialog.Builder(context)
                 .setTitle("Verwijder alle gegevens")
                 .setMessage("Weet je het zeker?")

@@ -71,7 +71,7 @@ public abstract class Base extends AppCompatActivity implements Decoratable {
 
         // todo settheme
 //        Themer.setTheme(this, theme);
-        setTheme(theme.style);
+        setTheme(theme.style); //verify - needed?
         //        toolbar.setPopupTheme(theme == R.style.AppTheme_Light? R.style.AppTheme_AppBarOverlay_Light: R.style.AppTheme_AppBarOverlay);
     }
 

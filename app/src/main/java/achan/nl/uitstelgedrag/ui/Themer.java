@@ -30,22 +30,13 @@ public class Themer {
      * Themes the given activity with the right theme.
      * @param activity the superclass of the activity to theme(e.g. Base).
      * @param theme See Base.Themes.
+     * @return true if the theme has been changed.
      */
-    public static void setTheme(Activity activity, Themes theme){
+    public static boolean setTheme(Activity activity, Themes theme){
 
 //        lightListener = new LightListener(activity);
 
         switch (theme) {
-            case DARK:
-                Log.w("Themer", "Theme = Dark");
-//                unregisterLightListener();
-                if (/*currentTheme == null | */currentTheme != DARK) {
-                    currentTheme = DARK;
-                    new Settings(activity).setTheme(DARK.id);
-                    activity.setTheme(DARK.style);
-//                    activity.recreate();
-                }
-                break;
             case LIGHT:
                 Log.w("Themer", "Theme = Light");
 //                unregisterLightListener();
@@ -53,12 +44,25 @@ public class Themer {
                     currentTheme = LIGHT;
                     new Settings(activity).setTheme(LIGHT.id);
                     activity.setTheme(LIGHT.style);
+                    return true;
+//                    activity.recreate();
+                }
+                break;
+            case DARK:
+                Log.w("Themer", "Theme = Dark");
+//                unregisterLightListener();
+                if (currentTheme != DARK) {
+                    currentTheme = DARK;
+                    new Settings(activity).setTheme(DARK.id);
+                    activity.setTheme(DARK.style);
+                    return true;
 //                    activity.recreate();
                 }
                 break;
             case AUTO:
                 if (!listening) {
                     listening = true;
+                    return true;
                     // register only once.
 //                    manager = ((SensorManager) activity.getSystemService(activity.SENSOR_SERVICE));
 //                    lightSensor = manager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -67,6 +71,8 @@ public class Themer {
                 }
                 break;
         }
+
+        return false;
     };
 
     public static class LightListener extends LightSensorListener{

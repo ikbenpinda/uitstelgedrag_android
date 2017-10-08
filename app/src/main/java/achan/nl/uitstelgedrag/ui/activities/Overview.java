@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,8 +36,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 public class Overview extends Base {
 
+    private static final int REQUEST_CODE = 1;
 
     @BindView(R.id.overview_coord_layout)  CoordinatorLayout coordinatorLayout;
     @BindView(R.id.bottomsheet)            View         bottomsheet;
@@ -68,6 +73,15 @@ public class Overview extends Base {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+
+        // Android 6.0 - Check permissions
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE);
+        }
 
         context = getApplicationContext();
         presenter = new TaskPresenterImpl(context);
@@ -159,7 +173,7 @@ public class Overview extends Base {
      }
 
      @OnClick(R.id.CheckoutButton) void checkOut(View v){
-         Timestamp         checkout = new Timestamp(Timestamp.DEPARTURE);
+         Timestamp checkout = new Timestamp(Timestamp.DEPARTURE);
          String timestampstr = "Uitgecheckt om " + checkout.hours + ":" + checkout.minutes + ".";
          Snackbar.make(v, timestampstr, Snackbar.LENGTH_SHORT).show();
          attendancePresenter.checkOut(checkout);
