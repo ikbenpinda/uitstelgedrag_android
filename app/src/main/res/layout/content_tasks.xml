@@ -17,8 +17,7 @@
     <Spinner
         android:id="@+id/task_filter_spinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/task_filters"/>
+        android:layout_height="wrap_content"/>
 
         <achan.nl.uitstelgedrag.ui.views.TaskRecyclerView
             android:id="@+id/MainList"
@@ -70,9 +69,10 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:id="@+id/til_labelview">
 
-                <AutoCompleteTextView
+                <android.support.v7.widget.AppCompatMultiAutoCompleteTextView
                     android:id="@+id/AddTaskCategoryAuto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -68,7 +70,7 @@ public class TaskActivity extends Base {
     @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
     @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
-    @BindView(R.id.AddTaskCategoryAuto) AutoCompleteTextView labelsview;
+    @BindView(R.id.AddTaskCategoryAuto) AppCompatMultiAutoCompleteTextView labelsview;
 
     AlertDialog waitingForLocationDialog;
 
@@ -91,7 +93,7 @@ public class TaskActivity extends Base {
     Location current;
     Address current_address;
 
-    // Chndwn
+    // Note- provisional implementation of the Chandown engine
     char LOCATION_SIGN = '@';
     char LABEL_SIGN = '#';
     String DELIMITER_SIGN = ","; // note '\n' as alternative?
@@ -114,6 +116,50 @@ public class TaskActivity extends Base {
                 if (s == null || s.isEmpty())
                     return;
 
+
+                // foreach consecutive letter
+                //note - works, but incompatible with delimiter and default autocompletion.
+/*
+                String currentText = labelsview.getText().toString();
+                int start = currentText.lastIndexOf(DELIMITER_SIGN);
+                start = start == -1? 0 : start;
+                int length = currentText.substring(start).length();
+                List<Label> suggestions = new ArrayList<>();
+                Log.i("LabelFilter", "start = " + start);
+                for (Label label : labeldb.getAll()) {
+                    String typed = currentText.substring(start, length);
+                    int end = length > label.title.length()? label.title.length(): length;
+                    String partial = label.title.substring(0, end);
+                    Log.i("LabelFilter", "Finding match for " + typed + " of " + currentText + " in " + label + "("+ partial +")");
+                    // equalling that of a specific label,
+                    if (partial.toLowerCase().equals(typed.toLowerCase())){
+                        Log.i("LabelFilter", "Match found: " + label.title);
+                        suggestions.add(label);
+                    }
+                }
+                // update the list
+                Log.i("LabelFilter", "Refreshing and displaying dropdown...");
+
+                categoryAdapter.clear();
+                categoryAdapter.addAll(suggestions);
+                categoryAdapter.notifyDataSetChanged();
+
+//                ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, suggestions);
+                ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, suggestions);
+                labelsview.setAdapter(adapter2);
+                labelsview.showDropDown();
+*/
+
+                ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, labeldb.getAll());
+                labelsview.setAdapter(adapter2);
+
+
+
+
+
+
+
+/*
                 if (s.charAt(0) == LABEL_SIGN & s.length() > MIN_INPUT){
                     Label label1 = new Label();
                     label1.title = "thuis1";
@@ -178,7 +224,7 @@ public class TaskActivity extends Base {
                                 } else
                                     Log.w("Location Services", "Geocoding: Nothing found!");
 
-                            });
+                            });*/
             }
         }
 
@@ -217,6 +263,7 @@ public class TaskActivity extends Base {
         smartLocation = SmartLocation.with(this);
         Log.i("TaskActivity", "# of items: " + tasks.size());
 
+        labelsview.setThreshold(1);
         labelsview.addTextChangedListener(locationLabelListener);
         labeldb = new LabelGateway(this);
         allLabels = labeldb.getAll();
@@ -256,8 +303,11 @@ public class TaskActivity extends Base {
         categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, allLabels);
 
         labelsview.setAdapter(categoryAdapter);
+        labelsview.setThreshold(1);
+        labelsview.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+
         labelsview.setOnFocusChangeListener((view, focused) -> {
-            if (focused && labelsview.getText().toString().length() == 0)
+            if (focused /*&& labelsview.getText().toString().length() == 0*/)
                     labelsview.showDropDown();
         });
 
