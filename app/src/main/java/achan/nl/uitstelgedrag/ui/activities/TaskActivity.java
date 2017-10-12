@@ -1,6 +1,7 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
@@ -15,7 +16,13 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,9 +104,12 @@ public class TaskActivity extends Base {
     char LOCATION_SIGN = '@';
     char LABEL_SIGN = '#';
     String DELIMITER_SIGN = ","; // note '\n' as alternative?
-    int MIN_INPUT = 2;
+    int MIN_INPUT = 1;
 
     TextWatcher locationLabelListener = new TextWatcher() {
+
+        String previous = "";
+        boolean changed = false;
 
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -107,19 +117,30 @@ public class TaskActivity extends Base {
         }
 
         @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
+
+            if (!previous.equals(charSequence.toString())) {
+                previous = charSequence.toString();
+                changed = true;
+            } else {
+                changed = false;
+            }
+
+            ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, labeldb.getAll());
+            labelsview.setAdapter(adapter2);
+
             // FIXME - use custom filter for performance and uncoupling from this view.
 //            if (charSequence.toString().contains("Huidige locatie") && current == null)
 //                addCurrentLocation();
-            String[] categories = charSequence.toString().split(DELIMITER_SIGN);
-            for (String s : categories) {
-                if (s == null || s.isEmpty())
-                    return;
+
+//            for (String s : categories) {
+//                if (s == null || s.isEmpty())
+//                    return;
 
 
-                // foreach consecutive letter
-                //note - works, but incompatible with delimiter and default autocompletion.
-/*
+            // foreach consecutive letter
+            //note - works, but incompatible with delimiter and default autocompletion.
+/*              // note - this is already done by MultiAutocompleteTextView + CommaTokenizer.
                 String currentText = labelsview.getText().toString();
                 int start = currentText.lastIndexOf(DELIMITER_SIGN);
                 start = start == -1? 0 : start;
@@ -149,9 +170,6 @@ public class TaskActivity extends Base {
                 labelsview.setAdapter(adapter2);
                 labelsview.showDropDown();
 */
-
-                ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, labeldb.getAll());
-                labelsview.setAdapter(adapter2);
 
 
 
@@ -225,12 +243,47 @@ public class TaskActivity extends Base {
                                     Log.w("Location Services", "Geocoding: Nothing found!");
 
                             });*/
-            }
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
-            // note - do nothing, maybe filter for commas or something.
+
+            if (!changed)
+                return;
+
+            // note - only trigger this on some events to prevent infinite loop.
+            String[] categories = labelsview.getText().toString().split(DELIMITER_SIGN);
+
+            Log.i("Spanner", "categories_size=" + categories.length);
+            SpannableStringBuilder builder = new SpannableStringBuilder("");
+
+            // Don't span the last label as it might still be edited by the user.
+            for (int i = 0; i < categories.length - 1; i++) {
+                String label = categories[i].trim();
+                Log.i("Spanner", "Spanning label for label '" + label + "'");
+
+                SpannableString spannable = new SpannableString(label);
+
+                int backgroundColor = i == 1? Color.CYAN : i == 2? Color.MAGENTA : Color.DKGRAY; // todo - set background to auto, random, or user-defined color.
+                int foregroundColor = Color.WHITE; // todo - set foreground if necessary
+                BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
+                ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
+
+                spannable.setSpan(background, 0, label.length(), 0);
+                spannable.setSpan(foreground, 0, label.length(), 0);
+
+                int st = editable.toString().indexOf(label);
+                int en = st + label.length(); // note - indexoutofbounds
+
+                Log.i("Spanner", "About to replace '" + editable.subSequence(st, en).toString() + "' in '" + editable.toString() + "', with '" + label + "'");
+                Log.i("Spanner", "Spannable:" + spannable.toString());
+                Log.i("Spanner", "Label:" + label);
+                Log.i("Spanner", "Editable:" + editable.toString());
+
+//                editable.setSpan(spannable, st, en - 1, 0);
+                editable.replace(st, en, spannable, 0, spannable.length()); // note - infinite loop
+            }
+
         }
     };
 
@@ -263,7 +316,7 @@ public class TaskActivity extends Base {
         smartLocation = SmartLocation.with(this);
         Log.i("TaskActivity", "# of items: " + tasks.size());
 
-        labelsview.setThreshold(1);
+
         labelsview.addTextChangedListener(locationLabelListener);
         labeldb = new LabelGateway(this);
         allLabels = labeldb.getAll();
@@ -303,7 +356,7 @@ public class TaskActivity extends Base {
         categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, allLabels);
 
         labelsview.setAdapter(categoryAdapter);
-        labelsview.setThreshold(1);
+        labelsview.setThreshold(MIN_INPUT);
         labelsview.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
         labelsview.setOnFocusChangeListener((view, focused) -> {
