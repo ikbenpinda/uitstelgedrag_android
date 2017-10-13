@@ -22,6 +22,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
@@ -63,6 +65,7 @@ import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static java.lang.String.valueOf;
 
 public class TaskActivity extends Base {
 
@@ -111,6 +114,19 @@ public class TaskActivity extends Base {
         String previous = "";
         boolean changed = false;
 
+        String[] categories = new String[]{};
+        Random random = new Random();
+        int[] colors = new int[]{
+                Color.rgb(211, 211, 211),
+                Color.rgb(50, 211, 211),
+                Color.rgb(211, 50, 211),
+                Color.rgb(211, 211, 50),
+                Color.rgb(50, 211, 50),
+                Color.rgb(211, 50, 50),
+                Color.rgb(50, 50, 211)
+        };
+
+
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             // note - do nothing
@@ -119,6 +135,7 @@ public class TaskActivity extends Base {
         @Override
         public void onTextChanged(CharSequence charSequence, int i0, int i1, int i2) {
 
+            // note - Prevent an infinite loop by not setting the event flag when the styling is updated.
             if (!previous.equals(charSequence.toString())) {
                 previous = charSequence.toString();
                 changed = true;
@@ -126,8 +143,22 @@ public class TaskActivity extends Base {
                 changed = false;
             }
 
-            ArrayAdapter<Label> adapter2 = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, labeldb.getAll());
-            labelsview.setAdapter(adapter2);
+            // todo - filter redundant suggestions already in labelsview.
+            List<Label> filteredResults = labeldb.getAll();
+            List<String> inter = new ArrayList<>();
+
+            for (int i = 0; i < categories.length; i++)
+                categories[i] = categories[i].trim().toLowerCase();
+
+            for (Label label : filteredResults)
+                inter.add(label.title.toLowerCase());
+
+            for (Label label : labeldb.getAll())
+                if (Arrays.asList(categories).contains(label.title))
+                    filteredResults.remove(label);
+
+            ArrayAdapter<Label> suggestionsAdapter = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, filteredResults);
+            labelsview.setAdapter(suggestionsAdapter);
 
             // FIXME - use custom filter for performance and uncoupling from this view.
 //            if (charSequence.toString().contains("Huidige locatie") && current == null)
@@ -252,10 +283,9 @@ public class TaskActivity extends Base {
                 return;
 
             // note - only trigger this on some events to prevent infinite loop.
-            String[] categories = labelsview.getText().toString().split(DELIMITER_SIGN);
+            categories = labelsview.getText().toString().split(DELIMITER_SIGN);
 
             Log.i("Spanner", "categories_size=" + categories.length);
-            SpannableStringBuilder builder = new SpannableStringBuilder("");
 
             // Don't span the last label as it might still be edited by the user.
             for (int i = 0; i < categories.length - 1; i++) {
@@ -264,8 +294,8 @@ public class TaskActivity extends Base {
 
                 SpannableString spannable = new SpannableString(label);
 
-                int backgroundColor = i == 1? Color.CYAN : i == 2? Color.MAGENTA : Color.DKGRAY; // todo - set background to auto, random, or user-defined color.
-                int foregroundColor = Color.WHITE; // todo - set foreground if necessary
+                int backgroundColor = colors[random.nextInt(colors.length)];// todo - set background to auto, random, or user-defined color.
+                int foregroundColor = Color.WHITE; // todo - set foreground to black if necessary
                 BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
                 ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
 
