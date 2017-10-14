@@ -1,6 +1,7 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
@@ -116,16 +117,6 @@ public class TaskActivity extends Base {
 
         String[] categories = new String[]{};
         Random random = new Random();
-        int[] colors = new int[]{
-                Color.rgb(211, 211, 211),
-                Color.rgb(50, 211, 211),
-                Color.rgb(211, 50, 211),
-                Color.rgb(211, 211, 50),
-                Color.rgb(50, 211, 50),
-                Color.rgb(211, 50, 50),
-                Color.rgb(50, 50, 211)
-        };
-
 
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -294,7 +285,7 @@ public class TaskActivity extends Base {
 
                 SpannableString spannable = new SpannableString(label);
 
-                int backgroundColor = colors[random.nextInt(colors.length)];// todo - set background to auto, random, or user-defined color.
+                int backgroundColor = Color.parseColor("#222222");// todo - set background to auto, random, or user-defined color.
                 int foregroundColor = Color.WHITE; // todo - set foreground to black if necessary
                 BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
                 ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
@@ -418,7 +409,8 @@ public class TaskActivity extends Base {
         if (grantResults.length < 1){
             // permission not granted
             Log.wtf("Permissions", "Fatal permission not granted.");
-            System.exit(0);
+            Intent intent = new Intent(this, Overview.class);
+            startActivity(intent);
         }
     }
 

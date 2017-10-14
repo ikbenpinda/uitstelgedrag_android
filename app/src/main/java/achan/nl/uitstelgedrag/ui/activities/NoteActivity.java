@@ -222,7 +222,8 @@ public class NoteActivity extends Base {
         if (grantResults.length < 1){
             // permission not granted
             Log.wtf("Permissions", "Fatal permission not granted.");
-            System.exit(0);
+            Intent intent = new Intent(this, Overview.class);
+            startActivity(intent);
         }
     }
 
