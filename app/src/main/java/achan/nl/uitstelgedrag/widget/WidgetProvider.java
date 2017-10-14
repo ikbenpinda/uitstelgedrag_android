@@ -24,9 +24,25 @@ public class WidgetProvider extends AppWidgetProvider {
      * Since these need to be consistent, use constants.
      */
 
-    public static final String OPEN_APP  = "achan.nl.uitstelgedrag.xml.OPEN_APP";
-    public static final String VIEW_ITEM = "achan.nl.uitstelgedrag.xml.VIEW_ITEM";
-    public static final String ADD_ITEM  = "achan.nl.uitstelgedrag.xml.ADD_ITEM";
+    /**
+     * Intent flag to indicate the user wants to open the app.
+     */
+    public static final String OPEN_APP     = "achan.nl.uitstelgedrag.xml.OPEN_APP";
+
+    /**
+     * Intent flag to indicate the user wants to view a specific item.
+     */
+    public static final String VIEW_ITEM    = "achan.nl.uitstelgedrag.xml.VIEW_ITEM";
+
+    /**
+     * Intent flag to indicate the user wants to add an item.
+     */
+    public static final String ADD_ITEM     = "achan.nl.uitstelgedrag.xml.ADD_ITEM";
+
+    /**
+     * Intent flag for triggering an internal update, not part of the default time-based trigger.
+     */
+    public static final String FORCE_UPDATE = "achan.nl.uitstelgedrag.xml.FORCE_UPDATE";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -51,6 +67,12 @@ public class WidgetProvider extends AppWidgetProvider {
                 Intent openAppAndAddTaskIntent = new Intent(context, TaskActivity.class);
                 openAppAndAddTaskIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(openAppAndAddTaskIntent);
+                break;
+            case FORCE_UPDATE:
+                int[] ids = intent.getExtras().getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+                AppWidgetManager instance = AppWidgetManager.getInstance(context);
+                instance.notifyAppWidgetViewDataChanged(ids, R.id.widget_listview);
+//                onUpdate(context, instance, ids);
                 break;
         }
         super.onReceive(context, intent);

@@ -1,13 +1,13 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -17,33 +17,26 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
-import android.text.Html;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.CharacterStyle;
-import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -51,13 +44,14 @@ import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
-import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import achan.nl.uitstelgedrag.ui.adapters.LabelAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenterImpl;
 import achan.nl.uitstelgedrag.ui.views.TaskRecyclerView;
+import achan.nl.uitstelgedrag.widget.WidgetProvider;
+import achan.nl.uitstelgedrag.widget.WidgetService;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -66,7 +60,6 @@ import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static java.lang.String.valueOf;
 
 public class TaskActivity extends Base {
 
@@ -495,6 +488,14 @@ public class TaskActivity extends Base {
     @Override
     protected void onPause() {
         super.onPause();
+        // update widget
+        Log.i("Widget", "Triggering widget update...");
+        Intent intent = new Intent(this, WidgetProvider.class);
+        intent.setAction(WidgetProvider.FORCE_UPDATE);
+        int ids[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
+        sendBroadcast(intent);
+        Log.i("Widget", "Triggering widget update...broadcast sent.");
     }
 
     @Override
