@@ -26,9 +26,19 @@ import achan.nl.uitstelgedrag.persistence.migrations.Migration;
 public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
     public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int     DATABASE_SCHEMA_VERSION = 28;
+    public static final int     DATABASE_SCHEMA_VERSION = 32;
 
     public static final String CREATE = "CREATE TABLE IF NOT EXISTS ";
+
+    /**
+     * Adds a column to the given table.
+     * @param table
+     * @param column
+     * @return
+     */
+    public static String ALTER_TABLE_ADD_COLUMN(Table table, Column column){
+        return "ALTER TABLE " + table.name + " ADD COLUMN " + column.describe() + ";";
+    }
 
     private Context context;
 
@@ -119,12 +129,45 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //nuke(db);
-        Migration m = database -> {
-            Log.w("OpenHelper", "Migrations are not yet supported.");
-            nuke(db);
+
+        //nuke(db); // Last resort solution to database migrations.
+
+        Migration migration30to31 = database -> {
+            Log.w("OpenHelper", "Migrating database version " + oldVersion + " to " + newVersion + ".");
+//            StorageRepository ioStorage = new StorageGateway();
+//            String path = ioStorage.exportData();
+//            ioStorage.importData(path);
+//            StringBuilder statementBuilder = new StringBuilder("ALTER TABLE");
+//            statementBuilder
+//                    .append(" ")
+//                    .append(Labels.TABLE.name)
+//                    .append(" ")
+//                    .append("ADD COLUMN")
+//                    .append(" ")
+//                    .append(Labels.COLOR.describe())
+//                    .append(";");
+//            statementBuilder.toString()
+            db.compileStatement(ALTER_TABLE_ADD_COLUMN(Labels.TABLE, Labels.COLOR)).execute();
         };
-        m.migrate(db);
+
+        Migration migration31to32 = database -> {
+            Log.w("OpenHelper", "Migrating database version " + oldVersion + " to " + newVersion + ".");
+
+            db.compileStatement(ALTER_TABLE_ADD_COLUMN(Locations.TABLE, Locations.CITY)).execute();
+            db.compileStatement(ALTER_TABLE_ADD_COLUMN(Locations.TABLE, Locations.ADDRESS)).execute();
+            db.compileStatement(ALTER_TABLE_ADD_COLUMN(Locations.TABLE, Locations.POSTAL_CODE)).execute();
+        };
+
+        migrate(migration31to32, db);
+    }
+
+    /**
+     * Runs the changes needed to update the database.
+     * Needed changes are defined in the given migration instance.
+     * @param migration
+     */
+    public void migrate(Migration migration, SQLiteDatabase db){
+        migration.migrate(db);
     }
 
     @Override

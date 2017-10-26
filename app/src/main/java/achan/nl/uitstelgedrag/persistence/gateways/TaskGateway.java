@@ -19,6 +19,8 @@ import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks_Labels;
 
+import static achan.nl.uitstelgedrag.persistence.definitions.tables.Tasks_Labels.DATA_LABEL_ID;
+
 /**
  * Created by Etienne on 17-4-2016.
  */
@@ -130,8 +132,14 @@ public class TaskGateway implements Repository<Task> {
         Log.i("TaskGateway", "Querying labels for task " + task.id);
         List<int[]> label_ids = Tasks_Labels.fromCursor(helper.query(Tasks_Labels.TABLE, Tasks_Labels.TASK_ID, "" + task.id));
         List<Label> labels = new ArrayList<>();
+        Log.i("TaskGateway", "" + label_ids.size() + " records found for task.");
+        // loop over pairings for task, select label for label_id from pairing.
         for (int[] id : label_ids) {
-            labels.add(Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id[Tasks_Labels.DATA_LABEL_ID])).get(0));
+            Log.i("TaskGateway", "Searching for label " + id[DATA_LABEL_ID]);
+            Label result = labelGateway.get(id[DATA_LABEL_ID]);
+            Log.i("TaskGateway", "Label found: "+ result.toString());
+            labels.add(result);
+//            labels.add(Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id[Tasks_Labels.DATA_LABEL_ID])).get(0));
         }
 //        String labelQuery = "SELECT * FROM " + Labels.TABLE + " WHERE " + Labels.TASK + " = " + task.id;
 //        Cursor labelCursor = database.rawQuery(labelQuery, null);
@@ -155,7 +163,10 @@ public class TaskGateway implements Repository<Task> {
         List<Task> filteredTasks = new ArrayList<>();
         for (Task task : tasks) {
             for (Label label : task.labels) {
-                if (isNearby(label.location, current))
+                Location location = new Location("");
+                location.setLatitude(label.location.latitude);
+                location.setLongitude(label.location.longitude);
+                if (isNearby(location, current))
                     filteredTasks.add(task);
             }
         }

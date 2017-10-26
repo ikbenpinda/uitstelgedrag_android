@@ -3,11 +3,12 @@ package achan.nl.uitstelgedrag.persistence.gateways;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
+import android.util.Log;
 
 import java.util.List;
 
 import achan.nl.uitstelgedrag.domain.models.Label;
+import achan.nl.uitstelgedrag.domain.models.Location;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.persistence.UitstelgedragOpenHelper;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
@@ -29,7 +30,9 @@ public class LabelGateway {
     }
 
     public Label get(int id) {
-        return Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id)).get(0);
+        Label result = Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id)).get(0);
+        result.location = Locations.fromCursor(helper.query(Locations.TABLE, Locations.LABEL_ID, "" + id));
+        return result;
     }
 
     /**
@@ -46,19 +49,24 @@ public class LabelGateway {
     public List<Label> getAll() {
         Cursor cursor = database.rawQuery("SELECT * FROM " + Labels.TABLE, null);
         List<Label> labels = Labels.fromCursor(cursor);
+        for (Label label : labels) {
+            Cursor subcursor = database.rawQuery("SELECT * FROM " + Locations.TABLE + " WHERE " + Locations.LABEL_ID + " = ?", new String[]{"" + label.id});
+            label.location = Locations.fromCursor(subcursor);
+            subcursor.close();
+        }
         cursor.close();
         return labels;
     }
 
     public Label insert(Label label) {
         label.id = (int) database.insert(Labels.TABLE.name, null, Labels.toValues(label));
-//        if (label.location != null && label.id > 0) todo - not implemented yet.
-//            insertLocation(label, label.location);
+        if (label.location != null)
+            insertLocation(label, label.location);
         return label;
     }
 
-    // fixme - unique constraint
     public void insertLocation(Label label, Location location){
+        Log.i("LabelGateway", "Persisting location for label.");
         database.insert(Locations.TABLE.name, null, Locations.toValues(label, location));
     }
 
@@ -68,8 +76,7 @@ public class LabelGateway {
     }
 
     public boolean delete(Label label) {
-        database.delete(Labels.TABLE.name, Labels.ID + " = ?", new String[]{"" + label.id});
-        return true; // fixme - int check instead.
+        return database.delete(Labels.TABLE.name, Labels.ID + " = ?", new String[]{"" + label.id}) > 0;
     }
 
 }

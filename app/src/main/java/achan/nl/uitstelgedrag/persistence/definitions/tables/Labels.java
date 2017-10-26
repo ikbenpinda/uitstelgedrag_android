@@ -2,6 +2,7 @@ package achan.nl.uitstelgedrag.persistence.definitions.tables;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,8 @@ public class Labels {
 
     public static final Column ID    = new Column("id", Types.INTEGER, Constraints.PRIMARY_KEY_AUTOINCREMENT);
     public static final Column TITLE = new Column("title", Types.TEXT, Constraints.NOT_NULL);
-    public static final Table  TABLE = new Table("Labels", ID, TITLE);
+    public static final Column COLOR = new Column("color", Types.TEXT);
+    public static final Table  TABLE = new Table("Labels", ID, TITLE, COLOR);
 
     /**
      * Fills a ContentValues object with the given model.
@@ -35,6 +37,9 @@ public class Labels {
         if (label.id > DEFAULT_ID_VALUE)
             values.put(ID.name, label.id);
         values.put(TITLE.name, label.title);
+
+        if (label.color != null)
+            values.put(COLOR.name, label.color);
 
         return values;
     }
@@ -54,6 +59,8 @@ public class Labels {
             Label label = new Label();
             label.id = cursor.getInt(cursor.getColumnIndexOrThrow(ID.name));
             label.title = cursor.getString(cursor.getColumnIndexOrThrow(TITLE.name));
+            label.color = cursor.getString(cursor.getColumnIndexOrThrow(COLOR.name));
+            Log.i("Labels", "Color: " + label.color);
             labels.add(label);
         }
 
