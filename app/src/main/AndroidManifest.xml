@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="achan.nl.uitstelgedrag">
-
-    <!-- Specify SDKs for unit testing and Play Store filtering. -->
+    xmlns:tools="http://schemas.android.com/tools"
+    package="achan.nl.uitstelgedrag"> <!-- Specify SDKs for unit testing and Play Store filtering. -->
     <uses-sdk
         android:minSdkVersion="19"
-        android:targetSdkVersion="23"/>
+        android:targetSdkVersion="23" />
 
     <!-- Data syncing, version tracking and disconnection fallbacks. -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- For taking attendances. -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- For saving notes and their attachments. -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> -->
 
     <service
         android:name=".UitstelgedragRemoteViewsService"
-        android:permission="android.permission.BIND_REMOTEVIEWS"/>
+        android:permission="android.permission.BIND_REMOTEVIEWS" />
 
     <!-- @style/Theme.AppCompat.NoActionBar -->
     <application
@@ -35,21 +33,24 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.Solarized">
+        android:theme="@style/AppTheme.Light">
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+            android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"
-            tools:replace="android:value"/>
+            tools:replace="android:value" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/maps_api_key"/>
 
         <activity android:name=".ui.activities.Overview">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -59,71 +60,55 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            tools:replace="android:theme"/>
-        <activity android:name=".ui.activities.Attendance">
-        </activity>
-        <activity android:name=".ui.activities.SettingsActivity">
-        </activity>
+            tools:replace="android:theme" />
 
         <!-- Widget service -->
         <service
             android:name=".widget.WidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"/>
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
         <!-- Widget receiver -->
         <receiver android:name=".widget.WidgetProvider">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_info"/>
+                android:resource="@xml/widget_info" />
         </receiver>
 
-        <activity android:name=".ui.activities.TaskActivity">
-        </activity>
-        <activity android:name=".ui.activities.Dayplanner">
-        </activity>
-        <activity android:name=".ui.activities.LoginActivity">
-        </activity>
-        <activity android:name=".ui.activities.TaskDetailActivity">
-        </activity>
-        <activity android:name=".ui.activities.HelpActivity">
-        </activity>
-        <activity android:name=".ui.activities.AboutActivity">
-        </activity>
+        <activity android:name=".ui.activities.TaskActivity" />
+        <activity android:name=".ui.activities.Dayplanner" />
+        <activity android:name=".ui.activities.LoginActivity" />
+        <activity android:name=".ui.activities.TaskDetailActivity" />
+        <activity android:name=".ui.activities.HelpActivity" />
+        <activity android:name=".ui.activities.AboutActivity" />
+        <activity android:name=".ui.activities.NoteActivity" />
+        <activity android:name=".ui.activities.NoteDetailActivity" />
+        <activity android:name=".ui.activities.Attendance" />
+        <activity android:name=".ui.activities.SettingsActivity" />
+        <activity android:name=".ui.activities.SetLocationActivity" />
 
         <meta-data
             android:name="com.sec.android.support.multiwindow"
-            android:value="true"/>
+            android:value="true" />
         <meta-data
             android:name="com.sec.android.multiwindow.DEFAULT_SIZE_W"
-            android:resource="@dimen/app_defaultsize_w"/>
+            android:resource="@dimen/app_defaultsize_w" />
         <meta-data
             android:name="com.sec.android.multiwindow.DEFAULT_SIZE_H"
-            android:resource="@dimen/app_defaultsize_h"/>
+            android:resource="@dimen/app_defaultsize_h" />
         <meta-data
             android:name="com.sec.android.multiwindow.MINIMUM_SIZE_W"
-            android:resource="@dimen/app_minimumsize_w"/>
+            android:resource="@dimen/app_minimumsize_w" />
         <meta-data
             android:name="com.sec.android.multiwindow.MINIMUM_SIZE_H"
-            android:resource="@dimen/app_minimumsize_h"/>
+            android:resource="@dimen/app_minimumsize_h" />
 
         <uses-library
             android:name="com.sec.android.app.multiwindow"
-            android:required="false">
-        </uses-library>
+            android:required="false"></uses-library>
 
-        <activity
-            android:name=".ui.activities.NoteActivity"
-            android:label="@string/title_activity_note"
-            android:theme="@style/AppTheme.Solarized">
-        </activity>
-        <activity
-            android:name=".ui.activities.NoteDetailActivity"
-            android:label="@string/title_activity_note_detail"
-            android:theme="@style/AppTheme.Solarized">
-        </activity>
     </application>
 
 </manifest>
