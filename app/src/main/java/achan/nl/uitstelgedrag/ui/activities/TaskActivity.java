@@ -2,37 +2,53 @@ package achan.nl.uitstelgedrag.ui.activities;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
+
+import com.mikepenz.iconics.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,8 +60,10 @@ import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import achan.nl.uitstelgedrag.ui.adapters.LabelAdapter;
+import achan.nl.uitstelgedrag.ui.adapters.LabelSpinnerAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenterImpl;
@@ -63,6 +81,19 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class TaskActivity extends Base {
 
+    // note/pseudo - default tasks usage:
+
+    // kies label
+    // voeg label toe
+    // locatie instellen
+    // locatie toevoegen aan label
+    // kleur instellen
+    // kleur toevoegen aan label
+    // voeg gekozen labels toe aan taak
+    // kies deadline
+    // voeg gekozen deadline aan taak toe
+    // voeg taak toe aan lijst.
+
     private static final int REQUEST_CODE = 1; // Arbitrary activity-identifying permission-request code.
 
     @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
@@ -75,8 +106,29 @@ public class TaskActivity extends Base {
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
     @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
     @BindView(R.id.AddTaskCategoryAuto) AppCompatMultiAutoCompleteTextView labelsview;
+    @BindView(R.id.provisional_label_color_picker) LinearLayout ll;
+    @BindView(R.id.tv_add_label_vs_trigger) TextView viewSwitcherTrigger;
+    @BindView(R.id.vs_add_label_view)   ViewSwitcher viewSwitcher;
+    //    @BindView(R.id.bottomsheet)         View bottomsheet;
+//    @BindView(R.id.bottomsheet_add_task) TextView bottomsheetAddTask;
+//    @BindView(R.id.invis_atv)            LinearLayout invisible_addtaskview_layout;
+    @BindView(R.id.btn_add_label)       Button addLabelButton;
+    @BindView(R.id.task_labels_list) LinearLayout tasklabelslist;
+
+    @BindView(R.id.provisional_label_color_picker_card_00) CardView colorcard00;
+    @BindView(R.id.provisional_label_color_picker_card_0A) CardView colorcard0A;
+    @BindView(R.id.provisional_label_color_picker_card_0B) CardView colorcard0B;
+    @BindView(R.id.provisional_label_color_picker_card_0C) CardView colorcard0C;
+    @BindView(R.id.provisional_label_color_picker_card_0D) CardView colorcard0E;
+    @BindView(R.id.provisional_label_color_picker_card_0E) CardView colorcard0D;
+    @BindView(R.id.provisional_label_color_picker_card_0F) CardView colorcard0F;
+    @BindView(R.id.provisional_label_color_picker_card_0G) CardView colorcard0G;
+    @BindView(R.id.provisional_label_color_picker_card_0H) CardView colorcard0H;
+
+    int selectedColor = 0;
 
     AlertDialog waitingForLocationDialog;
+//    BottomSheetBehavior bottomSheetBehavior;
 
     // reminder - you can use spannable string to fix the label views.
 
@@ -87,6 +139,9 @@ public class TaskActivity extends Base {
     LabelGateway labeldb;
     LabelAdapter categoryAdapter;
     List<Label> allLabels;
+
+    Label templateLabel;
+    achan.nl.uitstelgedrag.domain.models.Location lastLocation;
 
     boolean filterByLocation = true;
 
@@ -141,7 +196,9 @@ public class TaskActivity extends Base {
                 if (Arrays.asList(categories).contains(label.title))
                     filteredResults.remove(label);
 
-            ArrayAdapter<Label> suggestionsAdapter = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, filteredResults);
+            // TODO: 25-10-2017 custom view for location
+//            ArrayAdapter<Label> suggestionsAdapter = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, filteredResults);
+            LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, filteredResults);
             labelsview.setAdapter(suggestionsAdapter);
 
             // FIXME - use custom filter for performance and uncoupling from this view.
@@ -282,9 +339,17 @@ public class TaskActivity extends Base {
                 int foregroundColor = Color.WHITE; // todo - set foreground to black if necessary
                 BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
                 ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
+                ClickableSpan   onClickMenu = new ClickableSpan() {
+                    @Override
+                    public void onClick(View widget) {
+                        Log.i("ClickableSpan", "Item clicked.");
+                        View colorpicker = getLayoutInflater().from(context).inflate(R.layout.provisional_color_picker, null);
+                    }
+                };
 
                 spannable.setSpan(background, 0, label.length(), 0);
                 spannable.setSpan(foreground, 0, label.length(), 0);
+                spannable.setSpan(onClickMenu, 0, label.length(), 0);
 
                 int st = editable.toString().indexOf(label);
                 int en = st + label.length(); // note - indexoutofbounds
@@ -301,6 +366,103 @@ public class TaskActivity extends Base {
         }
     };
 
+    TextWatcher SingleAddLabelListener = new TextWatcher() {
+
+        String previous = "";
+        boolean changed = false;
+
+        String[] categories = new String[]{};
+        Random random = new Random();
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+            // note - Prevent an infinite loop by not setting the event flag when the styling is updated.
+            if (!previous.equals(charSequence.toString())) {
+                previous = charSequence.toString();
+                changed = true;
+            } else {
+                changed = false;
+            }
+
+            // todo - filter redundant suggestions already in labelsview.
+            List<Label> filteredResults = labeldb.getAll();
+            List<String> inter = new ArrayList<>();
+
+            for (int i = 0; i < categories.length; i++)
+                categories[i] = categories[i].trim().toLowerCase();
+
+            for (Label label : filteredResults)
+                inter.add(label.title.toLowerCase());
+
+            for (Label label : labeldb.getAll())
+                if (Arrays.asList(categories).contains(label.title))
+                    filteredResults.remove(label);
+
+            // fixme - adapter confusion, see textwatchers
+//            ArrayAdapter<Label> suggestionsAdapter = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, filteredResults);
+            LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, filteredResults);
+            labelsview.setAdapter(suggestionsAdapter);
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+            if (!changed)
+                return;
+
+            int noColorSelected = 0;
+            int defaultColor = colorcard00.getCardBackgroundColor().getDefaultColor();
+
+            if (selectedColor != defaultColor || selectedColor != noColorSelected)
+                return;
+
+            // note - only trigger this on some events to prevent infinite loop.
+            String label = labelsview.getText().toString().trim();
+
+            Log.i("Spanner", "categories_size=" + categories.length);
+
+            // Don't span the last label as it might still be edited by the user.
+            Log.i("Spanner", "Spanning label for label '" + label + "'");
+
+            SpannableString spannable = new SpannableString(label);
+
+//                int backgroundColor = Color.parseColor("#222222");// todo - set background to auto, random, or user-defined color.
+            int foregroundColor = selectedColor; // todo - set foreground to black if necessary
+
+
+//                BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
+            ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
+//                ClickableSpan onClickMenu = new ClickableSpan() {
+//                    @Override
+//                    public void onClick(View widget) {
+//                        Log.i("ClickableSpan", "Item clicked.");
+//                        View colorpicker = getLayoutInflater().from(context).inflate(R.layout.provisional_color_picker, null);
+//                    }
+//                };
+
+//                spannable.setSpan(background, 0, label.length(), 0);
+            spannable.setSpan(foreground, 0, label.length(), 0);
+//                spannable.setSpan(onClickMenu, 0, label.length(), 0);
+
+            int st = editable.toString().indexOf(label);
+            int en = st + label.length(); // note - indexoutofbounds
+
+            Log.i("Spanner", "About to replace '" + editable.subSequence(st, en).toString() + "' in '" + editable.toString() + "', with '" + label + "'");
+            Log.i("Spanner", "Spannable:" + spannable.toString());
+            Log.i("Spanner", "Label:" + label);
+            Log.i("Spanner", "Editable:" + editable.toString());
+
+//                editable.setSpan(spannable, st, en - 1, 0);
+            editable.replace(st, en, spannable, 0, spannable.length()); // note - infinite loop
+        }
+    };
+
     @Override
     Activities getCurrentActivity() {
         return Activities.TASKS;
@@ -310,6 +472,18 @@ public class TaskActivity extends Base {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+        Intent intent = getIntent();
+        ContentValues locationValues = intent.getParcelableExtra("location");
+        if (locationValues != null) {
+            lastLocation = new achan.nl.uitstelgedrag.domain.models.Location(
+                    locationValues.getAsDouble(Locations.LATITUDE.name),
+                    locationValues.getAsDouble(Locations.LONGITUDE.name),
+                    locationValues.getAsString(Locations.CITY.name),
+                    locationValues.getAsString(Locations.ADDRESS.name),
+                    locationValues.getAsString(Locations.POSTAL_CODE.name)
+            );
+            Log.i("TaskActivity", "lastLocation updated by setLocationActivity to " + lastLocation.toString());
+        }
 
         // Android 6.0 - Check permissions
         if (
@@ -329,9 +503,37 @@ public class TaskActivity extends Base {
         tasks = presenter.viewTasks();
         smartLocation = SmartLocation.with(this);
         Log.i("TaskActivity", "# of items: " + tasks.size());
+//
+//        bottomsheetAddTask.setOnClickListener(v -> {
+//            View dialogview = LayoutInflater.from(this).inflate(R.layout.add_task_view, null);
+//            AlertDialog.Builder addtaskdialog = new AlertDialog.Builder(this)
+//                    .setTitle("Nieuwe taak")
+//                    .setView(dialogview)
+//                    .setNegativeButton("annuleren", null)
+//                    .setPositiveButton("toevoegen", (dialog, which) -> {
+//
+//                    });
+//            addtaskdialog.create().show();
+//        });
+
+//        // note - disabled for now due to insufficient UX improvement.
+//        bottomSheetBehavior = BottomSheetBehavior.from(bottomsheet);
+//        bottomsheetAddTask.setOnClickListener(v -> {
+//
+//            //Note - if you want to use dp: Utils.convertDpToPx(context, height)
+//            bottomSheetBehavior.setPeekHeight(bottomsheetAddTask.getHeight());
+//            bottomsheetAddTask.requestLayout(); // note - getHeight won't be applied without this call.
+//
+//            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED){
+//                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//            }
+//            else if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED){
+//                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+//            }
+//        });
 
 
-        labelsview.addTextChangedListener(locationLabelListener);
+        labelsview.addTextChangedListener(SingleAddLabelListener);
         labeldb = new LabelGateway(this);
         allLabels = labeldb.getAll();
 
@@ -367,6 +569,7 @@ public class TaskActivity extends Base {
         setFilterOptions();
 
         // note - Applies to the category EditText at the bottom of the layout.
+        // fixme - this adapter gets replaced with the suggestionsadapter after typing!
         categoryAdapter = new LabelAdapter(this, R.layout.rowlayout_label, allLabels);
 
         labelsview.setAdapter(categoryAdapter);
@@ -394,6 +597,56 @@ public class TaskActivity extends Base {
         list.setAdapter(adapter);
         list.setEmptyView(emptyView);
 
+        viewSwitcherTrigger.setOnClickListener(v -> {
+            viewSwitcher.showNext();
+        });
+
+        View.OnClickListener colorListener = v -> {
+            selectedColor = ((CardView) v).getCardBackgroundColor().getDefaultColor();
+            String label = labelsview.getText().toString();
+            SpannableString spannable = new SpannableString(label);
+
+//                int backgroundColor = Color.parseColor("#222222");// todo - set background to auto, random, or user-defined color.
+            int foregroundColor = selectedColor; // todo - set foreground to black if necessary
+            if (selectedColor == ResourcesCompat.getColor(getResources(), R.color.primary, getTheme()))
+                selectedColor = ResourcesCompat.getColor(getResources(), R.color.accent, getTheme()); // Default color since making text transparent is kind of unusable.
+//                BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
+            ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
+//                ClickableSpan onClickMenu = new ClickableSpan() {
+//                    @Override
+//                    public void onClick(View widget) {
+//                        Log.i("ClickableSpan", "Item clicked.");
+//                        View colorpicker = getLayoutInflater().from(context).inflate(R.layout.provisional_color_picker, null);
+//                    }
+//                };
+
+//                spannable.setSpan(background, 0, label.length(), 0);
+            spannable.setSpan(foreground, 0, label.length(), 0);
+
+            labelsview.getText().replace(0, labelsview.getText().toString().length(), spannable, 0, spannable.length());
+        };
+
+        colorcard00.setOnClickListener(colorListener);
+        colorcard0A.setOnClickListener(colorListener);
+        colorcard0B.setOnClickListener(colorListener);
+        colorcard0C.setOnClickListener(colorListener);
+        colorcard0D.setOnClickListener(colorListener);
+        colorcard0E.setOnClickListener(colorListener);
+        colorcard0F.setOnClickListener(colorListener);
+        colorcard0G.setOnClickListener(colorListener);
+        colorcard0H.setOnClickListener(colorListener);
+
+        addLabelButton.setOnClickListener(v -> {
+            TextView labelView = new TextView(context);
+            labelView.setText(labelsview.getText());
+            if (selectedColor == 0)
+                labelView.setTextColor(getColor(R.color.accent)); // FIXME: 26-10-2017 compatibility issues.
+            else
+                labelView.setTextColor(selectedColor);
+            int padding8dp = Utils.convertDpToPx(this, 8f);
+            labelView.setPadding(padding8dp, padding8dp, padding8dp, padding8dp);
+            tasklabelslist.addView(labelView);
+        });
     }
 
     @Override
@@ -416,9 +669,10 @@ public class TaskActivity extends Base {
 
         spinner_labels.add(0, label);
         spinner_labels.addAll(labeldb.getAll());
-        ArrayAdapter<Label> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        category_spinner.setAdapter(adapter);
+//        ArrayAdapter<Label> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinner_labels);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        category_spinner.setAdapter(adapter);
+        category_spinner.setAdapter(new LabelSpinnerAdapter(this, R.layout.spinner_dropdown_label_item, spinner_labels));
     }
 
     private void filterTasks(Label label){//// FIXME: 7-10-2017 list stays outdated
@@ -434,8 +688,14 @@ public class TaskActivity extends Base {
             }
         }
 
+        // Tasks available but not with labels.
         for (Task task : results){
-            Log.i("Filter", "Results: " + task.labels.get(0));
+            Label taskLabel = null;
+
+            if (!task.labels.isEmpty())
+                taskLabel = task.labels.get(0);
+
+            Log.i("Filter", "Results: " + taskLabel);
         }
 
         adapter.tasks = results;
@@ -574,7 +834,7 @@ public class TaskActivity extends Base {
 
         // Split tasks on commas
         String[] descriptions = descriptionView.getText().toString().split(",");
-        String labels = labelsview.getText().toString();
+        String labels = labelsview.getText().toString(); // fixme - take labels from label-specific view.
         Date deadline = planTaskCheckbox.isChecked() ? parseDate() : null;
 
         for (String description : descriptions) {
@@ -586,6 +846,15 @@ public class TaskActivity extends Base {
                     Log.i("TaskActivity", "label id: " + label.id);
 
 //                    label.id = labeldb.
+
+                    // check if color is selected and doesnt override an existing selection,
+                    // since the preliminary view resets color by default.
+                    if (selectedColor != 0 && !labeldb.getAll().contains(label))
+                        label.color = String.valueOf(selectedColor);
+                    if (lastLocation != null) {
+                        label.location = lastLocation;
+                        lastLocation = null;
+                    }
 
                     task.labels.add(label);
 //                    TextView labelView = new TextView(context);
@@ -642,29 +911,50 @@ public class TaskActivity extends Base {
         //dismissKeyboard();
     }
 
-    @OnClick(R.id.imageButton) void showLocationDialog(){ // note - switched to autocomplete instead.
-//        String[] tags = labelsview.getText().toString().split(",");
-//        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-//                android.R.layout.simple_dropdown_item_1line, tags);
-//        final View locationView = LayoutInflater.from(this).inflate(R.layout.dialog_addlocation, null);
-//        AutoCompleteTextView tagsView = (AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags);
-//        tagsView.setAdapter(categoryAdapter);
-//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-//        dialog.setView(locationView)
-//                .setPositiveButton("voeg toe", (dialogInterface, i) -> {
-//                    Label label = new Label();
-//                    label.title = ((AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags)).getText().toString();
-//                    SmartLocation.with(this).location().oneFix().start(location -> {
-//                        label.location = location;
-//                    });
-//                    task.labels.add(label);
-//                })
-//                .setNegativeButton("laat maar", (dialogInterface, i) -> {})
-//                .create()
-//                .show();
+    @OnClick(R.id.imageButton) void addLocation(){ // note - switched to autocomplete instead.
+        String[] tags = labelsview.getText().toString().split(",");
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, tags);
+        final View locationView = LayoutInflater.from(this).inflate(R.layout.dialog_addlocation, null);
+        TextInputEditText addressView = (TextInputEditText) locationView.findViewById(R.id.dialog_addlocation_address);
+        AutoCompleteTextView tagsView = (AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags);
+        tagsView.setAdapter(categoryAdapter);
+
+        SmartLocation.with(this).location().oneFix().start(location -> {
+            SmartLocation.with(context).geocoding().reverse(location, (location1, list1) -> {
+                // note - reverse the found GPS coordinates to a human readable address.
+                Address address = list1.get(0);
+
+                lastLocation = new achan.nl.uitstelgedrag.domain.models.Location(address);
+
+//                addressView.setText(address.getAddressLine(0));
+                addressView.setText(lastLocation.name);
+            });
+        });
+
+        dialog.setView(locationView)
+                .setPositiveButton("voeg toe", (dialogInterface, i) -> {
+//                    templateLabel = new Label(); note - not necessary, just use location in addTask.
+//                    templateLabel.title = ((AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags)).getText().toString();
+//                    templateLabel.location = lastLocation;
+                    //task.labels.add(label);
+                    Log.i("Location", "No code for adding location to label in OnClickListener yet.");
+                })
+                .setNegativeButton("laat maar", (dialogInterface, i) -> {
+                    lastLocation = null;
+                })
+                .create()
+                .show();
     }
 
     @OnLongClick(R.id.imageButton) boolean addCurrentLocation(View v){
+        Intent setCustomLocationIntent = new Intent(context, SetLocationActivity.class);
+        startActivity(setCustomLocationIntent);
+        return true;
+        /*
         waitingForLocationDialog.show();
         smartLocation
                 .location()
@@ -674,13 +964,15 @@ public class TaskActivity extends Base {
                     Log.i("LocationManager", "Location Registered: " + location.toString());
                     current = location;
                     waitingForLocationDialog.dismiss();
-                    final EditText view = new EditText(context);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    // note - var 'this.context' is not a child of AppCompat, so we have to use 'this'.
+                    final EditText view = new EditText(this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Naam voor locatie")
                     .setView(view)
                     .setPositiveButton("OK", (dialogInterface, i) -> {
                         Label label = new Label();
-                        label.location = location;
+                        label.location = new achan.nl.uitstelgedrag.domain.models.Location();
                         label.title = view.getText().toString();
                     Snackbar.make(
                             v,
@@ -693,6 +985,7 @@ public class TaskActivity extends Base {
                     }).create().show();
                 });
         return true;
+        */
     }
 
     private Date parseDate() {
