@@ -1,6 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+
+    <color name="base16_red">#db2d20</color>
+    <color name="base16_light_red">#e8bbd0</color>
+    <color name="base16_yellow">#fded02</color>
+    <color name="base16_green">#01a252</color>
+    <color name="base16_cyan">#b5e4f4</color>
+    <color name="base16_blue">#01a0e4</color>
+    <color name="base16_purple">#a16a94</color>
+    <color name="base16_brown">#cdab53</color>
+
+    <color name="base16_eighties_black00">#2d2d2d</color>
+    <color name="base16_eighties_black01">#393939</color>
+    <color name="base16_eighties_black02">#515151</color>
+    <color name="base16_eighties_black03">#747369</color>
+    <color name="base16_eighties_white04">#a09f93</color>
+    <color name="base16_eighties_white05">#d3d0c8</color>
+    <color name="base16_eighties_white06">#e8e6df</color>
+    <color name="base16_eighties_white07">#f2f0ec</color>
+    <color name="base16_eighties_red">#f2777a</color>
+    <color name="base16_eighties_light_red">#f99157</color>
+    <color name="base16_eighties_yellow">#ffcc66</color>
+    <color name="base16_eighties_green">#99cc99</color>
+    <color name="base16_eighties_light_blue">#66cccc</color>
+    <color name="base16_eighties_blue">#6699cc</color>
+    <color name="base16_eighties_purple">#cc99cc</color>
+    <color name="base16_eighties_brown">#d27b53</color>
+
+    <color name="base16_ocean_black00">#2b303b</color>
+    <color name="base16_ocean_black01">#343d46</color>
+    <color name="base16_ocean_black02">#4f5b66</color>
+    <color name="base16_ocean_black03">#65737e</color>
+    <color name="base16_ocean_white04">#a7adba</color>
+    <color name="base16_ocean_white05">#c0c5ce</color>
+    <color name="base16_ocean_white06">#dfe1e8</color>
+    <color name="base16_ocean_white07">#eff1f5</color>
+    <color name="base16_ocean_red">#cc6666</color>
+    <color name="base16_ocean_lightred">#de935f</color>
+    <color name="base16_ocean_yellow">#f0c674</color>
+    <color name="base16_ocean_green">#b5bd68</color>
+    <color name="base16_ocean_lightblue">#8abeb7</color>
+    <color name="base16_ocean_blue">#81a2be</color>
+    <color name="base16_ocean_purple">#b294bb</color>
+    <color name="base16_ocean_brown">#ab7967</color>
+
+
+    <color name="base16_tomorrow_night_black00">#1d1f21</color>
+    <color name="base16_tomorrow_night_black01">#282a2e</color>
+    <color name="base16_tomorrow_night_black02">#373b41</color>
+    <color name="base16_tomorrow_night_black03">#969896</color>
+    <color name="base16_tomorrow_night_white04">#b4b7b4</color>
+    <color name="base16_tomorrow_night_white05">#c5c8c6</color>
+    <color name="base16_tomorrow_night_white06">#e0e0e0</color>
+    <color name="base16_tomorrow_night_white07">#ffffff</color>
+    <color name="base16_tomorrow_night_red">#cc6666</color>
+    <color name="base16_tomorrow_night_lightred">#de935f</color>
+    <color name="base16_tomorrow_night_yellow">#f0c674</color>
+    <color name="base16_tomorrow_night_green">#b5bd68</color>
+    <color name="base16_tomorrow_night_lightblue">#8abeb7</color>
+    <color name="base16_tomorrow_night_blue">#81a2be</color>
+    <color name="base16_tomorrow_night_purple">#b294bb</color>
+    <color name="base16_tomorrow_night_brown">#a3685a</color>
+
+    <color name="base16_material_darker_black00">#212121</color>
+    <color name="base16_material_darker_black01">#303030</color>
+    <color name="base16_material_darker_black02">#353535</color>
+    <color name="base16_material_darker_black03">#4A4A4A</color>
+    <color name="base16_material_darker_white04">#B2CCD6</color>
+    <color name="base16_material_darker_white05">#EEFFFF</color>
+    <color name="base16_material_darker_white06">#EEFFFF</color>
+    <color name="base16_material_darker_white07">#FFFFFF</color>
+    <color name="base16_material_darker_red">#F07178</color>
+    <color name="base16_material_darker_lightred">#F78C6C</color>
+    <color name="base16_material_darker_yellow">#FFCB6B</color>
+    <color name="base16_material_darker_green">#C3E88D</color>
+    <color name="base16_material_darker_lightblue">#89DDFF</color>
+    <color name="base16_material_darker_blue">#82AAFF</color>
+    <color name="base16_material_darker_purple">#C792EA</color>
+    <color name="base16_material_darker_brown">#FF5370</color>
+
+    <color name="base16_material_lighter_black00">#FAFAFA</color>
+    <color name="base16_material_lighter_black01">#E7EAEC</color>
+    <color name="base16_material_lighter_black02">#CCEAE7</color>
+    <color name="base16_material_lighter_black03">#CCD7DA</color>
+    <color name="base16_material_lighter_white04">#8796B0</color>
+    <color name="base16_material_lighter_white05">#80CBC4</color>
+    <color name="base16_material_lighter_white06">#80CBC4</color>
+    <color name="base16_material_lighter_white07">#FFFFFF</color>
+    <color name="base16_material_lighter_red">#FF5370</color>
+    <color name="base16_material_lighter_lightred">#F76D47</color>
+    <color name="base16_material_lighter_yellow">#FFB62C</color>
+    <color name="base16_material_lighter_green">#91B859</color>
+    <color name="base16_material_lighter_lightblue">#39ADB5</color>
+    <color name="base16_material_lighter_blue">#6182B8</color>
+    <color name="base16_material_lighter_purple">#7C4DFF</color>
+    <color name="base16_material_lighter_brown">#E53935</color>
+
+    <color name="base16_tomorrow_black00">#ffffff</color>
+    <color name="base16_tomorrow_black01">#e0e0e0</color>
+    <color name="base16_tomorrow_black02">#d6d6d6</color>
+    <color name="base16_tomorrow_black03">#8e908c</color>
+    <color name="base16_tomorrow_white04">#969896</color>
+    <color name="base16_tomorrow_white05">#4d4d4c</color>
+    <color name="base16_tomorrow_white06">#282a2e</color>
+    <color name="base16_tomorrow_white07">#1d1f21</color>
+    <color name="base16_tomorrow_red">#c82829</color>
+    <color name="base16_tomorrow_lightred">#f5871f</color>
+    <color name="base16_tomorrow_yellow">#eab700</color>
+    <color name="base16_tomorrow_green">#718c00</color>
+    <color name="base16_tomorrow_lightblue">#3e999f</color>
+    <color name="base16_tomorrow_blue">#4271ae</color>
+    <color name="base16_tomorrow_purple">#8959a8</color>
+    <color name="base16_tomorrow_brown">#a3685a</color>
+
+
     <color name="colorPrimary">@color/primary_material_dark</color>
     <color name="colorPrimaryDark">@color/primary_dark_material_dark</color>
     <color name="colorAccent">@color/accent_material_dark</color>

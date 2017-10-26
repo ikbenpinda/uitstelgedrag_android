@@ -1,9 +1,11 @@
 package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,15 +63,28 @@ public class LabelAdapter extends ArrayAdapter<Label> {
 
         labelIcon.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_local_offer_black_24dp));
         labelTitle.setText(label.title);
+
+        int defaultTextColor = getContext().getResources().getColor(R.color.accent);
+        int textColor = label.color != null ? Integer.parseInt(label.color): defaultTextColor;
+        labelTitle.setTextColor(textColor);
+
         labelDescription.setText("");
 
         if (label.location != null) {
             // fixme - Only for API 19! Deprecated since 22.
             labelIcon.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_place_black_24dp));
-            // todo - more human-readable display.
-            labelTitle.setText(label.title);
-            if (label.description != null)
-                labelDescription.setText(label.description);
+
+            StringBuilder locationFormatter = new StringBuilder("");
+
+            if (label.location.city != null)
+                locationFormatter.append(label.location.city);
+            if (label.location.address != null)
+                locationFormatter.append(", ").append(label.location.address);
+            if (label.location.postalCode != null)
+                locationFormatter.append(", ").append(label.location.postalCode);
+
+            labelDescription.setText(locationFormatter);
+            labelDescription.setTextColor(Color.WHITE);
         }
 
         return labelView;

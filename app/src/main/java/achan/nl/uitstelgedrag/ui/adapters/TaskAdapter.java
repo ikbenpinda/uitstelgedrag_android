@@ -2,6 +2,7 @@ package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
@@ -123,7 +124,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             for (Label label : task.labels) {
                 TextView labelsview = new TextView(context);
                 labelsview.setText(label.title);
-                labelsview.setTextColor(0xFF4081FF); // TODO: 8-10-2017 Dynamic Palette colors.
+
+                int defaultTextColor = context.getResources().getColor(R.color.accent);
+                int textColor = label.color != null ? Integer.parseInt(label.color): defaultTextColor;
+
+                if (label.color != null)  // note - Unset colors are null by default.
+                    Log.i("TaskAdapter", "Label.color = " + label.color);
+
+                labelsview.setTextColor(textColor);
+
                 holder.labels.addView(labelsview);
             }
         }
