@@ -52,8 +52,12 @@ import com.mikepenz.iconics.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import achan.nl.uitstelgedrag.R;
@@ -62,6 +66,7 @@ import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
+import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
 import achan.nl.uitstelgedrag.ui.adapters.LabelAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.LabelSpinnerAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
@@ -80,6 +85,16 @@ import io.nlopez.smartlocation.location.config.LocationParams;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class TaskActivity extends Base {
+
+    // note/pseudo - task filtering
+
+    // get user location
+    // get list of tasks
+    // sort by label on most nearby
+    // sort location-less items either at the top or bottom / VERIFY
+
+    // allow the user to smoothly transition to his own filtering
+    // timeout on location-measuring
 
     // note/pseudo - default tasks usage:
 
@@ -472,6 +487,8 @@ public class TaskActivity extends Base {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+
+        // Handle intent in case we returned from the label editing screen.
         Intent intent = getIntent();
         ContentValues locationValues = intent.getParcelableExtra("location");
         if (locationValues != null) {
@@ -647,6 +664,44 @@ public class TaskActivity extends Base {
             labelView.setPadding(padding8dp, padding8dp, padding8dp, padding8dp);
             tasklabelslist.addView(labelView);
         });
+
+        // Get user location
+        Log.i("TaskActivity", "Requesting user location...");
+        SmartLocation.with(context).location().oneFix().start(location -> {
+            Log.i("TaskActivity", "Finding matches for current location.");
+            List<Label> results = filterItems(location);
+
+            if (results.isEmpty())
+                return;
+
+            // Filter tasks for location
+            Label priority = results.get(0);
+
+            Log.i("TaskActivity", "Match found for current location: " + priority);
+
+            Location labelLocation = new Location("");
+            labelLocation.setLatitude(location.getLatitude());
+            labelLocation.setLongitude(location.getLongitude());
+
+            // TODO: 26-10-2017 Create compound list of nearby tags to filter with?
+            if (TaskGateway.isNearby(location, labelLocation)){
+                // use this location
+                for (int i = 0; i < category_spinner.getCount(); i++) {
+                    Log.i("TaskActivity", "Spinner item in matcher: " + category_spinner.getItemAtPosition(i).toString());
+                    if (((Label) category_spinner.getItemAtPosition(i)).title.equalsIgnoreCase(priority.title)) {
+                        category_spinner.setSelection(i);
+                        Log.i("TaskActivity", "Match found in matcher: " + category_spinner.getItemAtPosition(i).toString());
+                    }
+                }
+            }
+            else{
+                // use full list / default("do nothing")
+            }
+
+            // sort items by deadline
+            // sort items by date added
+        });
+
     }
 
     @Override
@@ -702,7 +757,40 @@ public class TaskActivity extends Base {
         list.getAdapter().notifyDataSetChanged(); // FIXME/VERIFY - More efficient solutions?
     }
 
-    private void filterItems(){
+    /**
+     * Returns a list of labels sorted on closest distance to the user.
+     * @param location
+     * @return
+     */
+    private List<Label> filterItems(Location location){
+
+        Map<Label, Double> distances = new HashMap<>();
+        for (Label label : labeldb.getAll()) {
+            // check for location.
+            if (label.location != null) {
+                Location labelLocation = new Location("");
+                labelLocation.setLatitude(label.location.latitude);
+                labelLocation.setLongitude(label.location.longitude);
+
+                // check distance.
+                double distance = TaskGateway.measureDistance(labelLocation, location);
+                // map distances.
+                distances.put(label, distance);
+            }
+        }
+        // Put the entries of the map in a list so we can iterate over them.
+        List<Map.Entry<Label, Double>> sortedLabels = new LinkedList<>(distances.entrySet());
+        // sort by distances.
+        Collections.sort(sortedLabels, (o1, o2) -> o1.getValue().compareTo(o2.getValue()));
+
+        // Convert the list of map entries back to a list of labels.
+        List<Label> results = new LinkedList<>();
+        // Foreach will be in order of nearest by because of the linking.
+        for (Map.Entry<Label, Double> entry : sortedLabels){
+            results.add(entry.getKey());
+        }
+
+        return results;
 //
 //        ArrayList new_items = new ArrayList();
 //        if (filterByLocation == false){

@@ -180,20 +180,11 @@ public class TaskGateway implements Repository<Task> {
     public static boolean isNearby(Location l1, Location l2){
 
         int range = 500;
-        double R = 6378.137; // Radius of earth in KM
-        double dLat = l2.getLatitude() * Math.PI / 180 - l1.getLatitude() * Math.PI / 180;
-        double dLon = l2.getLongitude() * Math.PI / 180 - l1.getLongitude() * Math.PI / 180;
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(l1.getLatitude() * Math.PI / 180) * Math.cos(l2.getLatitude() * Math.PI / 180) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double d = R * c;
-        double distance = d * 1000; // meters
 
 //        boolean latitudeIsNearby = l1.getLatitude() - l2.getLatitude() < range;
 //        boolean longitudeIsNearby = l1.getLongitude() - l2.getLongitude() < range;
 //        if (latitudeIsNearby && longitudeIsNearby)
-        if (distance < range)
+        if (measureDistance(l1, l2) < range)
             return true;
         return false;
     }
@@ -207,6 +198,27 @@ public class TaskGateway implements Repository<Task> {
             return -1;
         });
         return tasks;
+    }
+
+    /**
+     * Returns distance between two sets of GPS coordinates.
+     * @param l1 the first 1android.Location object.
+     * @param l2 the second android.Location object.
+     * @return distance in meters.
+     */
+    public static double measureDistance(Location l1, Location l2){
+
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = l2.getLatitude() * Math.PI / 180 - l1.getLatitude() * Math.PI / 180;
+        double dLon = l2.getLongitude() * Math.PI / 180 - l1.getLongitude() * Math.PI / 180;
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(l1.getLatitude() * Math.PI / 180) * Math.cos(l2.getLatitude() * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = R * c;
+        double distance = d * 1000; // meters
+
+        return distance;
     }
 
     /**
