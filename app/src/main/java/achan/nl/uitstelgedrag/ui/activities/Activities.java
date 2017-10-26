@@ -39,7 +39,10 @@ public enum Activities {// FIXME use string resources!
     HELP(5, "Help", R.layout.activity_help, HelpActivity.class),
 
     /** About section of the application. Not often used but useful for testing deployments. */
-    ABOUT(6, "Over", R.layout.activity_about, AboutActivity.class);
+    ABOUT(6, "Over", R.layout.activity_about, AboutActivity.class),
+
+    /** Seperate multi-purpose view for setting a location. */
+    SETLOCATION(32, "Locatie", R.layout.activity_set_location, SetLocationActivity.class);
 
 
     /** Arbitrary id for the activity. Can be negative. */
