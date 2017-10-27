@@ -7,6 +7,15 @@
     android:orientation="horizontal">
 
     <android.support.v7.widget.CardView
+        android:id="@+id/provisional_label_color_picker_card_10"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginRight="8dp"
+        android:padding="16dp"
+        >
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_00"
         android:layout_width="32dp"
         android:layout_height="32dp"

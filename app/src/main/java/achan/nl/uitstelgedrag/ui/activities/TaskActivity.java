@@ -64,6 +64,7 @@ import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import achan.nl.uitstelgedrag.persistence.gateways.TaskGateway;
@@ -129,6 +130,7 @@ public class TaskActivity extends Base {
 //    @BindView(R.id.invis_atv)            LinearLayout invisible_addtaskview_layout;
     @BindView(R.id.btn_add_label)       Button addLabelButton;
     @BindView(R.id.task_labels_list) LinearLayout tasklabelslist;
+    @BindView(R.id.edit_label_btn) TextView editLabelButton;
 
     @BindView(R.id.provisional_label_color_picker_card_00) CardView colorcard00;
     @BindView(R.id.provisional_label_color_picker_card_0A) CardView colorcard0A;
@@ -663,6 +665,13 @@ public class TaskActivity extends Base {
             int padding8dp = Utils.convertDpToPx(this, 8f);
             labelView.setPadding(padding8dp, padding8dp, padding8dp, padding8dp);
             tasklabelslist.addView(labelView);
+        });
+
+        editLabelButton.setOnClickListener(v -> {
+            Intent editLabelIntent = new Intent(this, Activities.SETLOCATION.activity);
+            Label label = (Label) category_spinner.getSelectedItem();
+            editLabelIntent.putExtra("label", Labels.toValues(label));
+            startActivity(editLabelIntent);
         });
 
         // Get user location

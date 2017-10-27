@@ -15,11 +15,28 @@
         tools:layout_editor_absoluteY="8dp"
         tools:layout_editor_absoluteX="8dp">
 
+        <EditText
+            android:id="@+id/edit_label_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:hint="label"
+            android:paddingTop="32dp"
+            android:layout_marginBottom="12dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <include layout="@layout/provisional_color_picker" />
+        </LinearLayout>
+
         <CheckBox
             android:id="@+id/location_use_current_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="gebruik huidige locatie"/>
+            android:text="gebruik locatie"/>
 
         <EditText
             android:id="@+id/location_address_edittext"
@@ -53,6 +70,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Annuleren" />
+
+            <Button
+                android:id="@+id/location_delete_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                android:text="verwijderen"/>
         </LinearLayout>
 
     </LinearLayout>

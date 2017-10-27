@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import achan.nl.uitstelgedrag.persistence.definitions.Column;
+import achan.nl.uitstelgedrag.persistence.definitions.Constraints;
 import achan.nl.uitstelgedrag.persistence.definitions.Table;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Attachments;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Attendances;
@@ -26,7 +27,7 @@ import achan.nl.uitstelgedrag.persistence.migrations.Migration;
 public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Database {
 
     public static final String  DATABASE_NAME = "Uitstelgedrag.sqlite";
-    public static final int     DATABASE_SCHEMA_VERSION = 32;
+    public static final int     DATABASE_SCHEMA_VERSION = 33;
 
     public static final String CREATE = "CREATE TABLE IF NOT EXISTS ";
 
@@ -128,6 +129,11 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
     }
 
     @Override
+    public void onConfigure(SQLiteDatabase db) {
+        db.setForeignKeyConstraintsEnabled(true);
+    }
+
+    @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
         //nuke(db); // Last resort solution to database migrations.
@@ -158,7 +164,15 @@ public class UitstelgedragOpenHelper extends SQLiteOpenHelper implements Databas
             db.compileStatement(ALTER_TABLE_ADD_COLUMN(Locations.TABLE, Locations.POSTAL_CODE)).execute();
         };
 
-        migrate(migration31to32, db);
+        Migration migration32to33 = database -> {
+            Log.w("OpenHelper", "Migrating database version " + oldVersion + " to " + newVersion + ".");
+
+            // Update Tasks_Labels with the ON DELETE constraint.
+            // Note - Hopefully fixed regression by setting setForeignKeysEnabled(true) in onConfigure.
+            // Note - Still added necessary null-check in Tasks_Labels deserializing in TaskGateway.
+        };
+
+        migrate(migration32to33, db);
     }
 
     /**

@@ -14,11 +14,26 @@
               tools:showIn="@layout/activity_task"
     android:weightSum="1">
 
-    <Spinner
-        android:id="@+id/task_filter_spinner"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"/>
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/task_filter_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"/>
+
+        <TextView
+            android:id="@+id/edit_label_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.Button.Borderless.Colored"
+            android:textAlignment="viewEnd"
+            android:gravity="center"
+            android:text="bewerken"/>
+    </LinearLayout>
 
         <achan.nl.uitstelgedrag.ui.views.TaskRecyclerView
             android:id="@+id/MainList"

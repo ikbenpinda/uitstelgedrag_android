@@ -30,7 +30,11 @@ public class LabelGateway {
     }
 
     public Label get(int id) {
-        Label result = Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id)).get(0);
+        List<Label> results = Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id));
+        if (results.isEmpty())
+            return null;
+
+        Label result = results.get(0);
         result.location = Locations.fromCursor(helper.query(Locations.TABLE, Locations.LABEL_ID, "" + id));
         return result;
     }
@@ -71,8 +75,12 @@ public class LabelGateway {
     }
 
     public void update(Label label) {
-        delete(label);
-        insert(label);
+        Log.i("LabelGateway", "Updating label.");
+        database.update(Labels.TABLE.name, Labels.toValues(label), Labels.ID.name + " = ?", new String[]{""+label.id});
+        if (label.location != null) {
+            database.delete(Locations.TABLE.name, Locations.LABEL_ID + " = ?", new String[]{"" + label.id});
+            database.insert(Locations.TABLE.name, null, Locations.toValues(label, label.location)/*, Locations.LABEL_ID.name + " = ?", new String[]{""+label.id}*/);// FIXME: 27-10-2017 insert/update location fails
+        }
     }
 
     public boolean delete(Label label) {

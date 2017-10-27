@@ -15,7 +15,7 @@ public class Location { // todo location API.
      * by the geocoder, or any user defined name for this location,
      * e.g: "Home".
      */
-    public String name;
+    public String name = "";
     public double latitude;
     public double longitude;
     public String city = null;

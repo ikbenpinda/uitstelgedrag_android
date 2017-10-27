@@ -137,8 +137,9 @@ public class TaskGateway implements Repository<Task> {
         for (int[] id : label_ids) {
             Log.i("TaskGateway", "Searching for label " + id[DATA_LABEL_ID]);
             Label result = labelGateway.get(id[DATA_LABEL_ID]);
-            Log.i("TaskGateway", "Label found: "+ result.toString());
-            labels.add(result);
+            Log.i("TaskGateway", "Label found: "+ result);
+            if (result != null)
+                labels.add(result);
 //            labels.add(Labels.fromCursor(helper.query(Labels.TABLE, Labels.ID, "" + id[Tasks_Labels.DATA_LABEL_ID])).get(0));
         }
 //        String labelQuery = "SELECT * FROM " + Labels.TABLE + " WHERE " + Labels.TASK + " = " + task.id;

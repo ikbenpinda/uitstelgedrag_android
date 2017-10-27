@@ -58,7 +58,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="snel toevoegen"
+                        android:text="Taak toevoegen"
                         style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                         android:padding="16dp"/>
 

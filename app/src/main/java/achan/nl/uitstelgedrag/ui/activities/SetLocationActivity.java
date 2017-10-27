@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -20,8 +22,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Location;
+import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
+import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.nlopez.smartlocation.SmartLocation;
@@ -29,10 +34,12 @@ import io.nlopez.smartlocation.geocoding.utils.LocationAddress;
 
 public class SetLocationActivity extends Base implements OnMapReadyCallback{
 
+    @BindView(R.id.edit_label_title) EditText labelTitle;
     @BindView(R.id.location_address_edittext) EditText addressField;
     @BindView(R.id.location_use_current_checkbox) CheckBox useCurrentLocationCheckbox;
     @BindView(R.id.location_cancel_button) Button cancelButton;
     @BindView(R.id.location_save_button) Button saveButton;
+    @BindView(R.id.location_delete_button) Button deleteButton;
 
     // Zoom levels. For the spec, see here: https://developers.google.com/maps/documentation/javascript/tutorial#zoom-levels.
     public static final int ZOOM_LEVEL_CITY = 10;
@@ -42,6 +49,8 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
     private Context context;
     private GoogleMap map;
     private Location lastLocation;
+    private Label lastLabel;
+    private boolean isInLabelEditingMode = false;
 
     @Override
     Activities getCurrentActivity() {
@@ -52,6 +61,16 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+
+        Intent intent = getIntent();
+        ContentValues labelValues = intent.getParcelableExtra("label");
+        isInLabelEditingMode = labelValues != null;
+        if (isInLabelEditingMode) {
+            deleteButton.setVisibility(View.VISIBLE);
+            int label_id = labelValues.getAsInteger(Labels.ID.name);
+            Label label = new LabelGateway(this).get(label_id);
+            initializeLabelEditingMode(label);
+        }
 
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
@@ -86,14 +105,68 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
         });
 
         useCurrentLocationCheckbox.setOnClickListener(v -> useCurrentLocation());
-        saveButton.setOnClickListener(v -> returnAddress(lastLocation));
-        cancelButton.setOnClickListener(v -> returnAddress(null));
+        saveButton.setOnClickListener(v -> {
+            if (isInLabelEditingMode)
+                exitActivity(lastLabel);
+            else
+                exitActivity(lastLocation);
+        });
+        cancelButton.setOnClickListener(v -> exitActivity(null));
+        deleteButton.setOnClickListener(v -> {
+            new LabelGateway(this).delete(lastLabel);
+            exitActivity(null);
+        });
+    }
+
+    private void exitActivity(Object data) {
+        Intent intent;
+
+        if (data == null)
+            intent = returnWithAddress(null);
+        else
+            intent = isInLabelEditingMode?
+                    returnWithUpdatedLabel(lastLabel):
+                    returnWithAddress(lastLocation);
+
+        startActivity(intent);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         useCurrentLocation();
+    }
+
+    private void initializeLabelEditingMode(Label label){
+
+        lastLabel = label;
+
+        labelTitle.setText(lastLabel.title);
+        labelTitle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                lastLabel.title = s.toString();
+            }
+        });
+
+        if (lastLabel.color != null)
+            labelTitle.setTextColor(Integer.parseInt(lastLabel.color));
+        // todo - color changed? choose from picker : leave as is.
+
+        if (!lastLabel.location.name.isEmpty())
+            addressField.setText(lastLabel.location.name);
+        // todo - update lastLabel.location with lastLocation automatically / listener pattern.
+
     }
 
     private void findLocationOnMap(){
@@ -157,12 +230,22 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
         lastLocation = new Location(address);
     }
 
-    private void returnAddress(Location location){
+    private Intent returnWithAddress(Location location){
         Intent returnAddressIntent = new Intent(this, Activities.TASKS.activity);
         if (location != null) {
             Log.i("SetLocationActivity", "Returning location for address: " + location.toString());
             returnAddressIntent.putExtra("location", Locations.toValues(null, location));
         }
-        startActivity(returnAddressIntent);
+        return returnAddressIntent;
+    }
+
+    private Intent returnWithUpdatedLabel(Label label){
+
+        label.location = lastLocation;
+        label.location.name = lastLocation.address + ", " + lastLocation.postalCode + ", " + lastLocation.city; // FIXME: 27-10-2017 move to location class function.
+        new LabelGateway(this).update(label);
+        Intent updateLabelIntent = new Intent(this, Activities.TASKS.activity);
+
+        return updateLabelIntent;
     }
 }

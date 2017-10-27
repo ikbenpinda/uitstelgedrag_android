@@ -17,7 +17,7 @@ import achan.nl.uitstelgedrag.persistence.definitions.Types;
 /**
  * Created by Etienne on 5-6-2016.
  */
-public class Labels {
+public class Labels { // // FIXME: 27-10-2017 on delete cascade constraint.
 
     public static final int DEFAULT_ID_VALUE = 0;
 
