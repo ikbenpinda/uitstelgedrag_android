@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/provisional_label_color_picker"
     android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_red">
+        app:cardBackgroundColor="?attr/colorPalette0A">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -39,7 +39,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_light_red">
+        app:cardBackgroundColor="?attr/colorPalette0B">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -48,7 +48,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_blue">
+        app:cardBackgroundColor="?attr/colorPalette0C">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -57,7 +57,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_light_blue">
+        app:cardBackgroundColor="?attr/colorPalette0D">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -66,7 +66,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_green">
+        app:cardBackgroundColor="?attr/colorPalette0E">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -75,7 +75,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_yellow">
+        app:cardBackgroundColor="?attr/colorPalette0F">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -84,7 +84,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_purple">
+        app:cardBackgroundColor="?attr/colorPalette0G">
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
@@ -93,7 +93,7 @@
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
-        app:cardBackgroundColor="@color/base16_eighties_brown">
+        app:cardBackgroundColor="?attr/colorPalette0H">
     </android.support.v7.widget.CardView>
 
-</LinearLayout>
+</merge>

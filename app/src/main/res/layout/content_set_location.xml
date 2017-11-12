@@ -24,13 +24,17 @@
             android:paddingTop="32dp"
             android:layout_marginBottom="12dp"/>
 
-        <LinearLayout
+        <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_height="wrap_content">
 
-            <include layout="@layout/provisional_color_picker" />
-        </LinearLayout>
+            <achan.nl.uitstelgedrag.ui.views.ColorPicker
+                android:id="@+id/location_color_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+            </achan.nl.uitstelgedrag.ui.views.ColorPicker>
+        </HorizontalScrollView>
 
         <CheckBox
             android:id="@+id/location_use_current_checkbox"

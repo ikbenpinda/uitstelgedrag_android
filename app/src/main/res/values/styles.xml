@@ -11,6 +11,17 @@
         <item name="colorAccent">@color/accent_material_dark</item>
         <!--<item name="android:windowTranslucentStatus">false</item>-->
 
+        <!-- Base16 default values -->
+        <item name="colorPalette00">@color/base16_material_darker_black00</item>
+        <item name="colorPalette0A">@color/base16_material_darker_red</item>
+        <item name="colorPalette0B">@color/base16_material_darker_lightred</item>
+        <item name="colorPalette0C">@color/base16_material_darker_yellow</item>
+        <item name="colorPalette0D">@color/base16_material_darker_green</item>
+        <item name="colorPalette0E">@color/base16_material_darker_lightblue</item>
+        <item name="colorPalette0F">@color/base16_material_darker_blue</item>
+        <item name="colorPalette0G">@color/base16_material_darker_purple</item>
+        <item name="colorPalette0H">@color/base16_material_darker_brown</item>
+
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_background">@color/material_drawer_dark_background</item>
         <item name="material_drawer_primary_text">@color/material_drawer_dark_primary_text</item>
@@ -61,6 +72,17 @@
         <item name="colorPrimaryDark">#455A64</item>
         <item name="colorPrimary">#607D8B</item>
         <item name="colorAccent">#FF4081</item>
+
+        <!-- Base16 default values -->
+        <item name="colorPalette00">@color/base16_material_lighter_black00</item>
+        <item name="colorPalette0A">@color/base16_material_lighter_red</item>
+        <item name="colorPalette0B">@color/base16_material_lighter_lightred</item>
+        <item name="colorPalette0C">@color/base16_material_lighter_yellow</item>
+        <item name="colorPalette0D">@color/base16_material_lighter_green</item>
+        <item name="colorPalette0E">@color/base16_material_lighter_lightblue</item>
+        <item name="colorPalette0F">@color/base16_material_lighter_blue</item>
+        <item name="colorPalette0G">@color/base16_material_lighter_purple</item>
+        <item name="colorPalette0H">@color/base16_material_lighter_brown</item>
 
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_background">@color/material_drawer_background</item>

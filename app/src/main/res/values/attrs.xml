@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="popupOverlayStyle" format="reference"/>
+
+    <!-- Attributes for base16 colors. -->
+    <attr name="colorPalette00" format="reference"/>
+    <attr name="colorPalette0A" format="reference"/>
+    <attr name="colorPalette0B" format="reference"/>
+    <attr name="colorPalette0C" format="reference"/>
+    <attr name="colorPalette0D" format="reference"/>
+    <attr name="colorPalette0E" format="reference"/>
+    <attr name="colorPalette0F" format="reference"/>
+    <attr name="colorPalette0G" format="reference"/>
+    <attr name="colorPalette0H" format="reference"/>
 </resources>

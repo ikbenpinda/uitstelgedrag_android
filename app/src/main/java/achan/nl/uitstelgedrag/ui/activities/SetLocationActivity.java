@@ -27,6 +27,7 @@ import achan.nl.uitstelgedrag.domain.models.Location;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
+import achan.nl.uitstelgedrag.ui.views.ColorPicker;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.nlopez.smartlocation.SmartLocation;
@@ -40,6 +41,7 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
     @BindView(R.id.location_cancel_button) Button cancelButton;
     @BindView(R.id.location_save_button) Button saveButton;
     @BindView(R.id.location_delete_button) Button deleteButton;
+    @BindView(R.id.location_color_picker) ColorPicker colorPicker;
 
     // Zoom levels. For the spec, see here: https://developers.google.com/maps/documentation/javascript/tutorial#zoom-levels.
     public static final int ZOOM_LEVEL_CITY = 10;
@@ -116,6 +118,9 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
             new LabelGateway(this).delete(lastLabel);
             exitActivity(null);
         });
+
+        // todo - Set listener, set color to currently known color.
+        colorPicker.setOnSelectionChangedListener(() -> {labelTitle.setTextColor(colorPicker.getSelectedColor());});
     }
 
     private void exitActivity(Object data) {
@@ -159,9 +164,10 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
             }
         });
 
-        if (lastLabel.color != null)
+        if (lastLabel.color != null) {
             labelTitle.setTextColor(Integer.parseInt(lastLabel.color));
-        // todo - color changed? choose from picker : leave as is.
+            colorPicker.setColor(0, Integer.parseInt(lastLabel.color));
+        }
 
         if (!lastLabel.location.name.isEmpty())
             addressField.setText(lastLabel.location.name);
@@ -241,6 +247,8 @@ public class SetLocationActivity extends Base implements OnMapReadyCallback{
 
     private Intent returnWithUpdatedLabel(Label label){
 
+        if (colorPicker.getSelectedColor() > 0)
+            label.color = String.valueOf(colorPicker.getSelectedColor());
         label.location = lastLocation;
         label.location.name = lastLocation.address + ", " + lastLocation.postalCode + ", " + lastLocation.city; // FIXME: 27-10-2017 move to location class function.
         new LabelGateway(this).update(label);
