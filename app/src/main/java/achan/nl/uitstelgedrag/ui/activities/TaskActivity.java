@@ -113,6 +113,7 @@ public class TaskActivity extends Base {
     // voeg taak toe aan lijst.
 
     private static final int REQUEST_CODE = 1; // Arbitrary activity-identifying permission-request code.
+    private static final String DEFAULT_LIST_TITLE = "Alles";
 
     @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
     @BindView(R.id.AddTaskButton)       Button              AddTaskButton;
@@ -566,6 +567,12 @@ public class TaskActivity extends Base {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Label selected = (Label)category_spinner.getSelectedItem();
+
+                if(selected.title.equals(DEFAULT_LIST_TITLE))
+                    editLabelButton.setVisibility(View.INVISIBLE);
+                else
+                    editLabelButton.setVisibility(View.VISIBLE);
+
                 Log.i("FILTERS", "onItemSelected: " + selected.toString());
 
                 if (selected.title.equals("Alles")) { // todo- architect a default case.
