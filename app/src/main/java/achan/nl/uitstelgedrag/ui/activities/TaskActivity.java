@@ -16,6 +16,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
@@ -73,6 +74,7 @@ import achan.nl.uitstelgedrag.ui.adapters.LabelSpinnerAdapter;
 import achan.nl.uitstelgedrag.ui.adapters.TaskAdapter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenter;
 import achan.nl.uitstelgedrag.ui.presenters.TaskPresenterImpl;
+import achan.nl.uitstelgedrag.ui.views.ColorPicker;
 import achan.nl.uitstelgedrag.ui.views.TaskRecyclerView;
 import achan.nl.uitstelgedrag.widget.WidgetProvider;
 import achan.nl.uitstelgedrag.widget.WidgetService;
@@ -121,26 +123,30 @@ public class TaskActivity extends Base {
     @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
     @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
+    @BindView(R.id.til_labelview)       TextInputLayout     tilLabelView;
+    @BindView(R.id.til_add_task_description)        TextInputLayout tilAddTaskDescription;
     @BindView(R.id.AddTaskCategoryAuto) AppCompatMultiAutoCompleteTextView labelsview;
-    @BindView(R.id.provisional_label_color_picker) LinearLayout ll;
+//    @BindView(R.id.provisional_label_color_picker) LinearLayout ll;
     @BindView(R.id.tv_add_label_vs_trigger) TextView viewSwitcherTrigger;
     @BindView(R.id.vs_add_label_view)   ViewSwitcher viewSwitcher;
     //    @BindView(R.id.bottomsheet)         View bottomsheet;
 //    @BindView(R.id.bottomsheet_add_task) TextView bottomsheetAddTask;
 //    @BindView(R.id.invis_atv)            LinearLayout invisible_addtaskview_layout;
     @BindView(R.id.btn_add_label)       Button addLabelButton;
-    @BindView(R.id.task_labels_list) LinearLayout tasklabelslist;
-    @BindView(R.id.edit_label_btn) TextView editLabelButton;
+    @BindView(R.id.task_labels_list)    LinearLayout tasklabelslist;
+    @BindView(R.id.edit_label_btn)      TextView editLabelButton;
 
-    @BindView(R.id.provisional_label_color_picker_card_00) CardView colorcard00;
-    @BindView(R.id.provisional_label_color_picker_card_0A) CardView colorcard0A;
-    @BindView(R.id.provisional_label_color_picker_card_0B) CardView colorcard0B;
-    @BindView(R.id.provisional_label_color_picker_card_0C) CardView colorcard0C;
-    @BindView(R.id.provisional_label_color_picker_card_0D) CardView colorcard0E;
-    @BindView(R.id.provisional_label_color_picker_card_0E) CardView colorcard0D;
-    @BindView(R.id.provisional_label_color_picker_card_0F) CardView colorcard0F;
-    @BindView(R.id.provisional_label_color_picker_card_0G) CardView colorcard0G;
-    @BindView(R.id.provisional_label_color_picker_card_0H) CardView colorcard0H;
+    @BindView(R.id.colorpicker) ColorPicker colorPicker;
+// note - replaced with custom view above.
+//    @BindView(R.id.provisional_label_color_picker_card_00) CardView colorcard00;
+//    @BindView(R.id.provisional_label_color_picker_card_0A) CardView colorcard0A;
+//    @BindView(R.id.provisional_label_color_picker_card_0B) CardView colorcard0B;
+//    @BindView(R.id.provisional_label_color_picker_card_0C) CardView colorcard0C;
+//    @BindView(R.id.provisional_label_color_picker_card_0D) CardView colorcard0E;
+//    @BindView(R.id.provisional_label_color_picker_card_0E) CardView colorcard0D;
+//    @BindView(R.id.provisional_label_color_picker_card_0F) CardView colorcard0F;
+//    @BindView(R.id.     provisional_label_color_picker_card_0G) CardView colorcard0G;
+//    @BindView(R.id.provisional_label_color_picker_card_0H) CardView colorcard0H;
 
     int selectedColor = 0;
 
@@ -434,7 +440,7 @@ public class TaskActivity extends Base {
                 return;
 
             int noColorSelected = 0;
-            int defaultColor = colorcard00.getCardBackgroundColor().getDefaultColor();
+            int defaultColor = colorPicker.getSelectedColor(); //colorcard00.getCardBackgroundColor().getDefaultColor(); note - should be replaced with custom view.
 
             if (selectedColor != defaultColor || selectedColor != noColorSelected)
                 return;
@@ -644,16 +650,16 @@ public class TaskActivity extends Base {
 
             labelsview.getText().replace(0, labelsview.getText().toString().length(), spannable, 0, spannable.length());
         };
-
-        colorcard00.setOnClickListener(colorListener);
-        colorcard0A.setOnClickListener(colorListener);
-        colorcard0B.setOnClickListener(colorListener);
-        colorcard0C.setOnClickListener(colorListener);
-        colorcard0D.setOnClickListener(colorListener);
-        colorcard0E.setOnClickListener(colorListener);
-        colorcard0F.setOnClickListener(colorListener);
-        colorcard0G.setOnClickListener(colorListener);
-        colorcard0H.setOnClickListener(colorListener);
+// note - should be replaced with custom view
+//        colorcard00.setOnClickListener(colorListener);
+//        colorcard0A.setOnClickListener(colorListener);
+//        colorcard0B.setOnClickListener(colorListener);
+//        colorcard0C.setOnClickListener(colorListener);
+//        colorcard0D.setOnClickListener(colorListener);
+//        colorcard0E.setOnClickListener(colorListener);
+//        colorcard0F.setOnClickListener(colorListener);
+//        colorcard0G.setOnClickListener(colorListener);
+//        colorcard0H.setOnClickListener(colorListener);
 
         addLabelButton.setOnClickListener(v -> {
             TextView labelView = new TextView(context);
@@ -665,6 +671,9 @@ public class TaskActivity extends Base {
             int padding8dp = Utils.convertDpToPx(this, 8f);
             labelView.setPadding(padding8dp, padding8dp, padding8dp, padding8dp);
             tasklabelslist.addView(labelView);
+            super.dismissKeyboard();
+            labelView.clearFocus();
+            tilLabelView.clearFocus(); // The TextInputLayout is what actually clears focus.
         });
 
         editLabelButton.setOnClickListener(v -> {
@@ -687,6 +696,7 @@ public class TaskActivity extends Base {
             Label priority = results.get(0);
 
             Log.i("TaskActivity", "Match found for current location: " + priority);
+
 
             Location labelLocation = new Location("");
             labelLocation.setLatitude(location.getLatitude());
@@ -1006,6 +1016,8 @@ public class TaskActivity extends Base {
         //  to add more items at once.
         //desc.clearFocus();
         //dismissKeyboard();
+
+        tilAddTaskDescription.clearFocus();
     }
 
     @OnClick(R.id.imageButton) void addLocation(){ // note - switched to autocomplete instead.
