@@ -9,10 +9,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.CalendarContract;
-import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -20,15 +17,14 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -44,7 +40,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -62,6 +57,7 @@ import java.util.Map;
 import java.util.Random;
 
 import achan.nl.uitstelgedrag.R;
+import achan.nl.uitstelgedrag.domain.ChanDownParser;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
 import achan.nl.uitstelgedrag.domain.models.Timestamp;
@@ -77,7 +73,6 @@ import achan.nl.uitstelgedrag.ui.presenters.TaskPresenterImpl;
 import achan.nl.uitstelgedrag.ui.views.ColorPicker;
 import achan.nl.uitstelgedrag.ui.views.TaskRecyclerView;
 import achan.nl.uitstelgedrag.widget.WidgetProvider;
-import achan.nl.uitstelgedrag.widget.WidgetService;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -113,7 +108,8 @@ public class TaskActivity extends Base {
     // voeg taak toe aan lijst.
 
     private static final int REQUEST_CODE = 1; // Arbitrary activity-identifying permission-request code.
-    private static final String DEFAULT_LIST_TITLE = "Alles";
+
+    private static final String DEFAULT_LIST_TITLE = "Alles"; // fixme - use localized resources.getstring, and check casing!
 
     @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
     @BindView(R.id.AddTaskButton)       Button              AddTaskButton;
@@ -161,6 +157,7 @@ public class TaskActivity extends Base {
     TaskAdapter adapter;
     TaskPresenter presenter;
     LabelGateway labeldb;
+    ChanDownParser parser = new ChanDownParser();
     LabelAdapter categoryAdapter;
     List<Label> allLabels;
 
@@ -182,6 +179,7 @@ public class TaskActivity extends Base {
     String DELIMITER_SIGN = ","; // note '\n' as alternative?
     int MIN_INPUT = 1;
 
+    // Fixme - figure out why one of the listeners fucks up autocomplete
     TextWatcher locationLabelListener = new TextWatcher() {
 
         String previous = "";
@@ -392,11 +390,10 @@ public class TaskActivity extends Base {
 
     TextWatcher SingleAddLabelListener = new TextWatcher() {
 
+        final int NO_COLOR_SELECTED = -1;
+
         String previous = "";
         boolean changed = false;
-
-        String[] categories = new String[]{};
-        Random random = new Random();
 
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -413,25 +410,6 @@ public class TaskActivity extends Base {
             } else {
                 changed = false;
             }
-
-            // todo - filter redundant suggestions already in labelsview.
-            List<Label> filteredResults = labeldb.getAll();
-            List<String> inter = new ArrayList<>();
-
-            for (int i = 0; i < categories.length; i++)
-                categories[i] = categories[i].trim().toLowerCase();
-
-            for (Label label : filteredResults)
-                inter.add(label.title.toLowerCase());
-
-            for (Label label : labeldb.getAll())
-                if (Arrays.asList(categories).contains(label.title))
-                    filteredResults.remove(label);
-
-            // fixme - adapter confusion, see textwatchers
-//            ArrayAdapter<Label> suggestionsAdapter = new ArrayAdapter<>(getBaseContext(), R.layout.rowlayout_label, R.id.label_title, filteredResults);
-            LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, filteredResults);
-            labelsview.setAdapter(suggestionsAdapter);
         }
 
         @Override
@@ -440,25 +418,36 @@ public class TaskActivity extends Base {
             if (!changed)
                 return;
 
-            int noColorSelected = 0;
-            int defaultColor = colorPicker.getSelectedColor(); //colorcard00.getCardBackgroundColor().getDefaultColor(); note - should be replaced with custom view.
+            List<Label> categories = parser.parseLabels(labelsview.getText().toString(), allLabels);
 
-            if (selectedColor != defaultColor || selectedColor != noColorSelected)
-                return;
+            for (Label label : categories) {
+                Log.i("ChanDownParser", label.toString());
 
-            // note - only trigger this on some events to prevent infinite loop.
-            String label = labelsview.getText().toString().trim();
+                Log.i("Spanner", "categories_size=" + categories.size());
+                Log.i("Spanner", "Spanning label for label '" + label + "'");
 
-            Log.i("Spanner", "categories_size=" + categories.length);
+                boolean colorIsSelected = colorPicker.getSelectedColor() != NO_COLOR_SELECTED;
+                boolean labelAlreadyColored = label.color != null && !label.color.isEmpty();
 
-            // Don't span the last label as it might still be edited by the user.
-            Log.i("Spanner", "Spanning label for label '" + label + "'");
+                Log.i("Spanner", "labelAlreadyColored: " + labelAlreadyColored);
+                Log.i("Spanner", "colorIsSelected: " + colorIsSelected);
+                // Color certain words in the text if these equal colored labels.
 
-            SpannableString spannable = new SpannableString(label);
+                if (labelAlreadyColored | colorIsSelected) {
+                    Spannable spannable = createSpannable(label);
+                    replaceSpannable(editable, spannable, label);
+                }
+            }
+        }
+
+        private Spannable createSpannable(Label label){
+
+            SpannableString spannable = new SpannableString(label.title);
 
 //                int backgroundColor = Color.parseColor("#222222");// todo - set background to auto, random, or user-defined color.
-            int foregroundColor = selectedColor; // todo - set foreground to black if necessary
-
+            boolean labelColorIsSet = label.color != null && !label.color.isEmpty();
+            int foregroundColor = labelColorIsSet?
+                    Integer.parseInt(label.color) : selectedColor; // todo - set foreground to black if necessary
 
 //                BackgroundColorSpan background = new BackgroundColorSpan(backgroundColor);
             ForegroundColorSpan foreground = new ForegroundColorSpan(foregroundColor);
@@ -471,19 +460,22 @@ public class TaskActivity extends Base {
 //                };
 
 //                spannable.setSpan(background, 0, label.length(), 0);
-            spannable.setSpan(foreground, 0, label.length(), 0);
+            spannable.setSpan(foreground, 0, label.title.length(), 0);
 //                spannable.setSpan(onClickMenu, 0, label.length(), 0);
 
-            int st = editable.toString().indexOf(label);
-            int en = st + label.length(); // note - indexoutofbounds
+            return spannable;
+        }
 
-            Log.i("Spanner", "About to replace '" + editable.subSequence(st, en).toString() + "' in '" + editable.toString() + "', with '" + label + "'");
+        private Editable replaceSpannable(Editable editable, Spannable spannable, Label label){
+            int st = editable.toString().indexOf(label.title);
+            int en = st + label.title.length(); // note - indexoutofbounds
+
+            Log.i("Spanner", "About to replace '" + editable.subSequence(st, en).toString() + "' in '" + editable.toString() + "', with '" + label.title + "'");
             Log.i("Spanner", "Spannable:" + spannable.toString());
-            Log.i("Spanner", "Label:" + label);
+            Log.i("Spanner", "Label:" + label.title);
             Log.i("Spanner", "Editable:" + editable.toString());
 
-//                editable.setSpan(spannable, st, en - 1, 0);
-            editable.replace(st, en, spannable, 0, spannable.length()); // note - infinite loop
+            return editable.replace(st, en, spannable, 0, spannable.length()); // note - infinite loop
         }
     };
 
@@ -606,7 +598,26 @@ public class TaskActivity extends Base {
 
         labelsview.setAdapter(categoryAdapter);
         labelsview.setThreshold(MIN_INPUT);
-        labelsview.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        // note - replaced with labelparser.
+        labelsview.setTokenizer(new MultiAutoCompleteTextView.Tokenizer() {
+            @Override
+            public int findTokenStart(CharSequence text, int cursor) {
+                return 0; // // TODO: 20-11-2017 write own tokenizer;
+                //todo - use code from parser/adapter filter for testability
+                //todo - see adapter filter for details.
+
+            }
+
+            @Override
+            public int findTokenEnd(CharSequence text, int cursor) {
+                return 0;
+            }
+
+            @Override
+            public CharSequence terminateToken(CharSequence text) {
+                return null;
+            }
+        });
 
         labelsview.setOnFocusChangeListener((view, focused) -> {
             if (focused /*&& labelsview.getText().toString().length() == 0*/)
@@ -633,8 +644,7 @@ public class TaskActivity extends Base {
             viewSwitcher.showNext();
         });
 
-        View.OnClickListener colorListener = v -> {
-            selectedColor = ((CardView) v).getCardBackgroundColor().getDefaultColor();
+        ColorPicker.OnSelectionChangedListener colorListener = () -> {
             String label = labelsview.getText().toString();
             SpannableString spannable = new SpannableString(label);
 
@@ -657,29 +667,33 @@ public class TaskActivity extends Base {
 
             labelsview.getText().replace(0, labelsview.getText().toString().length(), spannable, 0, spannable.length());
         };
-// note - should be replaced with custom view
-//        colorcard00.setOnClickListener(colorListener);
-//        colorcard0A.setOnClickListener(colorListener);
-//        colorcard0B.setOnClickListener(colorListener);
-//        colorcard0C.setOnClickListener(colorListener);
-//        colorcard0D.setOnClickListener(colorListener);
-//        colorcard0E.setOnClickListener(colorListener);
-//        colorcard0F.setOnClickListener(colorListener);
-//        colorcard0G.setOnClickListener(colorListener);
-//        colorcard0H.setOnClickListener(colorListener);
+
+        colorPicker.setOnSelectionChangedListener(colorListener);
 
         addLabelButton.setOnClickListener(v -> {
-            TextView labelView = new TextView(context);
-            labelView.setText(labelsview.getText());
-            if (selectedColor == 0)
-                labelView.setTextColor(getColor(R.color.accent)); // FIXME: 26-10-2017 compatibility issues.
-            else
-                labelView.setTextColor(selectedColor);
-            int padding8dp = Utils.convertDpToPx(this, 8f);
-            labelView.setPadding(padding8dp, padding8dp, padding8dp, padding8dp);
-            tasklabelslist.addView(labelView);
+
+            // FIXME - don't use the entire labelsview string, delimit and parse first.
+            // FIXME - reset the holder after adding tasks.
+            // FIXME - make removal possible without hacking it by restarting the activity.
+
+            for (Label label : parser.parseLabels(labelsview.getText().toString(), allLabels)) {
+
+                TextView labelView = new TextView(context);
+                labelView.setText(label.title);
+                if (label.color != null && !label.color.isEmpty())
+                    labelView.setTextColor(Integer.parseInt(label.color));
+                else if (selectedColor == 0)
+                    labelView.setTextColor(getColor(R.color.accent)); // FIXME: 26-10-2017 compatibility issues.
+                else
+                    labelView.setTextColor(selectedColor);
+
+                int padding = Utils.convertDpToPx(this, 8f);
+                labelView.setPadding(padding, padding, padding, padding);
+
+                tasklabelslist.addView(labelView);
+            }
+
             super.dismissKeyboard();
-            labelView.clearFocus();
             tilLabelView.clearFocus(); // The TextInputLayout is what actually clears focus.
         });
 
@@ -888,7 +902,7 @@ public class TaskActivity extends Base {
                             .reverse(location, (location1, list1) -> {
                         if (list1.size() > 0)
                             current_address = list1.get(0);
-                        Log.i("Location Services", "Current location: " + location.toString() + " / " + current_address.toString());
+                        Log.i("Location Services", "Current location: " + location + " / " + current_address);
                     });
 //                    waitingForLocationDialog.dismiss();
 //                    final EditText view = new EditText(context);
@@ -921,8 +935,10 @@ public class TaskActivity extends Base {
 //        listSwitcher.setDisplayedChild(VIEW_LIST);
         EditText    descriptionView = (EditText) findViewById(R.id.AddTaskDescription);
         descriptionView.requestFocus();
+        String descriptionInput = descriptionView.getText().toString();
+        String labelInput = labelsview.getText().toString();// FIXME use tasklabelslist
 
-        if (descriptionView.getText().toString().trim().isEmpty()) { // todo - espresso
+        if (descriptionInput.trim().isEmpty()) { // todo - espresso
             descriptionView.setError("Taak kan niet leeg zijn!");
             return;
         }
@@ -930,44 +946,36 @@ public class TaskActivity extends Base {
         // Check all labels for location.
         // If matches, use those instead.
         List<Task> new_tasks = new ArrayList<>();
-        List<Label> processedLabels = new ArrayList<>();
-        String[] unprocessedLabels = labelsview.getText().toString().split(",");
-        for (String unprocessedLabel : unprocessedLabels) {
-            Label processedLabel = new Label();
-            processedLabel.title = unprocessedLabel;
 
-//            for (Label label : allLabels) {
-//                if (label.title.equals(unprocessedLabel))
-//                    processedLabel = label;
-//                else
-//                    labeldb.insert(label);
-//            }
-
-            processedLabels.add(processedLabel);
+        // FIXME - temp workaround for tasklabelslist not being an actual listview.
+        StringBuilder n = new StringBuilder();
+        for (int i = 0; i < tasklabelslist.getChildCount(); i++) {
+                n.append(((TextView) tasklabelslist.getChildAt(i)).getText())
+                .append(", ");
         }
+        labelInput = n.toString();
 
-        // Split tasks on commas
-        String[] descriptions = descriptionView.getText().toString().split(",");
-        String labels = labelsview.getText().toString(); // fixme - take labels from label-specific view.
+        List<Label> processedLabels = parser.parseLabels(labelInput, labeldb.getAll());
+        List<Task> tasks = parser.parseTasks(descriptionInput);
+
         Date deadline = planTaskCheckbox.isChecked() ? parseDate() : null;
 
-        for (String description : descriptions) {
-            description = description.trim();
-            Task task = new Task(description);
-            if (!labels.isEmpty()) // note - Labels are optional, descriptions are not.
-                for (Label label : processedLabels) {
+        for (Task task : tasks) {
+            if (!processedLabels.isEmpty()) // note - Labels are optional, descriptions are not.
+                for (Label label : processedLabels) {//FIXME  - use and reset tasklabelslist
                     Log.i("TaskActivity", "Adding processed labels...");
                     Log.i("TaskActivity", "label id: " + label.id);
 
-//                    label.id = labeldb.
-
-                    // check if color is selected and doesnt override an existing selection,
+                    // check if color is selected and doesn't override an existing selection,
                     // since the preliminary view resets color by default.
-                    if (selectedColor != 0 && !labeldb.getAll().contains(label))
-                        label.color = String.valueOf(selectedColor);
-                    if (lastLocation != null) {
-                        label.location = lastLocation;
-                        lastLocation = null;
+                    if (!labeldb.getAll().contains(label)) {
+                        if (selectedColor != 0)
+                            label.color = String.valueOf(selectedColor);
+
+                        if (lastLocation != null) {
+                            label.location = lastLocation;
+                            lastLocation = null;
+                        }
                     }
 
                     task.labels.add(label);
@@ -989,28 +997,25 @@ public class TaskActivity extends Base {
 
             // fill buffer with new tasks
             new_tasks.add(task);
-
-            if (new_tasks.size() > 1){
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < descriptions.length; i++) {
-                    builder.append(descriptions[i]);
-                    if (i < descriptions.length - 1) {
-                        builder.append(", ");
-                    }
-                }
-
-                Snackbar.make(v, "Taken toegevoegd: " + builder.toString(), Snackbar.LENGTH_SHORT).show();
-            }
-            else
-                Snackbar.make(v, "Taak toegevoegd: " + task.description, Snackbar.LENGTH_SHORT).show();
-
-            descriptionView.setText("");
         }
 
         for (Task task : new_tasks) {
             adapter.addItem(adapter.getItemCount(), task);
             presenter.addTask(task); // FIXME: 3-10-2017 - SQLiteConstraintException: UNIQUE constraint failed.
             setFilterOptions();
+        }
+
+        // Show feedback after adding.
+        // String builder for user snackbar.
+        String single = "Taak toegevoegd";
+        String plural = "Taken toegevoegd";
+        StringBuilder builder;
+        builder = new StringBuilder(new_tasks.size() > 1? plural: single);
+        for (int i = 0; i < tasks.size(); i++) {
+            builder.append(tasks.get(i));
+            if (i < tasks.size() - 1) {
+                builder.append(", ");
+            }
         }
 
 //        filterItems();
@@ -1024,6 +1029,10 @@ public class TaskActivity extends Base {
         //desc.clearFocus();
         //dismissKeyboard();
 
+        Snackbar.make(v, builder.toString(), Snackbar.LENGTH_SHORT).show();
+        descriptionView.setText("");
+        labelsview.setText("");
+        tasklabelslist.removeAllViews();
         tilAddTaskDescription.clearFocus();
     }
 
@@ -1104,7 +1113,11 @@ public class TaskActivity extends Base {
         */
     }
 
+//    public static final int TODAY = 0;
+//    public static final int TOMORROW = 1;
+//    public static final int NEXT_WEEK = 2;
     private Date parseDate() {
+
         Date date = new Date();
 
         Log.i("TaskActivity", "Parsing date for chosen option " + planTaskSpinner.getSelectedItem().toString());
