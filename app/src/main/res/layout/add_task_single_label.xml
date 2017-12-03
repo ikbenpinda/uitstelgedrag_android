@@ -55,17 +55,17 @@
 
     </LinearLayout>
 
-    <ViewSwitcher
-        android:id="@+id/vs_add_label_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <!--<ViewSwitcher-->
+        <!--android:id="@+id/vs_add_label_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
 
-        <TextView
-            android:id="@+id/tv_add_label_vs_trigger"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=" +Label toevoegen" />
+        <!--<TextView-->
+            <!--android:id="@+id/tv_add_label_vs_trigger"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text=" +Label toevoegen" />-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -94,12 +94,12 @@
                 </android.support.design.widget.TextInputLayout>
 
 
-                <ImageButton
-                    android:id="@+id/imageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="visible"
-                    app:srcCompat="@drawable/ic_public_black_24dp" />
+                <!--<ImageButton-->
+                    <!--android:id="@+id/imageButton"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:visibility="visible"-->
+                    <!--app:srcCompat="@drawable/ic_public_black_24dp" />-->
 
                 <Button
                     android:id="@+id/btn_add_label"
@@ -110,40 +110,40 @@
 
             </LinearLayout>
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <!--<HorizontalScrollView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
 
                 <!--<include layout="@layout/provisional_color_picker" />-->
-            <achan.nl.uitstelgedrag.ui.views.ColorPicker
-                android:id="@+id/colorpicker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            <!--<achan.nl.uitstelgedrag.ui.views.ColorPicker-->
+                <!--android:id="@+id/colorpicker"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content" />-->
 
-            </HorizontalScrollView>
+            <!--</HorizontalScrollView>-->
         </LinearLayout>
-    </ViewSwitcher>
+    <!--</ViewSwitcher>-->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
 
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/TaskIsPlanned"
-            android:text="Plan voor"/>
+        <!--<CheckBox-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/TaskIsPlanned"-->
+            <!--android:text="Plan voor"/>-->
 
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/TaskIsPlannedFor"
-            android:entries="@array/planning_presets">
+        <!--<Spinner-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/TaskIsPlannedFor"-->
+            <!--android:entries="@array/planning_presets">-->
 
-        </Spinner>
+        <!--</Spinner>-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <Button
         android:id="@+id/AddTaskButton"

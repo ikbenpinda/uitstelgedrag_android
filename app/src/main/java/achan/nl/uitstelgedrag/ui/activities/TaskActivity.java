@@ -42,7 +42,6 @@ import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import com.mikepenz.iconics.utils.Utils;
 
@@ -115,17 +114,17 @@ public class TaskActivity extends Base {
     @BindView(R.id.AddTaskButton)       Button              AddTaskButton;
     @BindView(R.id.MainList)            TaskRecyclerView    list;
     @BindView(R.id.emptyListView)       TextView            emptyView;
-    @BindView(R.id.TaskIsPlanned)       CheckBox            planTaskCheckbox;
-    @BindView(R.id.imageButton)         ImageButton         addLocationButton;
-    @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
+//    @BindView(R.id.TaskIsPlanned)       CheckBox            planTaskCheckbox;
+//    @BindView(R.id.imageButton)         ImageButton         addLocationButton;
+//    @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
     @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
     @BindView(R.id.til_labelview)       TextInputLayout     tilLabelView;
     @BindView(R.id.til_add_task_description)        TextInputLayout tilAddTaskDescription;
     @BindView(R.id.AddTaskCategoryAuto) AppCompatMultiAutoCompleteTextView labelsview;
 //    @BindView(R.id.provisional_label_color_picker) LinearLayout ll;
-    @BindView(R.id.tv_add_label_vs_trigger) TextView viewSwitcherTrigger;
-    @BindView(R.id.vs_add_label_view)   ViewSwitcher viewSwitcher;
+//    @BindView(R.id.tv_add_label_vs_trigger) TextView viewSwitcherTrigger;
+//    @BindView(R.id.vs_add_label_view)   ViewSwitcher viewSwitcher;
     //    @BindView(R.id.bottomsheet)         View bottomsheet;
 //    @BindView(R.id.bottomsheet_add_task) TextView bottomsheetAddTask;
 //    @BindView(R.id.invis_atv)            LinearLayout invisible_addtaskview_layout;
@@ -133,7 +132,7 @@ public class TaskActivity extends Base {
     @BindView(R.id.task_labels_list)    LinearLayout tasklabelslist;
     @BindView(R.id.edit_label_btn)      TextView editLabelButton;
 
-    @BindView(R.id.colorpicker) ColorPicker colorPicker;
+//    @BindView(R.id.colorpicker) ColorPicker colorPicker; // todo - alternative way of toggling visibility state
 // note - replaced with custom view above.
 //    @BindView(R.id.provisional_label_color_picker_card_00) CardView colorcard00;
 //    @BindView(R.id.provisional_label_color_picker_card_0A) CardView colorcard0A;
@@ -426,7 +425,7 @@ public class TaskActivity extends Base {
                 Log.i("Spanner", "categories_size=" + categories.size());
                 Log.i("Spanner", "Spanning label for label '" + label + "'");
 
-                boolean colorIsSelected = colorPicker.getSelectedColor() != NO_COLOR_SELECTED;
+                boolean colorIsSelected = false;//colorPicker.getSelectedColor() != NO_COLOR_SELECTED;
                 boolean labelAlreadyColored = label.color != null && !label.color.isEmpty();
 
                 Log.i("Spanner", "labelAlreadyColored: " + labelAlreadyColored);
@@ -437,6 +436,18 @@ public class TaskActivity extends Base {
                     Spannable spannable = createSpannable(label);
                     replaceSpannable(editable, spannable, label);
                 }
+            }
+
+            String trimmed = editable.toString().trim();
+            char[] chars = trimmed.toCharArray();
+            char last_char = chars[trimmed.length() - 1];
+            if (last_char == ',') {
+                Log.i("afterTextChanged", "Trying to force the dropdown..");
+                // todo - efficiency, filter already-present results.
+                LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, allLabels);
+                labelsview.setAdapter(suggestionsAdapter);
+                labelsview.showDropDown();// todo - trigger dropdown
+                Log.i("afterTextChanged", "Meh.");
             }
         }
 
@@ -599,23 +610,65 @@ public class TaskActivity extends Base {
         labelsview.setAdapter(categoryAdapter);
         labelsview.setThreshold(MIN_INPUT);
         // note - replaced with labelparser.
+//        labelsview.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
         labelsview.setTokenizer(new MultiAutoCompleteTextView.Tokenizer() {
+
+            /**
+             * The start of the subsection of the string to replace in.
+             */
             @Override
             public int findTokenStart(CharSequence text, int cursor) {
-                return 0; // // TODO: 20-11-2017 write own tokenizer;
+
+                // TODO: 20-11-2017 write own tokenizer;
                 //todo - use code from parser/adapter filter for testability
                 //todo - see adapter filter for details.
 
+                //return cursor;
+                int i = cursor;
+
+                while (i > 0 && text.charAt(i - 1) != ',') {
+                    labelsview.showDropDown();
+                    i--;
+                }
+                while (i < cursor && text.charAt(i) == ' ') {
+                    i++;
+                }
+
+                Log.i("Tokenizer", "findTokenStart: " + i);
+
+                return i;
             }
 
+            /**
+             * The end of the subsection of the string to replace in.
+             */
             @Override
             public int findTokenEnd(CharSequence text, int cursor) {
-                return 0;
+                int i = cursor;
+                int len = text.length();
+
+                while (i < len) {
+                    if (text.charAt(i) == ',') {
+                        return i;
+                    } else {
+                        i++;
+                    }
+                }
+
+                Log.i("Tokenizer", "findTokenEnd: " + i);
+
+                return len;
             }
 
+            /**
+             * The CharSequence to replace stuff with.
+             */
             @Override
             public CharSequence terminateToken(CharSequence text) {
-                return null;
+
+                Log.i("Tokenizer", "text: " + text);
+
+                return text;
             }
         });
 
@@ -640,9 +693,9 @@ public class TaskActivity extends Base {
         list.setAdapter(adapter);
         list.setEmptyView(emptyView);
 
-        viewSwitcherTrigger.setOnClickListener(v -> {
-            viewSwitcher.showNext();
-        });
+//        viewSwitcherTrigger.setOnClickListener(v -> {
+//            viewSwitcher.showNext();
+//        });
 
         ColorPicker.OnSelectionChangedListener colorListener = () -> {
             String label = labelsview.getText().toString();
@@ -668,7 +721,7 @@ public class TaskActivity extends Base {
             labelsview.getText().replace(0, labelsview.getText().toString().length(), spannable, 0, spannable.length());
         };
 
-        colorPicker.setOnSelectionChangedListener(colorListener);
+//        colorPicker.setOnSelectionChangedListener(colorListener);
 
         addLabelButton.setOnClickListener(v -> {
 
@@ -683,7 +736,7 @@ public class TaskActivity extends Base {
                 if (label.color != null && !label.color.isEmpty())
                     labelView.setTextColor(Integer.parseInt(label.color));
                 else if (selectedColor == 0)
-                    labelView.setTextColor(getColor(R.color.accent)); // FIXME: 26-10-2017 compatibility issues.
+                    ;//labelView.setTextColor(getColor(R.color.accent)); // FIXME: 26-10-2017 compatibility issues.
                 else
                     labelView.setTextColor(selectedColor);
 
@@ -958,7 +1011,7 @@ public class TaskActivity extends Base {
         List<Label> processedLabels = parser.parseLabels(labelInput, labeldb.getAll());
         List<Task> tasks = parser.parseTasks(descriptionInput);
 
-        Date deadline = planTaskCheckbox.isChecked() ? parseDate() : null;
+        Date deadline = /*planTaskCheckbox.isChecked() ? parseDate() :*/ null;
 
         for (Task task : tasks) {
             if (!processedLabels.isEmpty()) // note - Labels are optional, descriptions are not.
@@ -1036,49 +1089,49 @@ public class TaskActivity extends Base {
         tilAddTaskDescription.clearFocus();
     }
 
-    @OnClick(R.id.imageButton) void addLocation(){ // note - switched to autocomplete instead.
-        String[] tags = labelsview.getText().toString().split(",");
+//    @OnClick(R.id.imageButton) void addLocation(){ // note - switched to autocomplete instead.
+//        String[] tags = labelsview.getText().toString().split(",");
+//
+//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//
+//        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
+//                android.R.layout.simple_dropdown_item_1line, tags);
+//        final View locationView = LayoutInflater.from(this).inflate(R.layout.dialog_addlocation, null);
+//        TextInputEditText addressView = (TextInputEditText) locationView.findViewById(R.id.dialog_addlocation_address);
+//        AutoCompleteTextView tagsView = (AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags);
+//        tagsView.setAdapter(categoryAdapter);
+//
+//        SmartLocation.with(this).location().oneFix().start(location -> {
+//            SmartLocation.with(context).geocoding().reverse(location, (location1, list1) -> {
+//                // note - reverse the found GPS coordinates to a human readable address.
+//                Address address = list1.get(0);
+//
+//                lastLocation = new achan.nl.uitstelgedrag.domain.models.Location(address);
+//
+////                addressView.setText(address.getAddressLine(0));
+//                addressView.setText(lastLocation.name);
+//            });
+//        });
+//
+//        dialog.setView(locationView)
+//                .setPositiveButton("voeg toe", (dialogInterface, i) -> {
+////                    templateLabel = new Label(); note - not necessary, just use location in addTask.
+////                    templateLabel.title = ((AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags)).getText().toString();
+////                    templateLabel.location = lastLocation;
+//                    //task.labels.add(label);
+//                    Log.i("Location", "No code for adding location to label in OnClickListener yet.");
+//                })
+//                .setNegativeButton("laat maar", (dialogInterface, i) -> {
+//                    lastLocation = null;
+//                })
+//                .create()
+//                .show();
+//    }
 
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, tags);
-        final View locationView = LayoutInflater.from(this).inflate(R.layout.dialog_addlocation, null);
-        TextInputEditText addressView = (TextInputEditText) locationView.findViewById(R.id.dialog_addlocation_address);
-        AutoCompleteTextView tagsView = (AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags);
-        tagsView.setAdapter(categoryAdapter);
-
-        SmartLocation.with(this).location().oneFix().start(location -> {
-            SmartLocation.with(context).geocoding().reverse(location, (location1, list1) -> {
-                // note - reverse the found GPS coordinates to a human readable address.
-                Address address = list1.get(0);
-
-                lastLocation = new achan.nl.uitstelgedrag.domain.models.Location(address);
-
-//                addressView.setText(address.getAddressLine(0));
-                addressView.setText(lastLocation.name);
-            });
-        });
-
-        dialog.setView(locationView)
-                .setPositiveButton("voeg toe", (dialogInterface, i) -> {
-//                    templateLabel = new Label(); note - not necessary, just use location in addTask.
-//                    templateLabel.title = ((AutoCompleteTextView) locationView.findViewById(R.id.dialog_addlocation_tags)).getText().toString();
-//                    templateLabel.location = lastLocation;
-                    //task.labels.add(label);
-                    Log.i("Location", "No code for adding location to label in OnClickListener yet.");
-                })
-                .setNegativeButton("laat maar", (dialogInterface, i) -> {
-                    lastLocation = null;
-                })
-                .create()
-                .show();
-    }
-
-    @OnLongClick(R.id.imageButton) boolean addCurrentLocation(View v){
-        Intent setCustomLocationIntent = new Intent(context, SetLocationActivity.class);
-        startActivity(setCustomLocationIntent);
-        return true;
+//    @OnLongClick(R.id.imageButton) boolean addCurrentLocation(View v){
+//        Intent setCustomLocationIntent = new Intent(context, SetLocationActivity.class);
+//        startActivity(setCustomLocationIntent);
+//        return true;
         /*
         waitingForLocationDialog.show();
         smartLocation
@@ -1111,30 +1164,30 @@ public class TaskActivity extends Base {
                 });
         return true;
         */
-    }
+//    }
 
 //    public static final int TODAY = 0;
 //    public static final int TOMORROW = 1;
 //    public static final int NEXT_WEEK = 2;
-    private Date parseDate() {
-
-        Date date = new Date();
-
-        Log.i("TaskActivity", "Parsing date for chosen option " + planTaskSpinner.getSelectedItem().toString());
-        switch (planTaskSpinner.getSelectedItem().toString()){
-            case "vandaag":
-                break;
-            case "morgen":
-                date = new Date(date.getTime() + Timestamp.DAY_IN_MILLIS);
-                break;
-            case "volgende week":
-                date = new Date(date.getTime() + Timestamp.DAY_IN_MILLIS * 7);
-                break;
-            default:
-                date = null;
-                break;
-        }
-
-        return date;
-    }
+//    private Date parseDate() {
+//
+//        Date date = new Date();
+//
+//        Log.i("TaskActivity", "Parsing date for chosen option " + planTaskSpinner.getSelectedItem().toString());
+//        switch (planTaskSpinner.getSelectedItem().toString()){
+//            case "vandaag":
+//                break;
+//            case "morgen":
+//                date = new Date(date.getTime() + Timestamp.DAY_IN_MILLIS);
+//                break;
+//            case "volgende week":
+//                date = new Date(date.getTime() + Timestamp.DAY_IN_MILLIS * 7);
+//                break;
+//            default:
+//                date = null;
+//                break;
+//        }
+//
+//        return date;
+//    }
 }
