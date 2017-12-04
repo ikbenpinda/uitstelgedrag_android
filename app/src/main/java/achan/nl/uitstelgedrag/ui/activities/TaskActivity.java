@@ -440,12 +440,15 @@ public class TaskActivity extends Base {
 
             String trimmed = editable.toString().trim();
             char[] chars = trimmed.toCharArray();
-            char last_char = chars[trimmed.length() - 1];
-            if (last_char == ',') {
+            int last_char = trimmed.length() > 0 ? trimmed.length() - 1 : -1; //fixme - index out of bounds when 0 doesnt exist or is negative
+            if (last_char < 0)
+                return;
+            if (chars[last_char] == DELIMITER_SIGN.charAt(0)) {
                 Log.i("afterTextChanged", "Trying to force the dropdown..");
                 // todo - efficiency, filter already-present results.
-                LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, allLabels);
+                LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, parser.excludeBfromA(allLabels, categories));
                 labelsview.setAdapter(suggestionsAdapter);
+                // todo - filtering duplicates using parseLabels
                 labelsview.showDropDown();// todo - trigger dropdown
                 Log.i("afterTextChanged", "Meh.");
             }
