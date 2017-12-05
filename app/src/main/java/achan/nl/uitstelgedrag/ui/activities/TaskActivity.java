@@ -448,7 +448,6 @@ public class TaskActivity extends Base {
                 // todo - efficiency, filter already-present results.
                 LabelAdapter suggestionsAdapter = new LabelAdapter(context, R.layout.rowlayout_label, parser.excludeBfromA(allLabels, categories));
                 labelsview.setAdapter(suggestionsAdapter);
-                // todo - filtering duplicates using parseLabels
                 labelsview.showDropDown();// todo - trigger dropdown
                 Log.i("afterTextChanged", "Meh.");
             }
@@ -1063,8 +1062,8 @@ public class TaskActivity extends Base {
 
         // Show feedback after adding.
         // String builder for user snackbar.
-        String single = "Taak toegevoegd";
-        String plural = "Taken toegevoegd";
+        String single = "Taak toegevoegd: ";
+        String plural = "Taken toegevoegd: ";
         StringBuilder builder;
         builder = new StringBuilder(new_tasks.size() > 1? plural: single);
         for (int i = 0; i < tasks.size(); i++) {
