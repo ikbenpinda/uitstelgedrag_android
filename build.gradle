@@ -2,6 +2,7 @@
 
 buildscript {
     repositories {
+        google()
         jcenter()
         mavenCentral()
         maven {
@@ -9,7 +10,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'            // Gradle plugin
+        classpath 'com.android.tools.build:gradle:3.2.1'            // Gradle plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'  // Butterknife
         classpath 'com.google.gms:google-services:3.1.1'            // Google Services
         classpath 'me.tatarka:gradle-retrolambda:3.7.0'             // RetroLambda
@@ -20,6 +21,7 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
         jcenter()
         maven {
             url "https://maven.google.com"
