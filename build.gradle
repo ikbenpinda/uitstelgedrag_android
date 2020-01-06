@@ -3,16 +3,16 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        jcenter({ url "http://jcenter.bintray.com" })
         mavenCentral()
         maven {
             url "https://maven.google.com"
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'            // Gradle plugin
+        classpath 'com.android.tools.build:gradle:3.5.3'            // Gradle plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'  // Butterknife
-        classpath 'com.google.gms:google-services:3.1.1'            // Google Services
+        classpath 'com.google.gms:google-services:4.3.3'            // Google Services
         classpath 'me.tatarka:gradle-retrolambda:3.7.0'             // RetroLambda
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -22,7 +22,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        jcenter({ url "http://jcenter.bintray.com" })
         maven {
             url "https://maven.google.com"
         }
