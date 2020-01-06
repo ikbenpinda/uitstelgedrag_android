@@ -1,14 +1,6 @@
 package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.SpannableString;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.List;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Label;
-import butterknife.internal.Utils;
 
 /**
  * Created by Etienne on 17-10-2017.

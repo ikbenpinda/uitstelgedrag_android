@@ -2,8 +2,6 @@ package achan.nl.uitstelgedrag.ui.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,13 +11,14 @@ import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.ChanDownParser;
@@ -149,7 +148,7 @@ public class LabelAdapter extends ArrayAdapter<Label> {
 
         if (label.location != null) {
             // fixme - Only for API 19! Deprecated since 22.
-            labelIcon.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_place_black_24dp));
+            labelIcon.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_place_black_24dp ));
 
             StringBuilder locationFormatter = new StringBuilder("");
 

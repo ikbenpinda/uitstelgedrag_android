@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.os.Bundle;
-import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;

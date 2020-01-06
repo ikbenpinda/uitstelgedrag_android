@@ -135,7 +135,6 @@ public class Timestamp { //IMPORTANT: rename to attendance, or vice versa.
 
     /**
      * Used for creating a timestamp from the past.
-     * @param type ARRIVAL/DEPARTURE
      * @param day day of the month
      * @param month month of the year
      * @param year

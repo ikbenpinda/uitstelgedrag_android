@@ -1,7 +1,8 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
+
+import androidx.appcompat.widget.Toolbar;
 
 /**
  * Default toolbar implementation.

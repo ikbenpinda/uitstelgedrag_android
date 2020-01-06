@@ -8,11 +8,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -22,6 +17,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.PopupMenu;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -327,7 +329,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @BindView(R.id.recording_current_position)  TextView    current;
         @BindView(R.id.recording_seekbar)           SeekBar     seekbar;
         @BindView(R.id.recording_length)            TextView    length;
-        @BindView(R.id.recording_layout)            CardView    layout;
+        @BindView(R.id.recording_layout)            CardView layout;
 
         Context context;
         PlayerStateChangeListener listener;

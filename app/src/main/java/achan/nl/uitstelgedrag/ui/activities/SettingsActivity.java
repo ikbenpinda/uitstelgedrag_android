@@ -4,14 +4,15 @@ package achan.nl.uitstelgedrag.ui.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.persistence.Settings;

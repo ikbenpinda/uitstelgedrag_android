@@ -1,6 +1,6 @@
 package achan.nl.uitstelgedrag;
 
-import android.support.multidex.MultiDexApplication;
+import androidx.multidex.MultiDexApplication;
 
 import com.facebook.FacebookSdk;
 

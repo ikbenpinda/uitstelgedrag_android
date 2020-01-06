@@ -9,18 +9,6 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatAutoCompleteTextView;
-import android.support.v7.widget.AppCompatMultiAutoCompleteTextView;
-import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -32,17 +20,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.mikepenz.iconics.utils.Utils;
 
 import java.util.ArrayList;
@@ -59,7 +54,6 @@ import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.ChanDownParser;
 import achan.nl.uitstelgedrag.domain.models.Label;
 import achan.nl.uitstelgedrag.domain.models.Task;
-import achan.nl.uitstelgedrag.domain.models.Timestamp;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Labels;
 import achan.nl.uitstelgedrag.persistence.definitions.tables.Locations;
 import achan.nl.uitstelgedrag.persistence.gateways.LabelGateway;
@@ -75,7 +69,6 @@ import achan.nl.uitstelgedrag.widget.WidgetProvider;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnLongClick;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
 
@@ -110,7 +103,7 @@ public class TaskActivity extends Base {
 
     private static final String DEFAULT_LIST_TITLE = "Alles"; // fixme - use localized resources.getstring, and check casing!
 
-    @BindView(R.id.task_coord)          CoordinatorLayout   coordlayout;
+    @BindView(R.id.task_coord)          CoordinatorLayout coordlayout;
     @BindView(R.id.AddTaskButton)       Button              AddTaskButton;
     @BindView(R.id.MainList)            TaskRecyclerView    list;
     @BindView(R.id.emptyListView)       TextView            emptyView;
@@ -118,10 +111,10 @@ public class TaskActivity extends Base {
 //    @BindView(R.id.imageButton)         ImageButton         addLocationButton;
 //    @BindView(R.id.TaskIsPlannedFor)    Spinner             planTaskSpinner;
     //    @BindView(R.id.task_labels_layout)  LinearLayout      task_labels_Layout;
-    @BindView(R.id.task_filter_spinner) Spinner             category_spinner;
-    @BindView(R.id.til_labelview)       TextInputLayout     tilLabelView;
-    @BindView(R.id.til_add_task_description)        TextInputLayout tilAddTaskDescription;
-    @BindView(R.id.AddTaskCategoryAuto) AppCompatMultiAutoCompleteTextView labelsview;
+    @BindView(R.id.task_filter_spinner)         Spinner         category_spinner;
+    @BindView(R.id.til_labelview)               TextInputLayout tilLabelView;
+    @BindView(R.id.til_add_task_description)    TextInputLayout tilAddTaskDescription;
+    @BindView(R.id.AddTaskCategoryAuto)         AppCompatMultiAutoCompleteTextView labelsview;
 //    @BindView(R.id.provisional_label_color_picker) LinearLayout ll;
 //    @BindView(R.id.tv_add_label_vs_trigger) TextView viewSwitcherTrigger;
 //    @BindView(R.id.vs_add_label_view)   ViewSwitcher viewSwitcher;
@@ -761,42 +754,45 @@ public class TaskActivity extends Base {
 
         // Get user location
         Log.i("TaskActivity", "Requesting user location...");
-        SmartLocation.with(context).location().oneFix().start(location -> {
-            Log.i("TaskActivity", "Finding matches for current location.");
-            List<Label> results = filterItems(location);
+        SmartLocation
+                .with(context)
+                .location()
+                .oneFix()
+                .start(location -> {
+                    Log.i("TaskActivity", "Finding matches for current location.");
+                    List<Label> results = filterItems(location);
 
-            if (results.isEmpty())
-                return;
+                    if (results.isEmpty())
+                        return;
 
-            // Filter tasks for location
-            Label priority = results.get(0);
+                    // Filter tasks for location
+                    Label priority = results.get(0);
 
-            Log.i("TaskActivity", "Match found for current location: " + priority);
+                    Log.i("TaskActivity", "Match found for current location: " + priority);
 
 
-            Location labelLocation = new Location("");
-            labelLocation.setLatitude(location.getLatitude());
-            labelLocation.setLongitude(location.getLongitude());
+                    Location labelLocation = new Location("");
+                    labelLocation.setLatitude(location.getLatitude());
+                    labelLocation.setLongitude(location.getLongitude());
 
-            // TODO: 26-10-2017 Create compound list of nearby tags to filter with?
-            if (TaskGateway.isNearby(location, labelLocation)){
-                // use this location
-                for (int i = 0; i < category_spinner.getCount(); i++) {
-                    Log.i("TaskActivity", "Spinner item in matcher: " + category_spinner.getItemAtPosition(i).toString());
-                    if (((Label) category_spinner.getItemAtPosition(i)).title.equalsIgnoreCase(priority.title)) {
-                        category_spinner.setSelection(i);
-                        Log.i("TaskActivity", "Match found in matcher: " + category_spinner.getItemAtPosition(i).toString());
+                    // TODO: 26-10-2017 Create compound list of nearby tags to filter with?
+                    if (TaskGateway.isNearby(location, labelLocation)){
+                        // use this location
+                        for (int i = 0; i < category_spinner.getCount(); i++) {
+                            Log.i("TaskActivity", "Spinner item in matcher: " + category_spinner.getItemAtPosition(i).toString());
+                            if (((Label) category_spinner.getItemAtPosition(i)).title.equalsIgnoreCase(priority.title)) {
+                                category_spinner.setSelection(i);
+                                Log.i("TaskActivity", "Match found in matcher: " + category_spinner.getItemAtPosition(i).toString());
+                            }
+                        }
                     }
-                }
-            }
-            else{
-                // use full list / default("do nothing")
-            }
+                    else{
+                        // use full list / default("do nothing")
+                    }
 
-            // sort items by deadline
-            // sort items by date added
-        });
-
+                    // sort items by deadline
+                    // sort items by date added
+                    });
     }
 
     @Override

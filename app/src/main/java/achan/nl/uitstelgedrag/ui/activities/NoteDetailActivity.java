@@ -1,9 +1,10 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.widget.TextView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import achan.nl.uitstelgedrag.R;
 import achan.nl.uitstelgedrag.domain.models.Note;

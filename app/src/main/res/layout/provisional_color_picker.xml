@@ -6,94 +6,94 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_10"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         >
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_00"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPrimary">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0A"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0A">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0B"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0B">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0C"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0C">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0D"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0D">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0E"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0E">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0F"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0F">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0G"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0G">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/provisional_label_color_picker_card_0H"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="8dp"
         android:padding="16dp"
         app:cardBackgroundColor="?attr/colorPalette0H">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </merge>

@@ -18,17 +18,17 @@
         android:layout_height="wrap_content"
         android:text="gebruik deze locatie"/>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dialog_addlocation_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="adres"/>
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <AutoCompleteTextView
@@ -37,5 +37,5 @@
             android:layout_height="wrap_content"
             android:hint="tag/label/categorie"
             />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

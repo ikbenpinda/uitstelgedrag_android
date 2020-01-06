@@ -3,11 +3,11 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!--fixme - merge instead of linearlayout? -->
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/rowlayout_color_view"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:padding="16dp">
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

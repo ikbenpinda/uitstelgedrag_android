@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
-import achan.nl.uitstelgedrag.domain.TaskBuilder;
+//import achan.nl.uitstelgedrag.domain.TaskBuilder;
 
 /**
  * Created by Etienne on 26-3-2016.
@@ -36,9 +36,7 @@ public class Task implements Serializable, Comparable<Task>{
      * for legacy reasons.
      *
      */
-    public static TaskBuilder Builder(){
-        return new TaskBuilder();
-    }
+//    public static TaskBuilder Builder(){ return new TaskBuilder(); }
 
     public void setDeadline(Date deadline){
         if (deadline.before(createdOn))

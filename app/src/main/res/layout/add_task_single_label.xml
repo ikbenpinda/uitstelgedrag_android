@@ -27,7 +27,7 @@
     <!--android:text="AAAAABCMIjL"/>-->
 
     <!-- todo - enforce next action, check multiline editing. -->
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_add_task_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         android:nextFocusForward="@+id/til_labelview"
         >
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/AddTaskDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             android:inputType="text"
             android:maxLines="1"
             android:hint="Taak" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
         android:id="@+id/task_labels_list"
@@ -77,13 +77,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_labelview"
                     android:layout_width="179dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.11">
 
-                    <android.support.v7.widget.AppCompatMultiAutoCompleteTextView
+                    <androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
                         android:id="@+id/AddTaskCategoryAuto"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -91,7 +91,7 @@
                         android:imeOptions="actionDone"
                         android:inputType="textCapWords|textAutoComplete" />
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
 
                 <!--<ImageButton-->

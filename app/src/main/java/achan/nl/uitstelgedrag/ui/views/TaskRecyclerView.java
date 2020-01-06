@@ -1,11 +1,12 @@
 package achan.nl.uitstelgedrag.ui.views;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Etienne on 05/02/17.
@@ -15,7 +16,7 @@ public class TaskRecyclerView extends RecyclerView { // todo extend viewgroup, a
 
     private View emptyView;
 
-    final private AdapterDataObserver observer = new AdapterDataObserver() {
+    final private RecyclerView.AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
             super.onItemRangeInserted(positionStart, itemCount);

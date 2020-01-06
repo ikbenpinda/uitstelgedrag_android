@@ -1,6 +1,6 @@
 package achan.nl.uitstelgedrag.ui.activities;
 
-import android.support.annotation.LayoutRes;
+import androidx.annotation.LayoutRes;
 
 import achan.nl.uitstelgedrag.R;
 
@@ -52,8 +52,7 @@ public enum Activities {// FIXME use string resources!
     String name;
 
     /** Layout id for the activity. Note: uses the activity, not the content layout. */
-    @LayoutRes
-    int layout;
+    @LayoutRes int layout;
 
     /** The activity class for intent creation. */
     Class activity;

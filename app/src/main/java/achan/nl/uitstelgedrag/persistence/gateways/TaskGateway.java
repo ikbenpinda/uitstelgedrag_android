@@ -90,7 +90,9 @@ public class TaskGateway implements Repository<Task> {
         task.id = (int) database.insert(Tasks.TABLE.name, null, Tasks.toValues(task));
 
         if (!task.labels.isEmpty()) {
-            task.labels.stream().forEach(label -> Log.i("TaskGateway", "Labels found:" + label.title) );
+            for (Label label1 : task.labels) {
+                Log.i("TaskGateway", "Labels found:" + label1.title);
+            }
 
             for (Label label : task.labels) {
 

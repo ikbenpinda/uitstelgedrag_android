@@ -7,10 +7,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.res.ResourcesCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import androidx.core.content.res.ResourcesCompat;
 
 import achan.nl.uitstelgedrag.R;
 
