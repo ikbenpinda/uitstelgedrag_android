@@ -2,3 +2,4 @@
 
 # Contains sensitive data.
 google-services.json
+/src/main/res/values/api-keys.xml
